@@ -36,9 +36,7 @@ td = np.linspace(0,t[-1],100)
 fyd = np.interp(td,t,fy)
 
 # plt.figure()
-# plt.plot(td,fxd)
 # plt.plot(td,fyd)
-# plt.plot(td,fxbd)
 # plt.show()
 
 def fromX(x):
