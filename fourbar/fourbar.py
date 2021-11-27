@@ -189,20 +189,31 @@ def solve(ang,l,kl,c,dir,gnd,cs,vis=False):
     motor.SetTorqueFunction(motorTorque)
     system.Add(motor)
 
-    t = []
-    fx = []
-    fy = []
-    fxb = []
-
+    data = {
+        't': [],
+        'fx': [],
+        'fy': [],
+        'fbx': [],
+        'tbz': []
+    }
     def record():
-        t.append(system.GetChTime())
-        fx.append(joint_foot.Get_react_force().x)
-        fy.append(joint_foot.Get_react_force().y)
-        fxb.append(joint_vertical.Get_react_force().x)
+        data['t'].append(system.GetChTime())
+        data['fx'].append(joint_foot.Get_react_force().x)
+        data['fy'].append(joint_foot.Get_react_force().y)
+        data['fbx'].append(joint_vertical.Get_react_force().x)
+        data['tbz'].append(joint_vertical.Get_react_torque().z)
 
     def end():
+        # Every center should not be below ground
+        # TODO: could use a better collision detection algorithm
+        collide = False
+        for i,link in enumerate(links):
+            pos = [link.GetPos().x,link.GetPos().y]
+            if pos[1] < pf[0,1]: collide = True
+
         return (
             (joint_foot.Get_react_force().y < 1e-6 and system.GetChTime() > 1e-2) or
+            collide or
             system.GetChTime() > tfinal
         )
 
@@ -237,8 +248,9 @@ def solve(ang,l,kl,c,dir,gnd,cs,vis=False):
             if end(): application.GetDevice().closeDevice()
     else:
         system.SetChTime(0)
-        while not end():
+        while True:
             record()
             system.DoStepDynamics(step)
+            if end(): break
 
-    return t, fx, fy, fxb
+    return data
