@@ -35,10 +35,12 @@ fy = -np.sign(yl)*cs['k']*cs['el']*np.power(np.abs(yl/cs['el']),cs['a'])
 td = np.linspace(0,t[-1],100)
 fxd = np.zeros(len(td))
 fyd = np.interp(td,t,fy)
+fxbd = np.zeros(len(td))
 
 # plt.figure()
 # plt.plot(td,fxd)
 # plt.plot(td,fyd)
+# plt.plot(td,fxbd)
 # plt.show()
 
 def fromX(x):
@@ -51,21 +53,22 @@ def fromX(x):
 
     return ang,l,kl,c,dir,gnd
 
-def error(t, fx, fy):
+def error(t,fx,fy,fxb):
     fxi = np.interp(td,t,fx)
     fyi = np.interp(td,t,fy)
-    e = np.sum((fyi-fyd)**2)+np.sum((fxi-fxd)**2)
+    fxbi = np.interp(td,t,fxb)
+    e = np.sum((fyi-fyd)**2)+np.sum((fxi-fxd)**2)+np.sum((fxbi-fxbd)**2)
     return e
 
 def obj(x):
     ang,l,kl,c,dir,gnd = fromX(x)
 
     try:
-        t, fx, fy = solve(ang,l,kl,c,dir,gnd,cs,vis=False)
+        t,fx,fy,fxb = solve(ang,l,kl,c,dir,gnd,cs,vis=False)
     except AssertionError:
         return 1000
 
-    return error(t, fx, fy)
+    return error(t,fx,fy,fxb)
 
 def cb(x,convergence=0):
     ang,l,kl,c,dir,gnd = fromX(x)
@@ -77,7 +80,7 @@ if __name__ == '__main__':
         bounds=bounds,
         constraints=cons,
         popsize=5,
-        maxiter=500,
+        maxiter=1000,
         callback=cb,
         workers=-1,
         polish=False,

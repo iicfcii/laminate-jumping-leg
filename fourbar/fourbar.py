@@ -192,11 +192,13 @@ def solve(ang,l,kl,c,dir,gnd,cs,vis=False):
     t = []
     fx = []
     fy = []
+    fxb = []
 
     def record():
         t.append(system.GetChTime())
         fx.append(joint_foot.Get_react_force().x)
         fy.append(joint_foot.Get_react_force().y)
+        fxb.append(joint_vertical.Get_react_force().x)
 
     def end():
         return (
@@ -239,4 +241,4 @@ def solve(ang,l,kl,c,dir,gnd,cs,vis=False):
             record()
             system.DoStepDynamics(step)
 
-    return t, fx, fy
+    return t, fx, fy, fxb
