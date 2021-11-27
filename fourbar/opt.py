@@ -34,6 +34,7 @@ yl = sol.y[1,:]
 fy = -np.sign(yl)*cs['k']*cs['el']*np.power(np.abs(yl/cs['el']),cs['a'])
 td = np.linspace(0,t[-1],100)
 fyd = np.interp(td,t,fy)
+fxd = np.zeros(len(td))
 
 # plt.figure()
 # plt.plot(td,fyd)
@@ -51,7 +52,9 @@ def fromX(x):
 
 def error(data):
     fyi = np.interp(td,data['t'],data['fy'])
+    fxi = np.interp(td,data['t'],data['fx'])
     e = np.sum((fyi-fyd)**2)
+    e = e+np.sum((fxi-fxd)**2)
     return e
 
 def obj(x):
