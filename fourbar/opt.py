@@ -11,7 +11,7 @@ pi = np.pi
 
 bounds = [(-pi,pi)]+[(0.02,0.1)]*5+[(0.05,0.5)]*4+[(-1,1)]*3
 cons = [
-    # LinearConstraint(np.array([[0,1,1,1,1,1,0,0,0,0]]),0,0.3),
+    LinearConstraint(np.array([[0,1,1,1,1,1,0,0,0,0,0,0,0]]),0,0.3),
 ]
 cs = {
     'g': 9.81,
@@ -76,7 +76,7 @@ if __name__ == '__main__':
         obj,
         bounds=bounds,
         constraints=cons,
-        popsize=10,
+        popsize=5,
         maxiter=500,
         callback=cb,
         workers=-1,

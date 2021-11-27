@@ -20,13 +20,15 @@ def fk(bad,ad,ab,bc,cd,form=1):
     sin_bcd = np.sqrt(1-cos_bcd**2)
     if form < 0: sin_bcd = -sin_bcd
 
-    cos_cdb = (l**2+cd**2-bc**2)/(2*l*cd)
     sin_cdb = bc/l*sin_bcd
+    cos_cdb = (l**2+cd**2-bc**2)/(2*l*cd)
     cdb = np.arctan2(sin_cdb,cos_cdb)
-    adb = np.arcsin(ab/l*np.sin(bad))
+
+    sin_adb = ab/l*np.sin(bad)
+    cos_adb = (ad**2+l**2-ab**2)/(2*ad*l)
+    adb = np.arctan2(sin_adb,cos_adb)
 
     adc = adb+cdb
-    # print(adc/DEG_2_RAD,adb/DEG_2_RAD,cdb/DEG_2_RAD)
 
     pts = np.array([
         [0,0],
@@ -51,7 +53,7 @@ def solve(ang,l,kl,c,dir,gnd,cs,vis=False):
     w = 0.02
     t = 0.002
 
-    step = 1e-6
+    step = 5e-6
     tfinal = 0.2
 
     # Forward kinematics
@@ -81,10 +83,10 @@ def solve(ang,l,kl,c,dir,gnd,cs,vis=False):
         ls.append(np.array([center,p2]))
 
     # plt.figure()
-    # for l in ls:
-    #     plt.plot(l[:,0],l[:,1],'-ok')
+    # for link,c in zip(ls,'rrggbbkk'):
+    #     plt.plot(link[:,0],link[:,1],'-o'+c)
     # plt.axis('scaled')
-    # r = 0.1
+    # r = 0.15
     # plt.xlim([-r,r])
     # plt.ylim([-r,r])
     # plt.show()
