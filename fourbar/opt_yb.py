@@ -53,7 +53,7 @@ def fromX(x):
 def error(data):
     ybi = np.interp(td,data['t'],data['yb'])
     fxbi = np.interp(td,data['t'],data['fxb'])
-    e = 50**2*np.sum((ybi-ybd)**2) # Scale to about the same range
+    e = 100**2*np.sum((ybi-ybd)**2) # Scale to about the same range
     e = e+np.sum((fxbi-fxbd)**2)
     return e
 

@@ -210,12 +210,18 @@ def solve(ang,l,kl,c,dir,gnd,cs,vis=False):
         data['dyb'].append(body.GetPos_dt().y)
 
     def end():
-        # Every center should not be below ground
-        # TODO: could use a better collision detection algorithm
+        # End points of every link should not be below ground
         collide = False
         for i,link in enumerate(links):
             pos = [link.GetPos().x,link.GetPos().y]
-            if pos[1] < pf[0,1]: collide = True
+            rot = link.GetRot().Q_to_Euler123().z
+            length = np.linalg.norm(ls[i][1,:]-ls[i][0,:])
+
+            y1 = pos[1]+length*np.sin(rot)
+            y2 = pos[1]-length*np.sin(rot)
+
+            if y1 < pf[0,1] or y2 < pf[0,1]:
+                collide = True
 
         return (
             (joint_foot.Get_react_force().y < 1e-6 and system.GetChTime() > 1e-2) or

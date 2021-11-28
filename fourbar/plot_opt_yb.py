@@ -19,6 +19,13 @@ c = 1
 dir = 1
 gnd = 1
 
+ang = 3.0121799553868307
+l = [0.06708632,0.05620438,0.05549923,0.06817905,0.05033273]
+kl = [0.23731334,0.15245639,0.38972191,0.06602987]
+c = 0.08978929783061318
+dir = 0.8375915414165533
+gnd = 0.5639741527612223
+
 data = fourbar.solve(ang,l,kl,c,dir,gnd,opt_yb.cs,vis=True)
 print(opt_yb.error(data))
 
@@ -30,7 +37,7 @@ plt.subplot(212)
 plt.plot(data['t'],data['dyb'])
 
 plt.figure()
-plt.plot(data['t'],data['fy'])
-plt.plot(data['t'],data['fx'])
-plt.plot(data['t'],data['fxb'])
+plt.plot(data['t'],data['fy'],'r')
+plt.plot(data['t'],data['fx'],'g')
+plt.plot(data['t'],data['fxb'],'b')
 plt.show()
