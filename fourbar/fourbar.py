@@ -217,10 +217,11 @@ def solve(ang,l,kl,c,dir,gnd,cs,vis=False):
             rot = link.GetRot().Q_to_Euler123().z
             length = np.linalg.norm(ls[i][1,:]-ls[i][0,:])
 
-            y1 = pos[1]+length*np.sin(rot)
-            y2 = pos[1]-length*np.sin(rot)
+            y1 = pos[1]+length/2*np.sin(rot)
+            y2 = pos[1]-length/2*np.sin(rot)
 
-            if y1 < pf[0,1] or y2 < pf[0,1]:
+            eps = 1e-3
+            if y1 < pf[0,1]-eps or y2 < pf[0,1]-eps:
                 collide = True
 
         return (
