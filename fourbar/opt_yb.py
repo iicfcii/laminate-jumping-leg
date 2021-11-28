@@ -33,9 +33,11 @@ t = sol.t
 yb = sol.y[0,:]
 td = np.linspace(0,t[-1],100)
 ybd = np.interp(td,t,yb)
+fxbd = np.zeros(len(td))
 
 # plt.figure()
-# plt.plot(td,pbyd)
+# plt.plot(td,ybd)
+# plt.plot(td,fxbd)
 # plt.show()
 
 def fromX(x):
@@ -50,7 +52,9 @@ def fromX(x):
 
 def error(data):
     ybi = np.interp(td,data['t'],data['yb'])
-    e = np.sum((ybi-ybd)**2)
+    fxbi = np.interp(td,data['t'],data['fxb'])
+    e = 50**2*np.sum((ybi-ybd)**2) # Scale to about the same range
+    e = e+np.sum((fxbi-fxbd)**2)
     return e
 
 def obj(x):
