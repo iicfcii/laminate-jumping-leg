@@ -193,15 +193,21 @@ def solve(ang,l,kl,c,dir,gnd,cs,vis=False):
         't': [],
         'fx': [],
         'fy': [],
-        'fbx': [],
-        'tbz': []
+        'fxb': [],
+        'tzb': [],
+        'yb':[],
+        'dyb':[],
     }
     def record():
         data['t'].append(system.GetChTime())
         data['fx'].append(joint_foot.Get_react_force().x)
         data['fy'].append(joint_foot.Get_react_force().y)
-        data['fbx'].append(joint_vertical.Get_react_force().x)
-        data['tbz'].append(joint_vertical.Get_react_torque().z)
+
+        data['fxb'].append(joint_vertical.Get_react_force().x)
+        data['tzb'].append(joint_vertical.Get_react_torque().z)
+
+        data['yb'].append(body.GetPos().y)
+        data['dyb'].append(body.GetPos_dt().y)
 
     def end():
         # Every center should not be below ground

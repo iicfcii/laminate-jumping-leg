@@ -7,7 +7,7 @@ pi = np.pi
 constants = {
     'g': 9.81,
     'mb': 0.03,
-    'ml': 0.005,
+    'ml': 0.01,
     'k': 100,
     'a': 1,
     'el': 0.1, # max leg extension
