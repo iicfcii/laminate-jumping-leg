@@ -63,7 +63,7 @@ def obj(x):
     try:
         data = solve(ang,l,kl,c,dir,gnd,cs,vis=False)
     except AssertionError:
-        return 1000
+        return 100000
 
     return error(data)
 
@@ -76,8 +76,9 @@ if __name__ == '__main__':
         obj,
         bounds=bounds,
         constraints=cons,
-        popsize=5,
+        popsize=10,
         maxiter=1000,
+        tol=0.1,
         callback=cb,
         workers=-1,
         polish=False,
