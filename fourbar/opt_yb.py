@@ -78,7 +78,7 @@ if __name__ == '__main__':
         constraints=cons,
         popsize=10,
         maxiter=1000,
-        tol=0.2,
+        tol=0.1,
         callback=cb,
         workers=-1,
         polish=False,
