@@ -69,7 +69,13 @@ def obj(x):
 
 def cb(x,convergence=0):
     ang,l,kl,c,dir,gnd = fromX(x)
-    print('ang',ang,'l',l,'k',kl,'c',c,'dir',dir,'gnd',gnd,'convergence',convergence)
+    print('ang =',ang)
+    print('l =',str(list(l)))
+    print('kl =',str(list(kl)))
+    print('c =',c)
+    print('dir =',dir)
+    print('gnd =',gnd)
+    print('convergence =',convergence)
 
 if __name__ == '__main__':
     res = differential_evolution(
@@ -77,7 +83,7 @@ if __name__ == '__main__':
         bounds=bounds,
         constraints=cons,
         popsize=10,
-        maxiter=1000,
+        maxiter=500,
         tol=0.1,
         callback=cb,
         workers=-1,
@@ -86,5 +92,10 @@ if __name__ == '__main__':
     )
     ang,l,kl,c,dir,gnd = fromX(list(res.x))
     print('Result', res.message)
-    print('Config', ang,str(l),str(kl),c,dir,gnd)
+    print('ang =',ang)
+    print('l =',str(list(l)))
+    print('kl =',str(list(kl)))
+    print('c =',c)
+    print('dir =',dir)
+    print('gnd =',gnd)
     print('Cost', res.fun)

@@ -29,6 +29,7 @@ for k, a in zip(K.flatten(),A.flatten()):
         v = sol.y[2,-1]
         V.append(v)
 V = np.array(V).reshape(K.shape)
+print(np.amax(V))
 
 fig = plt.figure()
 plt.contourf(K,A,V)
