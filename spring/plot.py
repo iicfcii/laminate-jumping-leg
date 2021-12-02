@@ -7,25 +7,28 @@ import data
 import process
 
 plt.figure()
-for i, thickness in enumerate([15,20]):
+for i, width in enumerate([10,20,30]):
     for j, length in enumerate([25,50]):
         c = 'C{:d}'.format(i)
         if length == 25:
             l = '-'
             d = (None,None)
             gap = 4
-        else:
+        elif length == 50:
             l = '--'
             d = (10,10)
             gap = 2
+        else:
+            l = '--'
+            d = (20,20)
+            gap = 1
 
         ps0 = []
         tzs0 = []
         for sample in [1]:
-            for trial in [1]:
-                fs = data.read('../data/{:d}mil_{:d}mm_20mm_{:d}_{:d}.csv'.format(thickness,length+15,sample,trial))
-                ps0.append(np.array(fs['p']))
-                tzs0.append(np.array(fs['tz']))
+            fs = data.read('../data/15mil_{:d}mm_{:d}mm_{:d}.csv'.format(length+15,width,sample))
+            ps0.append(np.array(fs['p']))
+            tzs0.append(np.array(fs['tz']))
 
         ps0 = np.concatenate(ps0)
         tzs0 = np.concatenate(tzs0)
@@ -47,7 +50,7 @@ for i, thickness in enumerate([15,20]):
         tvfit = pvfit*k
 
         plt.plot(pv,tv,'.',color=c,markersize=0.2)
-        plt.plot(pvfit,tvfit,l,color=c,dashes=d,label='k={:.3f} t={} l={}'.format(k,thickness,length))
+        plt.plot(pvfit,tvfit,l,color=c,dashes=d,label='k={:.3f} l={} t={}'.format(k,length,width))
 
 plt.xlabel('Virtual Angle [rad]')
 plt.ylabel('Virtual Torque [Nm]')
