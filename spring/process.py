@@ -3,11 +3,21 @@ import matplotlib.pyplot as plt
 import data
 
 DEG_PER_COUNT = 0.088
+GAP_COUNT = int(4/DEG_PER_COUNT)
+ZERO_FORCE_TH = 1e-3
 POS_MID = 2068
 R = 25/1000
 
 PI = np.pi
 DEG_2_RAD = PI/180
+
+def remove_gap(ps0,tzs0):
+    ps = ps0 + (tzs0>0)*GAP_COUNT/2 - (tzs0<0)*GAP_COUNT/2 # accounts gap
+    non_zero_idx = np.logical_or(tzs0 > ZERO_FORCE_TH, tzs0 < -ZERO_FORCE_TH) # remove zero force
+    ps = ps[non_zero_idx]
+    tzs = tzs0[non_zero_idx]
+
+    return ps, tzs
 
 def base2virtual(ps,tzs):
     thetas = []
