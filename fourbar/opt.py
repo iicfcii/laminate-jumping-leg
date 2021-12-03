@@ -52,16 +52,17 @@ def fromX(x):
 
 def error_yb(data):
     ybi = np.interp(td,data['t'],data['yb'])
-    fxbi = np.interp(td,data['t'],data['fxb'])
-    e = 500**2*np.sum((ybi-ybd)**2) # Scale to about the same range
-    e = e+np.sum((fxbi-fxbd)**2)
+    e = np.sqrt(np.sum((ybi-ybd)**2))
     return e
 
 def error_dyb(data):
-    fxbi = np.interp(td,data['t'],data['fxb'])
-    e = -100*data['dyb'][-1]
-    e = e+np.sum((fxbi-fxbd)**2)
+    e = -data['dyb'][-1]
     return e
+
+def fxb_max(data):
+    ts = 1e-3
+    if data['t'][-1] <= ts: return None
+    return np.amax(np.abs(data['fxb'])[np.array(data['t']) > ts])
 
 def obj(x,e):
     ang,l,kl,c,dir,gnd = fromX(x)
@@ -69,6 +70,10 @@ def obj(x,e):
     try:
         data = solve(ang,l,kl,c,dir,gnd,cs,vis=False)
     except AssertionError:
+        return 100000
+
+    f = fxb_max(data)
+    if f is None or f > 1:
         return 100000
 
     return e(data)
@@ -87,7 +92,7 @@ if __name__ == '__main__':
     res = differential_evolution(
         obj,
         bounds=bounds,
-        args=(error_dyb,),
+        args=(error_yb,),
         constraints=cons,
         popsize=10,
         maxiter=500,
