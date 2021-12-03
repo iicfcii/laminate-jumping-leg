@@ -16,17 +16,18 @@ cs = {
     'r': 0.04
 }
 x0 = [0,0,0,0]
+dim_sp = (3,3)
 
 K = np.arange(100,1600,100)
 A = np.arange(0.5,1.6,0.1)
 K, A = np.meshgrid(K,A)
-R = np.arange(0.05,0.5,0.05)
+R = np.linspace(0.04,0.36,dim_sp[0]*dim_sp[1])
 
-dim_sp = (3,3)
 fig, axes = plt.subplots(*dim_sp,sharex=True,sharey=True)
 
 for i,r in enumerate(R):
     cs['r'] = r
+    print('r = {:.2f}'.format(r))
 
     V = []
     for k, a in zip(K.flatten(),A.flatten()):
@@ -66,7 +67,7 @@ for i,r in enumerate(R):
         bbox={'boxstyle':'round','fc':'w'}
     )
 
-    if i == 1: plt.title('Launch speed, vmax [m/s]')
+    if i == 1: plt.title('Launch speed, v [m/s] ({:.2}Nm, {:.0f}RPM)'.format(cs['tau'],cs['v']/2/pi*60))
     if i == 3: plt.ylabel('Linearity, a')
     if i == 7: plt.xlabel('Stiffness, k [N/m]')
 
