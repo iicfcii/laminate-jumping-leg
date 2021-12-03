@@ -58,8 +58,9 @@ def error_yb(data):
     return e
 
 def error_dyb(data):
-    e = -10*data['dyb'][-1]
-    # e = e+np.sum((fxbi-fxbd)**2)
+    fxbi = np.interp(td,data['t'],data['fxb'])
+    e = -100*data['dyb'][-1]
+    e = e+np.sum((fxbi-fxbd)**2)
     return e
 
 def obj(x,e):

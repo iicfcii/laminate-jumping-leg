@@ -4,7 +4,7 @@ import numpy as np
 
 pi = np.pi
 
-constants = {
+cs = {
     'g': 9.81,
     'mb': 0.03,
     'ml': 0.01,
@@ -18,7 +18,7 @@ constants = {
 }
 x0 = [0,0,0,0]
 
-sol = jump.solve(x0, constants)
+sol = jump.solve(x0, cs)
 
 plt.figure()
 plt.subplot(221)
