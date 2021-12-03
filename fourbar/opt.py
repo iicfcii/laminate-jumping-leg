@@ -50,14 +50,19 @@ def fromX(x):
 
     return ang,l,kl,c,dir,gnd
 
-def error(data):
+def error_yb(data):
     ybi = np.interp(td,data['t'],data['yb'])
     fxbi = np.interp(td,data['t'],data['fxb'])
     e = 500**2*np.sum((ybi-ybd)**2) # Scale to about the same range
     e = e+np.sum((fxbi-fxbd)**2)
     return e
 
-def obj(x):
+def error_dyb(data):
+    e = -10*data['dyb'][-1]
+    # e = e+np.sum((fxbi-fxbd)**2)
+    return e
+
+def obj(x,e):
     ang,l,kl,c,dir,gnd = fromX(x)
 
     try:
@@ -65,7 +70,7 @@ def obj(x):
     except AssertionError:
         return 100000
 
-    return error(data)
+    return e(data)
 
 def cb(x,convergence=0):
     ang,l,kl,c,dir,gnd = fromX(x)
@@ -81,6 +86,7 @@ if __name__ == '__main__':
     res = differential_evolution(
         obj,
         bounds=bounds,
+        args=(error_dyb,),
         constraints=cons,
         popsize=10,
         maxiter=500,
