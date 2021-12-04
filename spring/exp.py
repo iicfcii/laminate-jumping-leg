@@ -78,6 +78,7 @@ if __name__ == '__main__':
     print('Experiment started')
     t0 = time.time()
     for pd in POS_LIST:
+        print('pd', pd)
         tp0 = time.time()
         pos_set = False
         while time.time()-tp0 < 1:

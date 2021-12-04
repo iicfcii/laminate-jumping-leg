@@ -8,7 +8,7 @@ import process
 
 plt.figure()
 for i, width in enumerate([10,20,30]):
-    for j, length in enumerate([25,50]):
+    for j, length in enumerate([25,50,75]):
         c = 'C{:d}'.format(i)
         if length == 25:
             l = '-'
@@ -20,7 +20,7 @@ for i, width in enumerate([10,20,30]):
             gap = 2
         else:
             l = '--'
-            d = (20,20)
+            d = (5,5)
             gap = 1
 
         ps0 = []
@@ -50,7 +50,7 @@ for i, width in enumerate([10,20,30]):
         tvfit = pvfit*k
 
         plt.plot(pv,tv,'.',color=c,markersize=0.2)
-        plt.plot(pvfit,tvfit,l,color=c,dashes=d,label='k={:.3f} l={} t={}'.format(k,length,width))
+        plt.plot(pvfit,tvfit,l,color=c,dashes=d,label='k={:.3f} l={} w={}'.format(k,length,width))
 
 plt.xlabel('Virtual Angle [rad]')
 plt.ylabel('Virtual Torque [Nm]')
