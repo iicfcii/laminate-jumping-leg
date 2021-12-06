@@ -29,16 +29,8 @@ cs = {
 # Desired force
 x0 = [0,0,0,0]
 sol = jump.solve(x0, cs)
-t = sol.t
-yb = sol.y[0,:]
-td = np.linspace(0,t[-1],100)
-ybd = np.interp(td,t,yb)
-fxbd = np.zeros(len(td))
-
-# plt.figure()
-# plt.plot(td,ybd)
-# plt.plot(td,fxbd)
-# plt.show()
+td = sol.t
+ybd = sol.y[0,:]
 
 def fromX(x):
     ang = x[0]
@@ -51,8 +43,17 @@ def fromX(x):
     return ang,l,kl,c,dir,gnd
 
 def error_yb(data):
-    ybi = np.interp(td,data['t'],data['yb'])
-    e = np.sqrt(np.sum((ybi-ybd)**2))
+    # Compare on the longer time range
+    tdd = np.linspace(0,np.maximum(data['t'][-1],td[-1]),100)
+    ybi = np.interp(tdd,data['t'],data['yb'])
+    ybdi = np.interp(tdd,td,ybd)
+
+    # plt.figure()
+    # plt.plot(tdd,ybdi)
+    # plt.plot(tdd,ybi)
+    # plt.show()
+
+    e = np.sqrt(np.sum((ybi-ybdi)**2))
     return e
 
 def error_dyb(data):

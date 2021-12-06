@@ -18,16 +18,17 @@ cs = {
 x0 = [0,0,0,0]
 dim_sp = (3,3)
 
-K = np.arange(100,1600,100)
+K = np.arange(100,1100,100)
 A = np.arange(0.5,1.6,0.1)
 K, A = np.meshgrid(K,A)
-R = np.linspace(0.04,0.36,dim_sp[0]*dim_sp[1])
+R = np.linspace(0.04,0.2,dim_sp[0]*dim_sp[1])
 
 fig, axes = plt.subplots(*dim_sp,sharex=True,sharey=True)
 
 for i,r in enumerate(R):
     cs['r'] = r
-    print('r = {:.2f}'.format(r))
+    cs['ml'] = r*0.001*0.02*2000*2*cs['em']
+    print('r = {:.2f} ml = {:.2f}'.format(r,cs['ml']))
 
     V = []
     for k, a in zip(K.flatten(),A.flatten()):
