@@ -31,6 +31,7 @@ x0 = [0,0,0,0]
 sol = jump.solve(x0, cs)
 td = sol.t
 ybd = sol.y[0,:]
+dybd = sol.y[2,:]
 
 def fromX(x):
     ang = x[0]
@@ -45,16 +46,22 @@ def fromX(x):
 def error_yb(data):
     # Compare on the longer time range
     tdd = np.linspace(0,np.maximum(data['t'][-1],td[-1]),100)
-    ybi = np.interp(tdd,data['t'],data['yb'])
-    ybdi = np.interp(tdd,td,ybd)
+
+    ybi = np.interp(tdd,data['t'],data['yb'],right=0)
+    ybdi = np.interp(tdd,td,ybd,right=0)
+
+    dybi = np.interp(tdd,data['t'],data['dyb'],right=0)
+    dybdi = np.interp(tdd,td,dybd,right=0)
 
     # plt.figure()
     # plt.plot(tdd,ybdi)
     # plt.plot(tdd,ybi)
     # plt.show()
 
-    e = np.sqrt(np.sum((ybi-ybdi)**2))
-    return e
+    # Normalized wrt max desired value
+    e = np.sqrt(np.sum((ybi-ybdi)**2))/np.amax(np.abs(ybdi))
+    de = np.sqrt(np.sum((dybi-dybdi)**2))/np.amax(np.abs(dybdi))
+    return e+de
 
 def error_dyb(data):
     e = -data['dyb'][-1]

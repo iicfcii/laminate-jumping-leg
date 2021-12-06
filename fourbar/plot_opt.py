@@ -57,6 +57,7 @@ plt.plot(data['t'],data['yb'])
 plt.plot(opt.td,opt.ybd,'--')
 plt.subplot(212)
 plt.plot(data['t'],data['dyb'])
+plt.plot(opt.td,opt.dybd,'--')
 
 plt.figure()
 plt.plot(data['t'],data['fy'],label='fy')
