@@ -9,9 +9,14 @@ import jump
 
 pi = np.pi
 
-bounds = [(-pi,pi)]+[(0.02,0.1)]*5+[(0.05,0.5)]*4+[(-1,1)]*3
+ang_limit = (-pi,pi)
+l_limit = (0.02,0.1)
+kl_limit = (0.05,0.5)
+size_limit = (0,0.25)
+
+bounds = [ang_limit]+[l_limit]*5+[kl_limit]*4+[(-1,1)]*3
 cons = [
-    LinearConstraint(np.array([[0,1,1,1,1,1,0,0,0,0,0,0,0]]),0,0.25),
+    LinearConstraint(np.array([[0,1,1,1,1,1,0,0,0,0,0,0,0]]),*size_limit),
 ]
 cs = {
     'g': 9.81,
@@ -44,14 +49,15 @@ def fromX(x):
     return ang,l,kl,c,dir,gnd
 
 def error_yb(data):
+    num_step = 100
     # Compare on the longer time range
-    tdd = np.linspace(0,np.maximum(data['t'][-1],td[-1]),100)
+    tdd = np.linspace(0,np.maximum(data['t'][-1],td[-1]),num_step)
 
-    ybi = np.interp(tdd,data['t'],data['yb'],right=0)
-    ybdi = np.interp(tdd,td,ybd,right=0)
+    ybi = np.interp(tdd,data['t'],data['yb'])
+    ybdi = np.interp(tdd,td,ybd)
 
-    dybi = np.interp(tdd,data['t'],data['dyb'],right=0)
-    dybdi = np.interp(tdd,td,dybd,right=0)
+    dybi = np.interp(tdd,data['t'],data['dyb'])
+    dybdi = np.interp(tdd,td,dybd)
 
     # plt.figure()
     # plt.plot(tdd,ybdi)
@@ -59,8 +65,8 @@ def error_yb(data):
     # plt.show()
 
     # Normalized wrt max desired value
-    e = np.sqrt(np.sum((ybi-ybdi)**2))/np.amax(np.abs(ybdi))
-    de = np.sqrt(np.sum((dybi-dybdi)**2))/np.amax(np.abs(dybdi))
+    e = np.sqrt(np.sum((ybi-ybdi)**2)/num_step)/np.amax(np.abs(ybdi))
+    de = np.sqrt(np.sum((dybi-dybdi)**2)/num_step)/np.amax(np.abs(dybdi))
     return e+de
 
 def error_dyb(data):
@@ -81,7 +87,7 @@ def obj(x,e):
         return 100000
 
     f = fxb_max(data)
-    if f is None or f > 1:
+    if f is None or f > 1.5:
         return 100000
 
     return e(data)
@@ -102,9 +108,9 @@ if __name__ == '__main__':
         bounds=bounds,
         args=(error_yb,),
         constraints=cons,
-        popsize=10,
+        popsize=20,
         maxiter=500,
-        tol=0.1,
+        tol=0.01,
         callback=cb,
         workers=-1,
         polish=False,
