@@ -7,7 +7,7 @@ from dynamixel_sdk import *
 import ati
 import data
 
-PORT_NAME = 'COM9'
+PORT_NAME = '/dev/tty.usbserial-FT5WJ6YV'
 PROTOCOL_VERSION = 2.0
 BAUDRATE = 57600
 SERVO_ID = 1
@@ -101,7 +101,7 @@ if __name__ == '__main__':
             pds.append(pd)
             ps.append(p)
             tzs.append(f[5])
-            # print('t {:.3f} pd {} p {} tz {:.3f}'.format(time.time()-t0,pd,p,f[5]))
+            print('t {:.3f} pd {} p {} tz {:.3f}'.format(time.time()-t0,pd,p,f[5]))
 
     # Disable torque
     groupSW = GroupSyncWrite(portH, packetH, ADDR_TORQUE_ENABLE, LEN_TORQUE_ENABLE)

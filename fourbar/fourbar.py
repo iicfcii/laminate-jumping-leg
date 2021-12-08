@@ -1,5 +1,4 @@
 import pychrono as chrono
-import pychrono.irrlicht as chronoirr
 import matplotlib.pyplot as plt
 import numpy as np
 
@@ -231,6 +230,8 @@ def solve(ang,l,kl,c,dir,gnd,cs,vis=False):
         )
 
     if vis:
+        import pychrono.irrlicht as chronoirr
+        
         application = chronoirr.ChIrrApp(system, "Jump", chronoirr.dimension2du(1024, 768),chronoirr.VerticalDir_Y)
         application.AddTypicalSky()
         application.AddTypicalLights()
