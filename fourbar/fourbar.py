@@ -2,7 +2,8 @@ import pychrono as chrono
 import matplotlib.pyplot as plt
 import numpy as np
 
-chrono.SetChronoDataPath('../chrono_data/')
+import os.path
+chrono.SetChronoDataPath(os.path.join(os.path.abspath('../chrono_data/'),''))
 
 pi = np.pi
 
@@ -154,11 +155,20 @@ def solve(ang,l,kl,c,dir,gnd,cs,vis=False):
         system.Add(joint)
         joints.append(joint)
 
-        spring = chrono.ChLinkRotSpringCB()
-        spring.Initialize(l1,l2,chrono.ChCoordsysD(chrono.ChVectorD(*pos,0)))
-        spring.RegisterTorqueFunctor(springTorques[i])
-        system.AddLink(spring)
-        springs.append(spring)
+        try:
+            spring = chrono.ChLinkRotSpringCB()
+            spring.Initialize(l1,l2,chrono.ChCoordsysD(chrono.ChVectorD(*pos,0)))
+            spring.RegisterTorqueFunctor(springTorques[i])
+            system.AddLink(spring)
+            springs.append(spring)
+        except AttributeError:
+            # Accommodate latest version of chrono
+            spring = chrono.ChLinkRSDA()
+            spring.Initialize(l1,l2,chrono.ChCoordsysD(chrono.ChVectorD(*pos,0)))
+            spring.SetSpringCoefficient(k)
+            spring.SetDampingCoefficient(b)
+            system.AddLink(spring)
+            springs.append(spring)
 
     joint_vertical = chrono.ChLinkMateGeneric(True,False,True,True,True,True)
     joint_vertical.Initialize(ground,body,chrono.ChFrameD(chrono.ChVectorD(0,0,0)))
@@ -232,7 +242,7 @@ def solve(ang,l,kl,c,dir,gnd,cs,vis=False):
     if vis:
         import pychrono.irrlicht as chronoirr
         
-        application = chronoirr.ChIrrApp(system, "Jump", chronoirr.dimension2du(1024, 768),chronoirr.VerticalDir_Y)
+        application = chronoirr.ChIrrApp(system, "Jump", chronoirr.dimension2du(800, 600),chronoirr.VerticalDir_Y)
         application.AddTypicalSky()
         application.AddTypicalLights()
         y_offset = 0
