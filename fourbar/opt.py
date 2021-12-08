@@ -10,9 +10,10 @@ import jump
 pi = np.pi
 
 ang_limit = (-pi,pi)
-l_limit = (0.02,0.1)
+l_limit = (0.02,0.2)
 kl_limit = (0.05,0.5)
-size_limit = (0,0.25)
+size_limit = (0,0.5)
+fxb_limit = 10
 
 bounds = [ang_limit]+[l_limit]*5+[kl_limit]*4+[(-1,1)]*3
 cons = [
@@ -21,14 +22,14 @@ cons = [
 cs = {
     'g': 9.81,
     'mb': 0.03,
-    'ml': 0.01,
+    'ml': 0.02,
     'k': 100,
     'a': 1,
     'el': 0.1, # max leg extension
     'tau': 0.215,
     'v': 383/60*2*pi,
     'em': pi,
-    'r': 0.04
+    'r': 0.08
 }
 
 # Desired force
@@ -67,7 +68,7 @@ def error_yb(data):
     # Normalized wrt max desired value
     e = np.sqrt(np.sum((ybi-ybdi)**2)/num_step)/np.amax(np.abs(ybdi))
     de = np.sqrt(np.sum((dybi-dybdi)**2)/num_step)/np.amax(np.abs(dybdi))
-    return e+de
+    return 0.2*e+0.8*de
 
 def error_dyb(data):
     e = -data['dyb'][-1]
@@ -87,7 +88,7 @@ def obj(x,e):
         return 100000
 
     f = fxb_max(data)
-    if f is None or f > 1.5:
+    if f is None or f > fxb_limit:
         return 100000
 
     return e(data)
@@ -109,7 +110,7 @@ if __name__ == '__main__':
         args=(error_yb,),
         constraints=cons,
         popsize=20,
-        maxiter=500,
+        maxiter=100,
         tol=0.01,
         callback=cb,
         workers=-1,
