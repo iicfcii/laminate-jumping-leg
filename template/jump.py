@@ -23,7 +23,7 @@ b = tau/r/(v*r)
 fb = b*(dys-dyb) # damping
 # input force, when not fully extended, constant output
 # otherwise, increase quickly to model the motor travel limit
-fm = Max(0,yb-ys-em*r)*10000-tau/r
+fm = (Max(0,yb-ys-em)/(yb-ys-em)-1)*tau/r
 
 dL_d_yb = diff(L,yb)
 dL_d_dyb = diff(L,dyb)
