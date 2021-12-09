@@ -3,7 +3,6 @@ import jump
 import numpy as np
 
 pi = np.pi
-
 cs = {
     'g': 9.81,
     'mb': 0.05,
@@ -18,10 +17,10 @@ cs = {
 }
 x0 = [0,0,0,0]
 
-for r in [0.04,0.06]:
+for r in [0.04,0.08]:
     cs['r'] = r
     plt.figure()
-    for i, k in enumerate([100,500,1000]):
+    for i, k in enumerate([100,250,500]):
         cs['k'] = k
         sol = jump.solve(x0, cs)
 

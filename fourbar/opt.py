@@ -4,34 +4,35 @@ sys.path.append('../template')
 import numpy as np
 import matplotlib.pyplot as plt
 from scipy.optimize import differential_evolution, LinearConstraint
-from fourbar import solve
+import fourbar
 import jump
 
 pi = np.pi
+cs = {
+    'g': 9.81,
+    'mb': 0.05,
+    'ml': 0.001,
+    'k': 100,
+    'a': 1,
+    'el': 0.1, # max leg extension
+    'tau': 0.215,
+    'v': 383/60*2*pi,
+    'em': 0.15,
+    'r': 0.06
+}
 
+m = 0.04
 ang_limit = (-pi,pi)
 l_limit = (0.02,0.2)
 kl_limit = (0.05,0.3)
-size_limit = (0,0.25)
-fxb_limit = 1.5
+size_limit = (0,(cs['mb']-m)/fourbar.rho/fourbar.w/fourbar.t)
+fxb_limit = 10
 e_max = 10
 
 bounds = [ang_limit]+[l_limit]*5+[kl_limit]*4+[(-1,1)]*3
 cons = [
     LinearConstraint(np.array([[0,1,1,1,1,1,0,0,0,0,0,0,0]]),*size_limit),
 ]
-cs = {
-    'g': 9.81,
-    'mb': 0.03,
-    'ml': 0.01,
-    'k': 100,
-    'a': 1,
-    'el': 0.1, # max leg extension
-    'tau': 0.215,
-    'v': 383/60*2*pi,
-    'em': pi,
-    'r': 0.04
-}
 
 # Desired force
 x0 = [0,0,0,0]
@@ -84,7 +85,7 @@ def obj(x,e):
     ang,l,kl,c,dir,gnd = fromX(x)
 
     try:
-        data = solve(ang,l,kl,c,dir,gnd,cs,vis=False)
+        data = fourbar.solve(ang,l,kl,c,dir,gnd,m,cs,vis=False)
     except AssertionError:
         return e_max
 
@@ -110,7 +111,7 @@ if __name__ == '__main__':
         bounds=bounds,
         args=(error_yb,),
         constraints=cons,
-        popsize=20,
+        popsize=10,
         maxiter=1000,
         tol=0.01,
         callback=cb,
