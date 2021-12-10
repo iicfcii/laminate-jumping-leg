@@ -59,3 +59,38 @@ def base2virtual(ps,tzs,R):
     # plt.show()
 
     return np.array(alphaps),np.array(Mls)
+
+def k(t,w,l):
+    gap = np.arctan2(0.9,l)/np.pi*180*2
+
+    ps0 = []
+    tzs0 = []
+    for sample in [1]:
+        fs = data.read('../data/{:d}mil_{:d}mm_{:d}mm_{:d}.csv'.format(t,l+15,w,sample))
+        ps0.append(np.array(fs['p']))
+        tzs0.append(np.array(fs['tz']))
+
+    ps0 = np.concatenate(ps0)
+    tzs0 = np.concatenate(tzs0)
+    ps, tzs = remove_gap(ps0,tzs0,gap)
+
+    # # Raw and adjusted data
+    # plt.figure()
+    # plt.plot(ps0,tzs0,label='raw')
+    # plt.plot(ps,tzs,'.',label='adjusted')
+    # plt.xlabel('Position Count (0.088deg/count)')
+    # plt.ylabel('Base Torque [Nm]')
+    # plt.legend()
+    # plt.show()
+
+    pv, tv = base2virtual(ps,tzs,l/1000)
+    coeff = np.polyfit(pv,tv,1)
+    k,b = coeff
+    pvfit = np.array([np.amin(pv),np.amax(pv)])
+    tvfit = np.polyval(coeff,pvfit)
+
+    # k = np.linalg.lstsq(pv.reshape(-1,1),tv,rcond=None)[0][0]
+    # pvfit = np.array([np.amin(pv),np.amax(pv)])
+    # tvfit = pvfit*k
+
+    return k,b,(pv,tv,pvfit,tvfit)
