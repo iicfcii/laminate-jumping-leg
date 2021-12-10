@@ -12,9 +12,14 @@ DEG_2_RAD = PI/180
 def remove_gap(ps0,tzs0,gap):
     gap_count = int(gap/DEG_PER_COUNT)
     ps = ps0 + (tzs0>0)*gap_count/2 - (tzs0<0)*gap_count/2 # accounts gap
+
     non_zero_idx = np.logical_or(tzs0 > ZERO_FORCE_TH, tzs0 < -ZERO_FORCE_TH) # remove zero force
     ps = ps[non_zero_idx]
     tzs = tzs0[non_zero_idx]
+
+    # small_angle_idx = np.abs(ps-POS_MID) < 5/DEG_PER_COUNT
+    # ps = ps[small_angle_idx]
+    # tzs = tzs[small_angle_idx]
 
     return ps, tzs
 

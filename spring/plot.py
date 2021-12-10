@@ -45,13 +45,17 @@ for thickness in [15,30]:
             # plt.show()
 
             pv, tv = process.base2virtual(ps,tzs,length/1000)
-            k = np.linalg.lstsq(pv.reshape(-1,1),tv,rcond=None)[0][0]
-
+            coeff = np.polyfit(pv,tv,1)
+            k,b = coeff
             pvfit = np.array([np.amin(pv),np.amax(pv)])
-            tvfit = pvfit*k
+            tvfit = np.polyval(coeff,pvfit)
 
-            plt.plot(pv,tv,'.',color=c,markersize=0.2)
-            plt.plot(pvfit,tvfit,l,color=c,dashes=d,label='k={:.3f} l={} w={}'.format(k,length,width))
+            # k = np.linalg.lstsq(pv.reshape(-1,1),tv,rcond=None)[0][0]
+            # pvfit = np.array([np.amin(pv),np.amax(pv)])
+            # tvfit = pvfit*k
+
+            plt.plot(pv,tv,'.',color=c,markersize=0.5)
+            plt.plot(pvfit,tvfit,l,color=c,dashes=d,label='k={:.3f} b={:.3f} l={} w={}'.format(k,b,length,width))
 
     plt.xlabel('Virtual Angle [rad]')
     plt.ylabel('Virtual Torque [Nm]')

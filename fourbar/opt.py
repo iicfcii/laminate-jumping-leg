@@ -17,7 +17,7 @@ cs = {
     'el': 0.1, # max leg extension
     'tau': 0.215,
     'v': 383/60*2*pi,
-    'em': 0.15,
+    'em': 0.1,
     'r': 0.06
 }
 
@@ -26,7 +26,7 @@ ang_limit = (-pi,pi)
 l_limit = (0.02,0.2)
 kl_limit = (0.05,0.3)
 size_limit = (0,(cs['mb']-m)/fourbar.rho/fourbar.w/fourbar.t)
-fxb_limit = 10
+fxb_limit = 1.5
 e_max = 10
 
 bounds = [ang_limit]+[l_limit]*5+[kl_limit]*4+[(-1,1)]*3
@@ -70,7 +70,7 @@ def error_yb(data):
     # Normalized wrt max desired value
     e = np.sqrt(np.sum((ybi-ybdi)**2)/num_step)/np.amax(np.abs(ybdi))
     de = np.sqrt(np.sum((dybi-dybdi)**2)/num_step)/np.amax(np.abs(dybdi))
-    return 0.2*e+0.8*de
+    return 0.5*e+0.5*de
 
 def error_dyb(data):
     e = -data['dyb'][-1]

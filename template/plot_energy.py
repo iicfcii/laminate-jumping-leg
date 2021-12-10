@@ -12,12 +12,12 @@ cs = {
     'el': 0.1, # max leg extension
     'tau': 0.215,
     'v': 383/60*2*pi,
-    'em': 0.15,
+    'em': 0.1,
     'r': 0.06
 }
 x0 = [0,0,0,0]
 
-for r in [0.04,0.08]:
+for r in [0.04,0.06]:
     cs['r'] = r
     plt.figure()
     for i, k in enumerate([100,250,500]):
