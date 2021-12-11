@@ -21,7 +21,7 @@ lmax = 0.09
 step = 5e-4
 tfinal = 2
 
-def run(tv,wv,lv):
+def run(tv,wv,lv,type='euler'):
     t = tv*2.54e-5
     w = wv/1000
     l = lv/1000
@@ -30,15 +30,31 @@ def run(tv,wv,lv):
     system.Set_G_acc(chrono.ChVectorD(0,0,0))
     mesh = fea.ChMesh();
 
-    section = fea.ChBeamSectionEulerSimple()
-    section.SetYoungModulus(E)
-    section.SetGwithPoissonRatio(mu)
-    section.SetDensity(rho)
-    section.SetAsRectangularSection(w,t)
-    # section.SetBeamRaleyghDamping(0.1)
+    if type == 'iga':
+        inertia = fea.ChInertiaCosseratSimple()
+        inertia.SetAsRectangularSection(w,t,rho)
 
-    builder = fea.ChBuilderBeamEuler()
-    builder.BuildBeam(mesh,section,int(l/dl),chrono.ChVectorD(0,0,0),chrono.ChVectorD(l,0,0),chrono.ChVectorD(0,1,0))
+        elasticity = fea.ChElasticityCosseratSimple()
+        elasticity.SetYoungModulus(E)
+        elasticity.SetGwithPoissonRatio(mu)
+        elasticity.SetAsRectangularSection(w,t)
+
+        section = fea.ChBeamSectionCosserat(inertia, elasticity)
+        section.SetDrawThickness(w,t)
+
+        builder = fea.ChBuilderBeamIGA()
+        builder.BuildBeam(mesh,section,int(l/dl),chrono.ChVectorD(0,0,0),chrono.ChVectorD(l,0,0),chrono.ChVectorD(0,1,0),1)
+    else:
+        section = fea.ChBeamSectionEulerSimple()
+        section.SetYoungModulus(E)
+        section.SetGwithPoissonRatio(mu)
+        section.SetDensity(rho)
+        section.SetAsRectangularSection(w,t)
+        # section.SetBeamRaleyghDamping(0.1)
+
+        builder = fea.ChBuilderBeamEuler()
+        builder.BuildBeam(mesh,section,int(l/dl),chrono.ChVectorD(0,0,0),chrono.ChVectorD(l,0,0),chrono.ChVectorD(0,1,0))
+
     builder.GetLastBeamNodes()[0].SetFixed(True)
 
     system.Add(mesh)
