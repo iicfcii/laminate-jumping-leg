@@ -4,6 +4,7 @@ sys.path.append('../utils')
 import pychrono as chrono
 import pychrono.fea as fea
 import pychrono.irrlicht as chronoirr
+import pychrono.pardisomkl as mkl
 import numpy as np
 import matplotlib.pyplot as plt
 import process
@@ -14,11 +15,11 @@ chrono.SetChronoDataPath('../chrono_data/')
 E = 18.6e9
 mu = 0.3
 rho = 1820
-dl = 0.005
+dl = 0.001
 lmax = 0.09
 
-step = 1e-3
-tfinal = 5
+step = 5e-4
+tfinal = 2
 
 def run(tv,wv,lv):
     t = tv*2.54e-5
@@ -37,11 +38,10 @@ def run(tv,wv,lv):
     # section.SetBeamRaleyghDamping(0.1)
 
     builder = fea.ChBuilderBeamEuler()
-    builder.BuildBeam(mesh,section,int(lmax/dl),chrono.ChVectorD(0,0,0),chrono.ChVectorD(lmax,0,0),chrono.ChVectorD(0,1,0))
+    builder.BuildBeam(mesh,section,int(l/dl),chrono.ChVectorD(0,0,0),chrono.ChVectorD(l,0,0),chrono.ChVectorD(0,1,0))
     builder.GetLastBeamNodes()[0].SetFixed(True)
 
     system.Add(mesh)
-
     motor = chrono.ChLinkMotorRotationAngle()
     motor.Initialize(
         builder.GetLastBeamNodes()[0],
@@ -52,12 +52,7 @@ def run(tv,wv,lv):
     motor.SetSpindleConstraint(False,False,False,False,False)
     system.Add(motor)
 
-    # import pychrono.pardisomkl as mkl
-    # solver = mkl.ChSolverPardisoMKL()
-    solver = chrono.ChSolverSparseQR()
-    solver.UseSparsityPatternLearner(True)
-    solver.LockSparsityPattern(True)
-    solver.SetVerbose(False)
+    solver = mkl.ChSolverPardisoMKL()
     system.SetSolver(solver)
 
     v_surf = fea.ChVisualizationFEAmesh(mesh)
@@ -100,7 +95,7 @@ def run(tv,wv,lv):
         if system.GetChTime() > tfinal: # in system seconds
               application.GetDevice().closeDevice()
 
-    file_name = '../data/{:d}mil_{:d}mm_{:d}mm_sim.csv'.format(tv,lv,wv)
+    file_name = '../data/{:d}mil_{:d}mm_{:d}mm_sim_beam.csv'.format(tv,lv,wv)
     data.write(
         file_name,
         ['t','p','tz','rot'],

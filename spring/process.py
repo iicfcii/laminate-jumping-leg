@@ -60,13 +60,9 @@ def base2virtual(ps,tzs,R):
 
     return np.array(alphaps),np.array(Mls)
 
-def k(t,w,l,sim=False):
-    if not sim:
-        gap = np.arctan2(0.5,l)/np.pi*180*2 # thickness dependent
-        samples = ['1','2']
-    else:
-        gap = 0
-        samples = ['sim']
+def k(t,w,l,samples,has_gap=True):
+    # thickness dependent
+    gap = np.arctan2(0.5,l)/np.pi*180*2 if has_gap else 0
 
     ps0 = []
     tzs0 = []

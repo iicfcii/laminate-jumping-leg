@@ -19,7 +19,7 @@ L,W,T = np.meshgrid(ls,ws,ts)
 
 K = []
 for l,w,t in zip(L.flatten(),W.flatten(),T.flatten()):
-    k,b,data = process.k(t,w,l)
+    k,b,data = process.k(t,w,l,samples=['1','2'],has_gap=False)
     K.append(k)
 K = np.array(K).reshape(L.shape)
 
@@ -36,8 +36,8 @@ for z in range(len(ts)):
         kps = model(L[y,:,z],W[y,:,z],T[y,:,z],coeff)
 
         c = 'C{:d}'.format(y)
-        plt.plot(L[y,:,z],ks,color=c,label='w={:d}mm'.format(ws[y]))
-        plt.plot(L[y,:,z],kps,'--',color=c)
+        plt.plot(L[y,:,z],ks,'o',color=c,label='w={:d}mm'.format(ws[y]))
+        plt.plot(L[y,:,z],kps,'-',color=c)
     plt.xlabel('l [mm]')
     plt.ylabel('k [Nm/rad]')
     plt.legend()
