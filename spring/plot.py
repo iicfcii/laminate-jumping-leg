@@ -6,7 +6,7 @@ import matplotlib.pyplot as plt
 import data
 import process
 
-for thickness in [15,30]:
+for thickness in [30]:
     plt.figure()
     for i, width in enumerate([10,20,30]):
         for j, length in enumerate([25,50,75]):

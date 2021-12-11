@@ -19,8 +19,8 @@ LEN_PRESENT_POSITION = 4
 ADDR_GOAL_POSITION = 116
 LEN_GOAL_POSITION = 4
 
-POS_MID = 2068 # ~180 deg
-STEP_NUM = 20 # signle side
+POS_MID = 2048 # ~180 deg
+STEP_NUM = 15 # signle side
 STEP_SIZE = 20 # 0.088 deg/count
 POS_LIST = POS_MID+STEP_SIZE*np.concatenate((
     np.arange(0,STEP_NUM),

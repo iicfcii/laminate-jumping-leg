@@ -4,7 +4,7 @@ import data
 
 DEG_PER_COUNT = 0.088
 ZERO_FORCE_TH = 1e-3
-POS_MID = 2068
+POS_MID = 2048
 
 PI = np.pi
 DEG_2_RAD = PI/180
@@ -61,12 +61,12 @@ def base2virtual(ps,tzs,R):
     return np.array(alphaps),np.array(Mls)
 
 def k(t,w,l):
-    gap = np.arctan2(0.9,l)/np.pi*180*2
+    gap = np.arctan2(0.5,l)/np.pi*180*2 # thickness dependent
 
     ps0 = []
     tzs0 = []
-    for sample in [1]:
-        fs = data.read('../data/{:d}mil_{:d}mm_{:d}mm_{:d}.csv'.format(t,l+15,w,sample))
+    for sample in [1,2]:
+        fs = data.read('../data/{:d}mil_{:d}mm_{:d}mm_{:d}.csv'.format(t,l,w,sample))
         ps0.append(np.array(fs['p']))
         tzs0.append(np.array(fs['tz']))
 
@@ -84,12 +84,14 @@ def k(t,w,l):
     # plt.show()
 
     pv, tv = base2virtual(ps,tzs,l/1000)
+
     coeff = np.polyfit(pv,tv,1)
     k,b = coeff
     pvfit = np.array([np.amin(pv),np.amax(pv)])
     tvfit = np.polyval(coeff,pvfit)
 
     # k = np.linalg.lstsq(pv.reshape(-1,1),tv,rcond=None)[0][0]
+    # b = 0
     # pvfit = np.array([np.amin(pv),np.amax(pv)])
     # tvfit = pvfit*k
 

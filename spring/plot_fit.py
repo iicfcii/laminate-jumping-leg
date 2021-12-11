@@ -6,7 +6,7 @@ import matplotlib.pyplot as plt
 import data
 import process
 
-ts = [15,30]
+ts = [30]
 ls = [25,50,75]
 ws = [10,20,30]
 
