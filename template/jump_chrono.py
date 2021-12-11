@@ -26,7 +26,7 @@ el = 0.1
 
 tau = 0.215
 v = 383/60*2*pi
-em = pi
+em = 0.15
 r = 0.06
 b = tau/r/(v*r)
 
@@ -119,8 +119,8 @@ class MotorTorque(chrono.ChFunction) :
 
     def Get_y(self, x):
         dy = self.body.GetPos().y-self.leg.GetPos().y
-        dyd = em*r+lb
-        return np.maximum(0,dy-dyd)*10000-tau/r
+        dyd = em+lb
+        return (np.maximum(0,dy-dyd)/(dy-dyd)-1)*tau/r
 
 motor = chrono.ChLinkMotorLinearForce()
 motor.Initialize(leg,body,chrono.ChFrameD(chrono.ChVectorD(0,ll+lb,0),chrono.Q_from_AngZ(pi/2)))

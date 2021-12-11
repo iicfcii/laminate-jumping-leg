@@ -6,6 +6,9 @@ import os.path
 chrono.SetChronoDataPath(os.path.join(os.path.abspath('../chrono_data/'),''))
 
 pi = np.pi
+w = 0.02
+t = 0.001
+rho = 2000
 
 # Fourbar
 #   b----c
@@ -45,13 +48,13 @@ def fk(bad,ad,ab,bc,cd,form=1):
 
 # l: ground crank coupler output ext
 # kl: crank coupler output ground
-def solve(ang,l,kl,c,dir,gnd,cs,vis=False):
+# c: fourbar cross form
+# dir: crank dir
+# gnd: ground or crank as ground
+# m: body mass including motor, circuits, connectors
+def solve(ang,l,kl,c,dir,gnd,m,cs,vis=False):
     kj = 0.001 # kj = [0.01,0.01,0.01,0.01]
-
-    rho = 1000
-    wb = (cs['mb']/rho)**(1/3)
-    w = 0.02
-    t = 0.002
+    wb = (m/rho)**(1/3)
 
     step = 5e-6
     tfinal = 0.2
@@ -183,18 +186,18 @@ def solve(ang,l,kl,c,dir,gnd,cs,vis=False):
     system.Add(joint_foot)
 
     class MotorTorque(chrono.ChFunction):
-        def __init__(self, motor):
+        def __init__(self, body):
             super().__init__()
-            self.motor = motor
+            self.body = body
 
         def Get_y(self, t):
-            rot = self.motor.GetMotorRot()
+            y = self.body.GetPos().y
             d = -1 if dir < 0 else 1
-            return d*(-cs['tau']+np.maximum(0,-cs['em']-rot)*100)
+            return d*((np.maximum(0,y-cs['em'])/(y-cs['em'])-1)*cs['tau'])
 
     motor = chrono.ChLinkMotorRotationTorque()
     motor.Initialize(links[0],links[-1],chrono.ChFrameD(chrono.ChVectorD(0,0,0)))
-    motorTorque = MotorTorque(motor)
+    motorTorque = MotorTorque(body)
     motor.SetTorqueFunction(motorTorque)
     system.Add(motor)
 
@@ -241,7 +244,7 @@ def solve(ang,l,kl,c,dir,gnd,cs,vis=False):
 
     if vis:
         import pychrono.irrlicht as chronoirr
-        
+
         application = chronoirr.ChIrrApp(system, "Jump", chronoirr.dimension2du(800, 600),chronoirr.VerticalDir_Y)
         application.AddTypicalSky()
         application.AddTypicalLights()
