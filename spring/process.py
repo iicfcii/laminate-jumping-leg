@@ -60,13 +60,18 @@ def base2virtual(ps,tzs,R):
 
     return np.array(alphaps),np.array(Mls)
 
-def k(t,w,l):
-    gap = np.arctan2(0.5,l)/np.pi*180*2 # thickness dependent
+def k(t,w,l,sim=False):
+    if not sim:
+        gap = np.arctan2(0.5,l)/np.pi*180*2 # thickness dependent
+        samples = ['1','2']
+    else:
+        gap = 0
+        samples = ['sim']
 
     ps0 = []
     tzs0 = []
-    for sample in [1,2]:
-        fs = data.read('../data/{:d}mil_{:d}mm_{:d}mm_{:d}.csv'.format(t,l,w,sample))
+    for sample in samples:
+        fs = data.read('../data/{:d}mil_{:d}mm_{:d}mm_{}.csv'.format(t,l,w,sample))
         ps0.append(np.array(fs['p']))
         tzs0.append(np.array(fs['tz']))
 
