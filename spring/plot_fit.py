@@ -36,9 +36,9 @@ for z in range(len(ts)):
         kps = model(L[y,:,z],W[y,:,z],T[y,:,z],coeff)
 
         c = 'C{:d}'.format(y)
-        plt.plot(L[y,:,z],ks,'o',color=c,label='w={:d}mm'.format(ws[y]))
-        plt.plot(L[y,:,z],kps,'-',color=c)
+        plt.plot(L[y,:,z],1/ks,'o',color=c,label='w={:d}mm'.format(ws[y]))
+        plt.plot(L[y,:,z],1/kps,'-',color=c)
     plt.xlabel('l [mm]')
-    plt.ylabel('k [Nm/rad]')
+    plt.ylabel('1/k [Nm/rad]')
     plt.legend()
 plt.show()
