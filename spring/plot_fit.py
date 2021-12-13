@@ -41,4 +41,17 @@ for z in range(len(ts)):
     plt.xlabel('l [mm]')
     plt.ylabel('1/k [Nm/rad]')
     plt.legend()
+
+for z in range(len(ts)):
+    plt.figure()
+    for x in range(len(ls)):
+        ks = K[:,x,z].flatten()
+        kps = model(L[:,x,z],W[:,x,z],T[:,x,z],coeff)
+
+        c = 'C{:d}'.format(x)
+        plt.plot(W[:,x,z],ks,'o',color=c,label='l={:d}mm'.format(ls[x]))
+        plt.plot(W[:,x,z],kps,'-',color=c)
+    plt.xlabel('w [mm]')
+    plt.ylabel('k [Nm/rad]')
+    plt.legend()
 plt.show()

@@ -28,6 +28,16 @@ def run(tv,wv,lv,type='euler'):
 
     system = chrono.ChSystemNSC()
     system.Set_G_acc(chrono.ChVectorD(0,0,0))
+
+    ground = chrono.ChBodyEasyCylinder(t,w,1,True)
+    ground.SetPos(chrono.ChVectorD(0,0,0))
+    ground.SetBodyFixed(True)
+    system.Add(ground)
+
+    pin = chrono.ChBodyEasyCylinder(t,w,1,True)
+    pin.SetPos(chrono.ChVectorD(l,0,0))
+    system.Add(pin)
+
     mesh = fea.ChMesh();
 
     if type == 'iga':
@@ -58,14 +68,22 @@ def run(tv,wv,lv,type='euler'):
     builder.GetLastBeamNodes()[0].SetFixed(True)
 
     system.Add(mesh)
+
+    link = chrono.ChLinkMateGeneric(False,True,True,False,False,False)
+    link.Initialize(
+        pin,
+        builder.GetLastBeamNodes()[int(l/dl)],
+        chrono.ChFrameD(chrono.ChVectorD(l,0,0))
+    )
+    system.Add(link)
+
     motor = chrono.ChLinkMotorRotationAngle()
     motor.Initialize(
-        builder.GetLastBeamNodes()[0],
-        builder.GetLastBeamNodes()[int(l/dl)],
+        ground,
+        pin,
         chrono.ChFrameD(chrono.ChVectorD(0,0,0),chrono.Q_from_AngX(chrono.CH_C_PI/2))
     )
     motor.SetAngleFunction(chrono.ChFunction_Sine(0,1/tfinal,30/180*chrono.CH_C_PI))
-    motor.SetSpindleConstraint(False,False,False,False,False)
     system.Add(motor)
 
     solver = mkl.ChSolverPardisoMKL()
