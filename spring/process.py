@@ -62,7 +62,7 @@ def base2virtual(ps,tzs,R):
 
 def k(t,w,l,samples,has_gap=True):
     # thickness dependent
-    gap = np.arctan2(0.5,l)/np.pi*180*2 if has_gap else 0
+    gap = np.arctan2(0.8,l)/np.pi*180*2 if has_gap else 0
 
     ps0 = []
     tzs0 = []

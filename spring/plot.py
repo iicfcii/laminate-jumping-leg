@@ -24,7 +24,7 @@ for thickness in [30]:
                 d = (5,5)
                 gap = 1
 
-            k,b,(pv,tv,pvfit,tvfit) = process.k(thickness,width,length,samples=['1','2'],has_gap=True)
+            k,b,(pv,tv,pvfit,tvfit) = process.k(thickness,width,length,samples=['1'],has_gap=True)
 
             plt.plot(pv,tv,'.',color=c,markersize=0.5)
             plt.plot(pvfit,tvfit,l,color=c,dashes=d,label='k={:.3f} b={:.3f} l={} w={}'.format(k,b,length,width))

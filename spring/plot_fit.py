@@ -19,7 +19,7 @@ L,W,T = np.meshgrid(ls,ws,ts)
 
 K = []
 for l,w,t in zip(L.flatten(),W.flatten(),T.flatten()):
-    k,b,data = process.k(t,w,l,samples=['1','2'],has_gap=False)
+    k,b,data = process.k(t,w,l,samples=['1'],has_gap=False)
     K.append(k)
 K = np.array(K).reshape(L.shape)
 
