@@ -7,13 +7,13 @@ import data
 import process
 
 ts = [30]
-ls = [25,50,75]
+ls = [25,37.5,50,62.5,75]
 ws = [10,20,30]
 
 # Simple beam model
 # k = E*w*t^3/L/16
-def model(l,w,t,coeff):
-    return coeff*((w.flatten()/1000)*(t.flatten()*2.54e-5)**3/(l.flatten()/1000))
+def model(l,w,t,E):
+    return E*((w.flatten()/1000)*(t.flatten()*2.54e-5)**3/(l.flatten()/1000))/16
 
 L,W,T = np.meshgrid(ls,ws,ts)
 
@@ -27,7 +27,7 @@ r = np.arange(0,1) # Use 15mill data
 a = model(L[:,:,r],W[:,:,r],T[:,:,r],1).reshape(-1,1)
 b = K[:,:,r].flatten()
 coeff,r,rank,s = np.linalg.lstsq(a,b,rcond=None)
-print('Fit Youngs modulus [GPa] {:.2f}'.format(coeff[0]*16/1e9))
+print('Fit Youngs modulus [GPa] {:.2f}'.format(coeff[0]/1e9))
 
 for z in range(len(ts)):
     plt.figure()
@@ -36,10 +36,12 @@ for z in range(len(ts)):
         kps = model(L[y,:,z],W[y,:,z],T[y,:,z],coeff)
 
         c = 'C{:d}'.format(y)
-        plt.plot(L[y,:,z],1/ks,'o',color=c,label='w={:d}mm'.format(ws[y]))
+        plt.plot(L[y,:,z],1/ks,'o',color=c,label='w={:.1f}mm'.format(ws[y]))
         plt.plot(L[y,:,z],1/kps,'-',color=c)
     plt.xlabel('l [mm]')
     plt.ylabel('1/k [Nm/rad]')
+    plt.ylim([0,15])
+    plt.xlim([0,90])
     plt.legend()
 
 for z in range(len(ts)):
@@ -49,9 +51,11 @@ for z in range(len(ts)):
         kps = model(L[:,x,z],W[:,x,z],T[:,x,z],coeff)
 
         c = 'C{:d}'.format(x)
-        plt.plot(W[:,x,z],ks,'o',color=c,label='l={:d}mm'.format(ls[x]))
+        plt.plot(W[:,x,z],ks,'o',color=c,label='l={:.1f}mm'.format(ls[x]))
         plt.plot(W[:,x,z],kps,'-',color=c)
     plt.xlabel('w [mm]')
     plt.ylabel('k [Nm/rad]')
+    plt.ylim([0,0.8])
+    plt.xlim([0,40])
     plt.legend()
 plt.show()
