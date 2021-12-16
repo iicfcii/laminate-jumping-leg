@@ -33,16 +33,23 @@ def base2virtual(ps,tzs,R):
     alphaps = []
     for p,tz in zip(ps,tzs):
         theta = (p-POS_MID)*DEG_PER_COUNT*DEG_2_RAD
-        l = R/np.cos(theta)/2
 
-        cos_alpha = (l**2+l**2-R**2)/(2*l*l)
-        sin_alpha = R/l*np.sin(theta)
+        # Virtual beam pair with one fixed length
+        l = R/2
+        lp = np.sqrt(R**2+(R/2)**2-2*R*R/2*np.cos(theta))
+
+        # Virtual beam pair with equal length
+        # l = R/np.cos(theta)/2
+        # lp = l
+
+        cos_alpha = (l**2+lp**2-R**2)/(2*l*lp)
+        sin_alpha = R/lp*np.sin(theta)
 
         alpha = np.arctan2(sin_alpha,cos_alpha)
 
         F = -tz/R
         Fpl = F*np.sin(alpha-PI/2+theta)
-        Ml = Fpl*l # Moment required to deform to this angle
+        Ml = Fpl*lp # Moment required to deform to this angle
 
         alphap = np.sign(alpha)*PI-alpha
 
@@ -67,7 +74,7 @@ def k(t,w,l,samples,has_gap=True):
     ps0 = []
     tzs0 = []
     for sample in samples:
-        fs = data.read('../data/{:d}mil_{:d}mm_{:d}mm_{}.csv'.format(t,int(l),w,sample))
+        fs = data.read('../data/{:d}mil_{:d}mm_{:d}mm_{}.csv'.format(int(t/5)*5,int(l),w,sample))
         ps0.append(np.array(fs['p']))
         tzs0.append(np.array(fs['tz']))
 

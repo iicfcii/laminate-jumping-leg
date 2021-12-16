@@ -53,7 +53,7 @@ def run(tv,wv,lv,type='euler'):
         section.SetDrawThickness(w,t)
 
         builder = fea.ChBuilderBeamIGA()
-        builder.BuildBeam(mesh,section,int(l/dl),chrono.ChVectorD(0,0,0),chrono.ChVectorD(l,0,0),chrono.ChVectorD(0,1,0),1)
+        builder.BuildBeam(mesh,section,int(lmax/dl),chrono.ChVectorD(0,0,0),chrono.ChVectorD(lmax,0,0),chrono.ChVectorD(0,1,0),1)
     else:
         section = fea.ChBeamSectionEulerSimple()
         section.SetYoungModulus(E)
@@ -63,7 +63,7 @@ def run(tv,wv,lv,type='euler'):
         # section.SetBeamRaleyghDamping(0.1)
 
         builder = fea.ChBuilderBeamEuler()
-        builder.BuildBeam(mesh,section,int(l/dl),chrono.ChVectorD(0,0,0),chrono.ChVectorD(l,0,0),chrono.ChVectorD(0,1,0))
+        builder.BuildBeam(mesh,section,int(lmax/dl),chrono.ChVectorD(0,0,0),chrono.ChVectorD(lmax,0,0),chrono.ChVectorD(0,1,0))
 
     builder.GetLastBeamNodes()[0].SetFixed(True)
 
@@ -129,14 +129,14 @@ def run(tv,wv,lv,type='euler'):
         if system.GetChTime() > tfinal: # in system seconds
               application.GetDevice().closeDevice()
 
-    file_name = '../data/{:d}mil_{:d}mm_{:d}mm_sim_beam.csv'.format(tv,lv,wv)
+    file_name = '../data/{:d}mil_{:d}mm_{:d}mm_sim_beam.csv'.format(int(tv/10)*10,int(lv),wv)
     data.write(
         file_name,
         ['t','p','tz','rot'],
         [T,P,TZ,ROT]
     )
 
-for t in [30]:
+for t in [32.5]:
     for w in [10,20,30]:
-        for l in [25,50,75]:
+        for l in [25,37.5,50,62.5,75]:
             run(t,w,l)
