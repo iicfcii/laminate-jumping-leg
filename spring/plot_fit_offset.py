@@ -35,7 +35,7 @@ B = 1/K.flatten()
 coeff,r,rank,s = np.linalg.lstsq(A,B,rcond=None)
 E = 16/coeff[0]
 b = coeff[1]/coeff[0]
-print('E {:.2f} b {:.2f}'.format(E/1e9,b))
+print('E {:.2f} b {:.4f}'.format(E/1e9,b))
 
 for z in range(len(ts)):
     plt.figure()
@@ -52,7 +52,6 @@ for z in range(len(ts)):
     plt.ylabel('1/k [Nm/rad]')
     plt.legend()
 
-for z in range(len(ts)):
     plt.figure()
     for x in range(len(ls)):
         ks = K[:,x,z].flatten()

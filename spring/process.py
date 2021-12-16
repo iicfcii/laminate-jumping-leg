@@ -3,7 +3,7 @@ import matplotlib.pyplot as plt
 import data
 
 DEG_PER_COUNT = 0.088
-ZERO_FORCE_TH = 5e-3
+ZERO_FORCE_TH = 5e-4
 POS_MID = 2048
 
 PI = np.pi
@@ -69,7 +69,7 @@ def base2virtual(ps,tzs,R):
 
 def k(t,w,l,samples,has_gap=True):
     # thickness dependent
-    gap = np.arctan2(1.2,l)/np.pi*180*2 if has_gap else 0
+    gap = np.arctan2(1.5-t*2.54e-2/2,l)/np.pi*180*2 if has_gap else 0
 
     ps0 = []
     tzs0 = []
