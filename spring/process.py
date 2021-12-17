@@ -36,7 +36,7 @@ def base2virtual(ps,tzs,R):
 
         # Virtual beam pair with one fixed length
         l = R/2
-        lp = np.sqrt(R**2+(R/2)**2-2*R*R/2*np.cos(theta))
+        lp = np.sqrt(R**2+l**2-2*R*l*np.cos(theta))
 
         # Virtual beam pair with equal length
         # l = R/np.cos(theta)/2
