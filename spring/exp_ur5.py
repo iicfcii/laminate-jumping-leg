@@ -12,7 +12,7 @@ RAD_PER_COUNT = 0.088/180*np.pi
 
 POS_MID = 0/180*np.pi
 STEP_NUM = 10 # signle side
-STEP_SIZE = 20*RAD_PER_COUNT # 0.088 deg/count
+STEP_SIZE = 20/STEP_NUM/180*np.pi # 0.088 deg/count
 POS_LIST = STEP_SIZE*np.concatenate((
     np.arange(0,STEP_NUM),
     np.arange(STEP_NUM,-STEP_NUM,-1),
@@ -24,7 +24,7 @@ TOOL_ROT_OFFSET = np.pi/4
 
 # Virtual rotation pose wrt base
 Tbv = m3d.Transform()
-Tbv.pos = m3d.Vector(-0.002, -0.38745, 0.080)
+Tbv.pos = m3d.Vector(-0.0025, -0.38645, 0.080)
 Tbv.orient = m3d.Orientation.new_euler((np.pi, 0, 0), encoding='XYZ')
 
 # Tool pose wrt virtual rotation
