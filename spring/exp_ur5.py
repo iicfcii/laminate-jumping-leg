@@ -19,12 +19,12 @@ POS_LIST = STEP_SIZE*np.concatenate((
     np.arange(-STEP_NUM,1),
 ))
 
-VIRTUAL_CENTER_OFFSET = -0.0
-TOOL_ROT_OFFSET = np.pi/4
+VIRTUAL_CENTER_OFFSET = -0.025-0.025
+TOOL_ROT_OFFSET = -133.5/180*np.pi
 
 # Virtual rotation pose wrt base
 Tbv = m3d.Transform()
-Tbv.pos = m3d.Vector(-0.0025, -0.38645, 0.080)
+Tbv.pos = m3d.Vector(-0.0025, -0.48905, 0.080) # 18*25.4+31.85
 Tbv.orient = m3d.Orientation.new_euler((np.pi, 0, 0), encoding='XYZ')
 
 # Tool pose wrt virtual rotation
