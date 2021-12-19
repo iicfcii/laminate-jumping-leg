@@ -16,8 +16,7 @@ E = 18.6e9
 mu = 0.3
 rho = 1820
 dl = 0.001
-lo = 0.000 # Motor rotation center offset
-lmax = 0.09+lo
+lmax = 0.09
 
 step = 5e-4
 tfinal = 2
@@ -31,12 +30,12 @@ def run(tv,wv,lv,type='euler'):
     system.Set_G_acc(chrono.ChVectorD(0,0,0))
 
     ground = chrono.ChBodyEasyCylinder(t,w,1,True)
-    ground.SetPos(chrono.ChVectorD(lo,0,0))
+    ground.SetPos(chrono.ChVectorD(0,0,0))
     ground.SetBodyFixed(True)
     system.Add(ground)
 
     pin = chrono.ChBodyEasyCylinder(t,w,1,True)
-    pin.SetPos(chrono.ChVectorD(l+lo,0,0))
+    pin.SetPos(chrono.ChVectorD(l,0,0))
     system.Add(pin)
 
     mesh = fea.ChMesh();
@@ -66,15 +65,18 @@ def run(tv,wv,lv,type='euler'):
         builder = fea.ChBuilderBeamEuler()
         builder.BuildBeam(mesh,section,int(lmax/dl),chrono.ChVectorD(0,0,0),chrono.ChVectorD(lmax,0,0),chrono.ChVectorD(0,1,0))
 
-    builder.GetLastBeamNodes()[0].SetFixed(True)
+    # builder.GetLastBeamNodes()[0].SetFixed(True)
+    ground_link = chrono.ChLinkMateGeneric(True,True,True,True,True,True)
+    ground_link.Initialize(ground,builder.GetLastBeamNodes()[0],chrono.ChFrameD(chrono.ChVectorD(0,0,0)))
+    system.Add(ground_link)
 
     system.Add(mesh)
 
     link = chrono.ChLinkMateGeneric(False,True,True,False,False,False)
     link.Initialize(
         pin,
-        builder.GetLastBeamNodes()[int((l+lo)/dl)],
-        chrono.ChFrameD(chrono.ChVectorD(l+lo,0,0))
+        builder.GetLastBeamNodes()[int(l/dl)],
+        chrono.ChFrameD(chrono.ChVectorD(l,0,0))
     )
     system.Add(link)
 
@@ -82,7 +84,7 @@ def run(tv,wv,lv,type='euler'):
     motor.Initialize(
         ground,
         pin,
-        chrono.ChFrameD(chrono.ChVectorD(lo,0,0),chrono.Q_from_AngX(chrono.CH_C_PI/2))
+        chrono.ChFrameD(chrono.ChVectorD(0,0,0),chrono.Q_from_AngX(chrono.CH_C_PI/2))
     )
     motor.SetAngleFunction(chrono.ChFunction_Sine(0,1/tfinal,20/180*chrono.CH_C_PI))
     system.Add(motor)
@@ -108,7 +110,10 @@ def run(tv,wv,lv,type='euler'):
     ROT = []
     while application.GetDevice().run():
         T.append(system.GetChTime())
-        TZ.append(-motor.GetMotorTorque())
+
+        # tz = -motor.GetMotorTorque()
+        tz = ground_link.Get_react_torque().y
+        TZ.append(tz)
 
         rot = motor.GetMotorRot()
         p = int(rot/chrono.CH_C_PI*180/process.DEG_PER_COUNT)+process.POS_MID
