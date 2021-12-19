@@ -55,7 +55,6 @@ for z in range(len(ts)):
     plt.figure()
     for x in range(len(ls)):
         ks = K[:,x,z].flatten()
-        # kps = model(L[:,x,z],W[:,x,z],T[:,x,z],coeff)
 
         l_wt3,wt3_inv = model(L[:,x,z],W[:,x,z],T[:,x,z])
         kps = 1/(16*l_wt3/E + 16*b*wt3_inv/E)

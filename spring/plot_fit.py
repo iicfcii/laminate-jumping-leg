@@ -6,56 +6,57 @@ import matplotlib.pyplot as plt
 import data
 import process
 
-ts = [30]
+ts = [32.5]
 ls = [25,37.5,50,62.5,75]
 ws = [10,20,30]
 
-# Simple beam model
-# k = E*w*t^3/L/16
-def model(l,w,t,E):
-    return E*((w.flatten()/1000)*(t.flatten()*2.54e-5)**3/(l.flatten()/1000))/16
-
 L,W,T = np.meshgrid(ls,ws,ts)
-
 K = []
 for l,w,t in zip(L.flatten(),W.flatten(),T.flatten()):
     k,b,data = process.k(t,w,l,samples=['1'],has_gap=False)
     K.append(k)
 K = np.array(K).reshape(L.shape)
 
-r = np.arange(0,1) # Use 15mill data
-a = model(L[:,:,r],W[:,:,r],T[:,:,r],1).reshape(-1,1)
-b = K[:,:,r].flatten()
-coeff,r,rank,s = np.linalg.lstsq(a,b,rcond=None)
-print('Fit Youngs modulus [GPa] {:.2f}'.format(coeff[0]/1e9))
+# Model
+# k = E*w*t^3/l/16
+# 1/k = 16*l/E*w*t^3
+def model(l,w,t):
+    l_wt3 = (l.flatten()*1e-3)/(w.flatten()*1e-3)/(t.flatten()*2.54e-5)**3
+    return l_wt3
+
+l_wt3 = model(L,W,T)
+A = l_wt3.reshape(-1,1)
+B = 1/K.flatten()
+coeff,r,rank,s = np.linalg.lstsq(A,B,rcond=None)
+E = 16/coeff[0]
+print('E {:.2f}'.format(E/1e9))
 
 for z in range(len(ts)):
     plt.figure()
     for y in range(len(ws)):
-        ks = K[y,:,z].flatten()
-        kps = model(L[y,:,z],W[y,:,z],T[y,:,z],coeff)
+        ks_inv = 1/K[y,:,z].flatten()
+
+        l_wt3 = model(L[y,:,z],W[y,:,z],T[y,:,z])
+        kps_inv = 16*l_wt3/E
 
         c = 'C{:d}'.format(y)
-        plt.plot(L[y,:,z],1/ks,'o',color=c,label='w={:.1f}mm'.format(ws[y]))
-        plt.plot(L[y,:,z],1/kps,'-',color=c)
+        plt.plot(L[y,:,z],ks_inv,'o',color=c,label='w={:.1f}mm'.format(ws[y]))
+        plt.plot(L[y,:,z],kps_inv,'-',color=c)
     plt.xlabel('l [mm]')
     plt.ylabel('1/k [Nm/rad]')
-    plt.ylim([0,15])
-    plt.xlim([0,90])
     plt.legend()
 
-for z in range(len(ts)):
     plt.figure()
     for x in range(len(ls)):
         ks = K[:,x,z].flatten()
-        kps = model(L[:,x,z],W[:,x,z],T[:,x,z],coeff)
+
+        l_wt3 = model(L[:,x,z],W[:,x,z],T[:,x,z])
+        kps = 1/(16*l_wt3/E)
 
         c = 'C{:d}'.format(x)
         plt.plot(W[:,x,z],ks,'o',color=c,label='l={:.1f}mm'.format(ls[x]))
         plt.plot(W[:,x,z],kps,'-',color=c)
     plt.xlabel('w [mm]')
     plt.ylabel('k [Nm/rad]')
-    plt.ylim([0,0.8])
-    plt.xlim([0,40])
     plt.legend()
 plt.show()
