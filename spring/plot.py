@@ -5,7 +5,6 @@ import numpy as np
 import matplotlib.pyplot as plt
 import data
 import process
-import beam
 
 fig, axs = plt.subplots(2,3,sharex=True,sharey=True)
 for k, tmil in enumerate([16.5,32.5]):

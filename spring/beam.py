@@ -4,7 +4,6 @@ sys.path.append('../utils')
 import pychrono as chrono
 import pychrono.fea as fea
 import pychrono.irrlicht as chronoirr
-import pychrono.pardisomkl as mkl
 import numpy as np
 import matplotlib.pyplot as plt
 import data
@@ -46,8 +45,13 @@ def sim(rot,tz,tmil,lmm,wmm):
 
     system.Add(mesh)
 
-    solver = mkl.ChSolverPardisoMKL()
-    system.SetSolver(solver)
+    try:
+        import pychrono.pardisomkl as mkl
+        solver = mkl.ChSolverPardisoMKL()
+        system.SetSolver(solver)
+    except:
+        solver = chrono.ChSolverMINRES()
+        system.SetSolver(solver)
 
     v_surf = fea.ChVisualizationFEAmesh(mesh)
     v_surf.SetFEMdataType(fea.ChVisualizationFEAmesh.E_PLOT_SURFACE)
