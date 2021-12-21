@@ -7,7 +7,6 @@ import pychrono.irrlicht as chronoirr
 import pychrono.pardisomkl as mkl
 import numpy as np
 import matplotlib.pyplot as plt
-import process
 import data
 
 chrono.SetChronoDataPath('../chrono_data/')
@@ -21,10 +20,10 @@ lmax = 0.09
 step = 5e-4
 tfinal = 2
 
-def run(tv,wv,lv,type='euler'):
-    t = tv*2.54e-5
-    w = wv/1000
-    l = lv/1000
+def run(tmil,wmm,lmm):
+    t = tmil*2.54e-5
+    w = wmm/1000
+    l = lmm/1000
 
     system = chrono.ChSystemNSC()
     system.Set_G_acc(chrono.ChVectorD(0,0,0))
@@ -40,30 +39,15 @@ def run(tv,wv,lv,type='euler'):
 
     mesh = fea.ChMesh();
 
-    if type == 'iga':
-        inertia = fea.ChInertiaCosseratSimple()
-        inertia.SetAsRectangularSection(w,t,rho)
+    section = fea.ChBeamSectionEulerSimple()
+    section.SetYoungModulus(E)
+    section.SetGwithPoissonRatio(mu)
+    section.SetDensity(rho)
+    section.SetAsRectangularSection(w,t)
+    # section.SetBeamRaleyghDamping(0.1)
 
-        elasticity = fea.ChElasticityCosseratSimple()
-        elasticity.SetYoungModulus(E)
-        elasticity.SetGwithPoissonRatio(mu)
-        elasticity.SetAsRectangularSection(w,t)
-
-        section = fea.ChBeamSectionCosserat(inertia, elasticity)
-        section.SetDrawThickness(w,t)
-
-        builder = fea.ChBuilderBeamIGA()
-        builder.BuildBeam(mesh,section,int(lmax/dl),chrono.ChVectorD(0,0,0),chrono.ChVectorD(lmax,0,0),chrono.ChVectorD(0,1,0),1)
-    else:
-        section = fea.ChBeamSectionEulerSimple()
-        section.SetYoungModulus(E)
-        section.SetGwithPoissonRatio(mu)
-        section.SetDensity(rho)
-        section.SetAsRectangularSection(w,t)
-        # section.SetBeamRaleyghDamping(0.1)
-
-        builder = fea.ChBuilderBeamEuler()
-        builder.BuildBeam(mesh,section,int(lmax/dl),chrono.ChVectorD(0,0,0),chrono.ChVectorD(lmax,0,0),chrono.ChVectorD(0,1,0))
+    builder = fea.ChBuilderBeamEuler()
+    builder.BuildBeam(mesh,section,int(lmax/dl),chrono.ChVectorD(0,0,0),chrono.ChVectorD(lmax,0,0),chrono.ChVectorD(0,1,0))
 
     # builder.GetLastBeamNodes()[0].SetFixed(True)
     ground_link = chrono.ChLinkMateGeneric(True,True,True,True,True,True)
@@ -116,8 +100,6 @@ def run(tv,wv,lv,type='euler'):
         TZ.append(tz)
 
         rot = motor.GetMotorRot()
-        p = int(rot/chrono.CH_C_PI*180/process.DEG_PER_COUNT)+process.POS_MID
-        P.append(p)
         ROT.append(rot)
 
         application.BeginScene()
@@ -135,14 +117,14 @@ def run(tv,wv,lv,type='euler'):
         if system.GetChTime() > tfinal: # in system seconds
               application.GetDevice().closeDevice()
 
-    file_name = '../data/{:d}mil_{:d}mm_{:d}mm_sim_beam.csv'.format(int(tv/10)*10,int(lv),wv)
+    file_name = '../data/{:d}mil_{:d}mm_{:d}mm_sim_beam.csv'.format(int(tmil/5)*5,int(lmm),wmm)
     data.write(
         file_name,
-        ['t','p','tz','rot'],
-        [T,P,TZ,ROT]
+        ['t','tz','rot'],
+        [T,TZ,ROT]
     )
 
-for t in [32.5]:
+for t in [16.5,32.5]:
     for w in [10,20,30]:
         for l in [25,37.5,50,62.5,75]:
             run(t,w,l)
