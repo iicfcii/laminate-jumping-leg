@@ -49,7 +49,7 @@ def sim(rot,tz,tmil,lmm,wmm):
         import pychrono.pardisomkl as mkl
         solver = mkl.ChSolverPardisoMKL()
         system.SetSolver(solver)
-    except:
+    except ModuleNotFoundError:
         solver = chrono.ChSolverMINRES()
         system.SetSolver(solver)
 
