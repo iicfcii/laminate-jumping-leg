@@ -4,33 +4,10 @@ sys.path.append('../utils')
 import numpy as np
 import matplotlib.pyplot as plt
 import data
+import process
+import beam
 
-def process(tmil, lmm, wmm, type, rot_offset, has_gap=True):
-    fs = data.read('../data/{:d}mil_{:d}mm_{:d}mm_{}.csv'.format(int(tmil/5)*5,int(lmm),wmm,type))
-    t = np.array(fs['t'])
-    rot0 = np.array(fs['rot'])
-    tz = np.array(fs['tz'])
-
-    gap = np.arctan2(1.5-tmil*2.54e-2/2,lmm)*2 if has_gap else 0
-    rot = rot0 + (tz>0)*gap/2 - (tz<0)*gap/2 # accounts gap
-    rot -= rot_offset
-
-    t_sample = []
-    t_idx = []
-    t_current = 1
-    for i in range(len(t)):
-        if t[i] > t_current:
-            t_idx.append(i)
-            t_sample.append(t[i])
-            t_current += 1
-
-    r = 50
-    rot_sample = [np.average(rot[i-r:i+r]) for i in t_idx]
-    tz_sample = [np.average(tz[i-r:i+r]) for i in t_idx]
-
-    return np.array(rot_sample), np.array(tz_sample)
-
-plt.figure()
+fig, axs = plt.subplots(2,3,sharex=True,sharey=True)
 for k, tmil in enumerate([16.5,32.5]):
     for j, wmm in enumerate([10,20,30]):
         idx = 3*k+j+1
@@ -41,9 +18,14 @@ for k, tmil in enumerate([16.5,32.5]):
             w = wmm/1000
 
             # Experiment
-            rot, tz = process(tmil,lmm,wmm,'1',np.pi/4 if k==1 else 0)
-            xs = np.cos(rot)*l
-            ys = np.sin(rot)*l
+            rot, tz = process.sample(tmil,lmm,wmm,'1',np.pi/4 if k==1 else 0)
+            xe = np.cos(rot)*l
+            ye = np.sin(rot)*l
+
+            # fea
+            fs = data.read('../data/{:d}mil_{:d}mm_{:d}mm_beam.csv'.format(int(tmil/5)*5,int(lmm),wmm))
+            xf = np.array(fs['x'])
+            yf = np.array(fs['y'])
 
             # PRBM
             gamma = 0.85
@@ -53,16 +35,20 @@ for k, tmil in enumerate([16.5,32.5]):
             K = gamma*Ktheta*E*I/l
 
             theta = tz/l*gamma*l/K
-            xms = np.cos(theta)*gamma*l+(1-gamma)*l
-            yms = np.sin(theta)*gamma*l
+            xm = np.cos(theta)*gamma*l+(1-gamma)*l
+            ym = np.sin(theta)*gamma*l
 
-            plt.plot(xs,ys,color='C1',label='experiment')
-            plt.plot(xms,yms,'o',color='C2',markersize=1,label='model')
+            plt.plot(xe,ye,color='C1',label='experiment')
+            plt.plot(xm,ym,'o',color='C2',markersize=1,label='PRBM')
+            plt.plot(xf,yf,'o',color='C3',markersize=1,label='FEA')
 
             plt.axis('square')
             plt.title('t={:.1f}mil w={:.1f}mm'.format(tmil,wmm))
             if idx == 1 and i == 0: plt.legend()
-
         plt.xlim([0.015,0.085])
         plt.ylim([-0.03,0.03])
+plt.gcf().add_subplot(111, frameon=False)
+plt.tick_params(labelcolor='none', which='both', top=False, bottom=False, left=False, right=False)
+plt.xlabel('x [mm]')
+plt.ylabel('y [mm]')
 plt.show()
