@@ -1,6 +1,7 @@
 import sys
 sys.path.append('../utils')
 
+from scipy.optimize import root_scalar
 import numpy as np
 import process
 import data
@@ -20,7 +21,13 @@ def sim(rot,tz,t,l,w):
     l = lmm/1000
 
     K = k(t,l,w)
-    theta = tz/l*gamma*l/K
+
+    def eq(theta):
+        return tz/l*np.cos(theta-rot)*gamma*l-K*theta
+    sol = root_scalar(eq, bracket=[-np.pi/2, np.pi/2], method='brentq')
+    assert sol.converged
+    theta = sol.root
+    # theta = tz/l*gamma*l/K
     x = np.cos(theta)*gamma*l+(1-gamma)*l
     y = np.sin(theta)*gamma*l
 
