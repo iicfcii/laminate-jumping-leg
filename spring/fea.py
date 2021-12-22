@@ -8,10 +8,11 @@ import numpy as np
 import matplotlib.pyplot as plt
 import data
 import process
+import prbm
 
 chrono.SetChronoDataPath('../chrono_data/')
 
-E = 18.6e9*1.1
+E = prbm.E
 mu = 0.3
 rho = 1820
 dl = 0.005
@@ -78,7 +79,7 @@ if __name__ == '__main__':
                     x.append(pos[0])
                     y.append(pos[1])
 
-                file_name = '../data/{:d}mil_{:d}mm_{:d}mm_beam.csv'.format(int(tmil/5)*5,int(lmm),wmm)
+                file_name = '../data/{:d}mil_{:d}mm_{:d}mm_fea.csv'.format(int(tmil/5)*5,int(lmm),wmm)
                 data.write(
                     file_name,
                     ['x','y','rot','tz'],

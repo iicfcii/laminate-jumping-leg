@@ -23,16 +23,12 @@ cs = {
 
 m = 0.04
 ang_limit = (-pi,pi)
-l_limit = (0.02,0.2)
-kl_limit = (0.05,0.3)
-size_limit = (0,(cs['mb']-m)/fourbar.rho/fourbar.w/fourbar.t)
-fxb_limit = 1.5
+l_limit = (0.02,0.15)
+w_limit = (0.005,0.04)
+fxb_limit = 10
 e_max = 10
 
-bounds = [ang_limit]+[l_limit]*5+[kl_limit]*4+[(-1,1)]*3
-cons = [
-    LinearConstraint(np.array([[0,1,1,1,1,1,0,0,0,0,0,0,0]]),*size_limit),
-]
+bounds = [ang_limit]+[l_limit]*5+[w_limit]*2+[(-1,1)]*1
 
 # Desired force
 x0 = [0,0,0,0]
@@ -44,12 +40,10 @@ dybd = sol.y[2,:]
 def fromX(x):
     ang = x[0]
     l = x[1:6]
-    kl = x[6:10]
-    c = x[10]
-    dir = x[11]
-    gnd = x[12]
+    w = x[6:8]
+    c = x[8]
 
-    return ang,l,kl,c,dir,gnd
+    return ang,l,w,c
 
 def error_yb(data):
     num_step = 100
@@ -82,10 +76,10 @@ def fxb_max(data):
     return np.amax(np.abs(data['fxb'])[np.array(data['t']) > ts])
 
 def obj(x,e):
-    ang,l,kl,c,dir,gnd = fromX(x)
+    ang,l,w,c = fromX(x)
 
     try:
-        data = fourbar.solve(ang,l,kl,c,dir,gnd,m,cs,vis=False)
+        data = fourbar.solve(ang,l,w,c,m,cs,vis=False)
     except AssertionError:
         return e_max
 
@@ -96,13 +90,11 @@ def obj(x,e):
     return e(data)
 
 def cb(x,convergence=0):
-    ang,l,kl,c,dir,gnd = fromX(x)
+    ang,l,w,c = fromX(x)
     print('ang =',ang)
     print('l =',str(list(l)))
-    print('kl =',str(list(kl)))
+    print('w =',str(list(w)))
     print('c =',c)
-    print('dir =',dir)
-    print('gnd =',gnd)
     print('convergence =',convergence)
 
 if __name__ == '__main__':
@@ -110,7 +102,6 @@ if __name__ == '__main__':
         obj,
         bounds=bounds,
         args=(error_yb,),
-        constraints=cons,
         popsize=10,
         maxiter=1000,
         tol=0.01,
@@ -119,12 +110,10 @@ if __name__ == '__main__':
         polish=False,
         disp=True
     )
-    ang,l,kl,c,dir,gnd = fromX(list(res.x))
+    ang,l,w,c = fromX(list(res.x))
     print('Result', res.message)
     print('ang =',ang)
     print('l =',str(list(l)))
-    print('kl =',str(list(kl)))
+    print('w =',str(list(w)))
     print('c =',c)
-    print('dir =',dir)
-    print('gnd =',gnd)
     print('Cost', res.fun)

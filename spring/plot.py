@@ -5,6 +5,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import data
 import process
+import prbm
 
 fig, axs = plt.subplots(2,3,sharex=True,sharey=True)
 for k, tmil in enumerate([16.5,32.5]):
@@ -27,15 +28,9 @@ for k, tmil in enumerate([16.5,32.5]):
             yf = np.array(fs['y'])
 
             # PRBM
-            gamma = 0.85
-            Ktheta = 2.65
-            E = 18.6e9*1.1
-            I = w*t**3/12
-            K = gamma*Ktheta*E*I/l
-
-            theta = tz/l*gamma*l/K
-            xm = np.cos(theta)*gamma*l+(1-gamma)*l
-            ym = np.sin(theta)*gamma*l
+            fs = data.read('../data/{:d}mil_{:d}mm_{:d}mm_prbm.csv'.format(int(tmil/5)*5,int(lmm),wmm))
+            xm = np.array(fs['x'])
+            ym = np.array(fs['y'])
 
             plt.plot(xe,ye,color='C1',label='experiment')
             plt.plot(xm,ym,'o',color='C2',markersize=1,label='PRBM')
