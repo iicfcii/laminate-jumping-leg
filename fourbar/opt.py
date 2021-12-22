@@ -23,9 +23,9 @@ cs = {
 
 m = 0.04
 ang_limit = (-pi,pi)
-l_limit = (0.02,0.15)
+l_limit = (0.02,0.1)
 w_limit = (0.005,0.04)
-fxb_limit = 10
+fxb_limit = 1.5
 e_max = 10
 
 bounds = [ang_limit]+[l_limit]*5+[w_limit]*2+[(-1,1)]*1
