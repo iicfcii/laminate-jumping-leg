@@ -14,7 +14,7 @@ pi = np.pi
 wr = 0.02
 tr = 0.0013
 tf = 32.5*2.54e-5
-rho = 2000
+rho = prbm.rho
 
 # Fourbar
 #   b----c

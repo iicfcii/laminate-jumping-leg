@@ -9,6 +9,7 @@ import data
 gamma = 0.85
 Ktheta = 2.65
 E = 18.6e9*1.1
+rho = 1820
 
 def k(t,l,w):
     I = w*t**3/12

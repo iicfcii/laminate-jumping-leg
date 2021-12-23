@@ -14,7 +14,7 @@ chrono.SetChronoDataPath('../chrono_data/')
 
 E = prbm.E
 mu = 0.3
-rho = 1820
+rho = prbm.rho
 dl = 0.005
 lmax = 0.09
 
