@@ -81,7 +81,8 @@ def solve(ang,l,w,c,m,cs,vis=False):
     # Crank
     p1 = ps[0,:]
     p2 = ps[1,:]
-    pj = (p2-p1)*(1-prbm.gamma)+p1
+    pad = 0.005 # 5mm pad at both ends for wider hinge
+    pj = (p2-p1)*((1-pad*2/l[1])*(1-prbm.gamma)+pad/l[1])+p1
     ls.append(np.array([p1,pj]))
     ls.append(np.array([pj,p2]))
     # Coupler

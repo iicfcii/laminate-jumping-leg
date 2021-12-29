@@ -14,6 +14,7 @@ l = [0.0667462984263527, 0.06871600593157108, 0.057458335150298974, 0.0853050769
 w = [0.005110082533442327, 0.015817837847544945]
 c = 0.8531961714403822
 
+print('Total leg length',np.sum(l))
 data = fourbar.solve(ang,l,w,c,opt.m,opt.cs,vis=True)
 print('Error yb',opt.error_yb(data))
 print('Error dyb',opt.error_dyb(data))
