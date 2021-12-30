@@ -74,6 +74,8 @@ def solve(ang,l,w,c,m,cs,vis=False):
     pf = (rot @ pf.T).T
 
     ls = []
+    pad = 0.005 # 5mm pad at ends for wider hinge
+
     # Ground
     p1 = ps[3,:]
     p2 = ps[0,:]
@@ -81,7 +83,6 @@ def solve(ang,l,w,c,m,cs,vis=False):
     # Crank
     p1 = ps[0,:]
     p2 = ps[1,:]
-    pad = 0.005 # 5mm pad at both ends for wider hinge
     pj = (p2-p1)*((1-pad*2/l[1])*(1-prbm.gamma)+pad/l[1])+p1
     ls.append(np.array([p1,pj]))
     ls.append(np.array([pj,p2]))
@@ -92,7 +93,7 @@ def solve(ang,l,w,c,m,cs,vis=False):
     # Ext
     p1 = ps[2,:]
     p2 = pf[0,:]
-    pj = (p2-p1)*(1-prbm.gamma)+p1
+    pj = (p2-p1)*((1-pad/l[4])*(1-prbm.gamma)+pad/l[4])+p1
     ls.append(np.array([p1,pj]))
     ls.append(np.array([pj,p2]))
     # Rocker
