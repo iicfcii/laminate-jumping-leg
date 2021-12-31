@@ -12,7 +12,7 @@ chrono.SetChronoDataPath(os.path.join(os.path.abspath('../chrono_data/'),''))
 
 pi = np.pi
 wr = 0.02
-tr = 0.0013
+tr = 0.0014 # 0.8255,0.015,0.127,0.015,0.4191
 tf = 32.5*2.54e-5
 rho = prbm.rho
 
