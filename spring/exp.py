@@ -3,67 +3,80 @@ sys.path.append('../utils')
 
 import time
 import numpy as np
-from dynamixel_sdk import *
-import ati
+import math3d as m3d
 import data
+import ati
+import urx
 
-PORT_NAME = '/dev/tty.usbserial-FT5WJ6YV'
-PROTOCOL_VERSION = 2.0
-BAUDRATE = 57600
-SERVO_ID = 1
+RAD_PER_COUNT = 0.088/180*np.pi
 
-ADDR_TORQUE_ENABLE = 64
-LEN_TORQUE_ENABLE = 1
-ADDR_PRESENT_POSITION = 132
-LEN_PRESENT_POSITION = 4
-ADDR_GOAL_POSITION = 116
-LEN_GOAL_POSITION = 4
-
-POS_MID = 2048 # ~180 deg
-STEP_NUM = 15 # signle side
-STEP_SIZE = 20 # 0.088 deg/count
-POS_LIST = POS_MID+STEP_SIZE*np.concatenate((
+POS_MID = 0/180*np.pi
+STEP_NUM = 10 # signle side
+STEP_SIZE = 20/STEP_NUM/180*np.pi # 0.088 deg/count
+POS_LIST = STEP_SIZE*np.concatenate((
     np.arange(0,STEP_NUM),
     np.arange(STEP_NUM,-STEP_NUM,-1),
     np.arange(-STEP_NUM,1),
 ))
 
-def limit_p(p):
-    r = STEP_SIZE*STEP_NUM+50
-    p_start = POS_MID-r
-    p_end = POS_MID+r
-    assert p > p_start and p < p_end, 'Position should be between {} and {} but is {}'.format(p_start,p_end,p)
+VIRTUAL_CENTER_OFFSET = -0.025-0.025
+TOOL_ROT_OFFSET = -133.5/180*np.pi
+
+# Virtual rotation pose wrt base
+Tbv = m3d.Transform()
+Tbv.pos = m3d.Vector(-0.0025, -0.48905, 0.080) # 18*25.4+31.85
+Tbv.orient = m3d.Orientation.new_euler((np.pi, 0, 0), encoding='XYZ')
+
+# Tool pose wrt virtual rotation
+Tvt = m3d.Transform()
+Tvt.pos = m3d.Vector(0,VIRTUAL_CENTER_OFFSET,0)
+Tvt.orient = m3d.Orientation.new_euler((0, 0, TOOL_ROT_OFFSET), encoding='XYZ')
+
+def to_l(pose):
+    return np.array(list(pose.pos)+list(pose.orient.rotation_vector))
+
+def to_p(rot):
+    return round((rot-POS_MID)/RAD_PER_COUNT+2048)
+
+def limit_tool(rz):
+    assert np.abs(rz) < POS_MID+STEP_NUM*STEP_SIZE, 'Tool rotation out of range'
+    return
+
+def rotate_tool(rot): # Only z, absolute
+    Tvv = m3d.Transform()
+    Tvv.orient.rotate_zb(rot)
+    Tbt = Tbv*Tvv*Tvt
+
+    ur5.movel(to_l(Tbt),acc=0.1,vel=0.05,wait=False)
+
+# Tool pose wrt base
+Tbt = Tbv*Tvt
+L_INIT = to_l(Tbt)
+print('Desired initial pose',list(L_INIT))
 
 if __name__ == '__main__':
-    portH = PortHandler(PORT_NAME)
-    portH.setBaudRate(BAUDRATE)
-    packetH = PacketHandler(PROTOCOL_VERSION)
+    ur5 = urx.Robot("192.168.1.103")
+    ur5.set_payload(0.17,(0,-0.002,0.013))
+    time.sleep(1)
 
-    # Disable torque and check current position
-    # To avoid potential damage to test setup, especially force sensor
-    groupSW = GroupSyncWrite(portH, packetH, ADDR_TORQUE_ENABLE, LEN_TORQUE_ENABLE)
-    groupSW.addParam(SERVO_ID,int(0).to_bytes(LEN_TORQUE_ENABLE, 'little'))
-    groupSW.txPacket()
+    pose = ur5.get_pose()
+    pos = np.array(list(pose.pos))
+    rot = np.array(list(pose.orient.to_euler('XYZ')))
+    print('Actual initial pose',list(pos)+list(pose.orient.rotation_vector))
 
-    groupSR = GroupSyncRead(portH, packetH, ADDR_PRESENT_POSITION,LEN_PRESENT_POSITION)
-    groupSR.addParam(SERVO_ID)
-    groupSR.txRxPacket()
-    current_pos = groupSR.getData(SERVO_ID,ADDR_PRESENT_POSITION,LEN_PRESENT_POSITION)
+    e_pos = np.linalg.norm(L_INIT[:3]-pos)
+    e_rotxy = np.linalg.norm(np.array([np.pi,0])-rot[:2])
+    e_rotxy_i = np.linalg.norm(np.array([-np.pi,0])-rot[:2])
+    assert (
+        e_pos < 0.001 and
+        np.minimum(e_rotxy,e_rotxy_i) < 0.01
+    ), \
+    'Please move robot to L_INIT manually, e_pos {:.4f} e_rotxy {:.3f}'.format(e_pos,e_rotxy)
+    print('Inital position OK')
 
-    limit_p(current_pos)
-    print('Inital Position OK')
-
-    # Enable torque and move to mid position
-    groupSW = GroupSyncWrite(portH, packetH, ADDR_TORQUE_ENABLE, LEN_TORQUE_ENABLE)
-    groupSW.addParam(SERVO_ID,int(1).to_bytes(LEN_TORQUE_ENABLE, 'little'))
-    groupSW.txPacket()
-
-    groupSW = GroupSyncWrite(portH, packetH, ADDR_GOAL_POSITION, LEN_GOAL_POSITION)
-    groupSW.addParam(SERVO_ID,int(POS_MID).to_bytes(LEN_GOAL_POSITION, 'little'))
-    groupSW.txPacket()
-
-    print('Servo homed')
-    time.sleep(3)
+    rotate_tool(0)
+    time.sleep(2)
+    print('Homed')
 
     sensor = ati.init()
     ati.set_bias(sensor)
@@ -74,25 +87,24 @@ if __name__ == '__main__':
     pds = []
     ps = []
     tzs = []
+    rotds = []
+    rots = []
 
     print('Experiment started')
     t0 = time.time()
-    for pd in POS_LIST:
-        print('pd', pd)
+    for rotd in POS_LIST:
+        pd = to_p(rotd)
+        print('pd',pd,'rotd',rotd)
         tp0 = time.time()
         pos_set = False
-        while time.time()-tp0 < 1:
+        while time.time()-tp0 < 1: # Wait 1 second
             if not pos_set:
-                limit_p(pd)
-                groupSW = GroupSyncWrite(portH, packetH, ADDR_GOAL_POSITION, LEN_GOAL_POSITION)
-                groupSW.addParam(SERVO_ID,int(pd).to_bytes(LEN_GOAL_POSITION, 'little'))
-                groupSW.txPacket()
+                rotate_tool(rotd)
                 pos_set = True
 
-            groupSR = GroupSyncRead(portH, packetH, ADDR_PRESENT_POSITION, LEN_PRESENT_POSITION)
-            groupSR.addParam(SERVO_ID)
-            groupSR.txRxPacket()
-            p = groupSR.getData(SERVO_ID,ADDR_PRESENT_POSITION,LEN_PRESENT_POSITION)
+            rot = (Tbv.inverse*Tbt.inverse*(ur5.get_pose())).orient.to_euler('XYZ')[2]
+
+            p = to_p(rot)
 
             ati.single_read(sensor)
             f = ati.recv(sensor)
@@ -101,18 +113,16 @@ if __name__ == '__main__':
             pds.append(pd)
             ps.append(p)
             tzs.append(f[5])
-            print('t {:.3f} pd {} p {} tz {:.3f}'.format(time.time()-t0,pd,p,f[5]))
-
-    # Disable torque
-    groupSW = GroupSyncWrite(portH, packetH, ADDR_TORQUE_ENABLE, LEN_TORQUE_ENABLE)
-    groupSW.addParam(SERVO_ID,int(0).to_bytes(LEN_TORQUE_ENABLE, 'little'))
-    groupSW.txPacket()
+            rotds.append(rotd)
+            rots.append(rot)
+            print('t {:.3f} rotd {:.3f} rot {:.3f} pd {:d} p {:d} tz {:.3f}'.format(time.time()-t0,rotd,rot,pd,p,f[5]))
 
     ati.stop(sensor)
+    ur5.close()
 
     file_name = '../data/test.csv'
     data.write(
         file_name,
-        ['t','pd','p','tz'],
-        [ts,pds,ps,tzs]
+        ['t','pd','p','tz','rotd','rot'],
+        [ts,pds,ps,tzs,rotds,rots]
     )

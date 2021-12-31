@@ -1,14 +1,20 @@
+import sys
+sys.path.append('../spring')
+
 import pychrono as chrono
+import pychrono.irrlicht as chronoirr
 import matplotlib.pyplot as plt
 import numpy as np
+import prbm
 
 import os.path
 chrono.SetChronoDataPath(os.path.join(os.path.abspath('../chrono_data/'),''))
 
 pi = np.pi
-w = 0.02
-t = 0.001
-rho = 2000
+wr = 0.02
+tr = 0.0014 # 0.8255,0.015,0.127,0.015,0.4191
+tf = 32.5*2.54e-5
+rho = prbm.rho
 
 # Fourbar
 #   b----c
@@ -46,16 +52,12 @@ def fk(bad,ad,ab,bc,cd,form=1):
 
     return pts, ts
 
-# l: ground crank coupler output ext
-# kl: crank coupler output ground
+# l: ground crank coupler rocker ext
+# w: crank ext
 # c: fourbar cross form
 # dir: crank dir
-# gnd: ground or crank as ground
 # m: body mass including motor, circuits, connectors
-def solve(ang,l,kl,c,dir,gnd,m,cs,vis=False):
-    kj = 0.001 # kj = [0.01,0.01,0.01,0.01]
-    wb = (m/rho)**(1/3)
-
+def solve(ang,l,w,c,m,cs,vis=False):
     step = 5e-6
     tfinal = 0.2
 
@@ -71,23 +73,37 @@ def solve(ang,l,kl,c,dir,gnd,m,cs,vis=False):
     ps = (rot @ ps.T).T
     pf = (rot @ pf.T).T
 
-    # Make it easier to plot and manipulate
     ls = []
-    for i in range(4):
-        p1 = ps[i,:]
-        if i == 1:
-            p2 = pf.flatten()
-        elif i == 3:
-            p2 = ps[0,:]
-        else:
-            p2 = ps[i+1,:]
-        center = (p1+p2)/2
-        ls.append(np.array([p1,center]))
-        ls.append(np.array([center,p2]))
+    pad = 0.005 # 5mm pad at ends for wider hinge
+
+    # Ground
+    p1 = ps[3,:]
+    p2 = ps[0,:]
+    ls.append(np.array([p1,p2]))
+    # Crank
+    p1 = ps[0,:]
+    p2 = ps[1,:]
+    pj = (p2-p1)*((1-pad*2/l[1])*(1-prbm.gamma)+pad/l[1])+p1
+    ls.append(np.array([p1,pj]))
+    ls.append(np.array([pj,p2]))
+    # Coupler
+    p1 = ps[1,:]
+    p2 = ps[2,:]
+    ls.append(np.array([p1,p2]))
+    # Ext
+    p1 = ps[2,:]
+    p2 = pf[0,:]
+    pj = (p2-p1)*((1-pad/l[4])*(1-prbm.gamma)+pad/l[4])+p1
+    ls.append(np.array([p1,pj]))
+    ls.append(np.array([pj,p2]))
+    # Rocker
+    p1 = ps[2,:]
+    p2 = ps[3,:]
+    ls.append(np.array([p1,p2]))
 
     # plt.figure()
-    # for link,c in zip(ls,'rrggbbkk'):
-    #     plt.plot(link[:,0],link[:,1],'-o'+c)
+    # for link in ls:
+    #     plt.plot(link[:,0],link[:,1],'-ok')
     # plt.axis('scaled')
     # r = 0.15
     # plt.xlim([-r,r])
@@ -107,12 +123,13 @@ def solve(ang,l,kl,c,dir,gnd,m,cs,vis=False):
     system = chrono.ChSystemNSC()
     system.Set_G_acc(chrono.ChVectorD(0,-9.81,0))
 
-    ground = chrono.ChBodyEasyBox(0.1,t,w,rho,True)
+    ground = chrono.ChBodyEasyBox(0.1,tr,wr,rho,True)
     ground.SetPos(chrono.ChVectorD(*pf.flatten(),0))
     ground.SetRot(chrono.Q_from_AngZ(0))
     ground.SetBodyFixed(True)
     system.Add(ground)
 
+    wb = (m/rho)**(1/3)
     body = chrono.ChBodyEasyBox(wb,wb,wb,rho,False)
     body.SetPos(chrono.ChVectorD(0,0,0))
     body.SetRot(chrono.Q_from_AngZ(0))
@@ -120,14 +137,24 @@ def solve(ang,l,kl,c,dir,gnd,m,cs,vis=False):
 
     links = []
     # Bodies
-    for i in range(8):
+    for i in range(len(ls)):
         pos, rot, length = pose(ls[i])
-        link = chrono.ChBodyEasyBox(length,t,w,rho,True)
+        if i == 1 or i == 2:
+            tl = tf
+            wl = w[0]
+        elif i == 4 or i == 5:
+            tl = tf
+            wl = w[1]
+        else:
+            tl = tr
+            wl = wr
+        link = chrono.ChBodyEasyBox(length,tl,wl,rho,True)
         link.SetPos(chrono.ChVectorD(*pos,0))
         link.SetRot(chrono.Q_from_AngZ(rot))
         system.Add(link)
         links.append(link)
 
+    # Joints and Springs
     class RotSpringTorque(chrono.TorqueFunctor):
         def __init__(self, k, b):
             super(RotSpringTorque, self).__init__()
@@ -138,37 +165,56 @@ def solve(ang,l,kl,c,dir,gnd,m,cs,vis=False):
             torque = -self.k*angle-self.b*vel
             return torque
 
-    # Joints and Springs
     joints = []
     springs = []
     springTorques = []
-    for i in range(8):
-        is_joint = i%2==1 # real joint, first joint at center of crank
-        k = kl[int(i/2)] if not is_joint else kj
-        b = 0.0 if i < 7 else cs['tau']/(cs['v'])
-        springTorques.append(RotSpringTorque(k,b))
+    for i in range(len(links)):
+        if i == 6: # rocker to ground
+            l1_i = i
+            l2_i = 0
+        elif i == 5: # rocker to coupler
+            l1_i = 3
+            l2_i = 6
+        else:
+            l1_i = i
+            l2_i = i+1
 
-        l1 = links[2 if i == 3 and l[2] < l[4] else i] # handle foot link differently
-        idx = i+1 if i+1 < 8 else 0
-        l2 = links[idx]
-        pos = ls[idx][0,:] # next link's start so the foot are connected correctly
+        l1 = links[l1_i]
+        l2 = links[l2_i]
+        p = ls[l1_i][1,:]
 
-        joint = chrono.ChLinkMateGeneric(True,True,True,True,True,False)
-        joint.Initialize(l1,l2,chrono.ChFrameD(chrono.ChVectorD(*pos,0)))
+        if i != 3:
+            joint = chrono.ChLinkMateGeneric(True,True,True,True,True,False)
+        else: # coupler to start of ext
+            joint = chrono.ChLinkMateGeneric(True,True,True,True,True,True)
+        joint.Initialize(l1,l2,chrono.ChFrameD(chrono.ChVectorD(*p,0)))
         system.Add(joint)
         joints.append(joint)
 
+        if i == 1:
+            kl = prbm.k(tf,l[1],w[0])
+        elif i == 4:
+            kl = prbm.k(tf,l[4],w[1])
+        else:
+            kl = 0.0001
+
+        if i == 0:
+            b = cs['tau']/(cs['v'])
+        else:
+            b = 0
+
         try:
             spring = chrono.ChLinkRotSpringCB()
-            spring.Initialize(l1,l2,chrono.ChCoordsysD(chrono.ChVectorD(*pos,0)))
+            spring.Initialize(l1,l2,chrono.ChCoordsysD(chrono.ChVectorD(*p,0)))
+            springTorques.append(RotSpringTorque(kl,b))
             spring.RegisterTorqueFunctor(springTorques[i])
             system.AddLink(spring)
             springs.append(spring)
         except AttributeError:
-            # Accommodate latest version of chrono
+            # Accommodate develop version of chrono
             spring = chrono.ChLinkRSDA()
-            spring.Initialize(l1,l2,chrono.ChCoordsysD(chrono.ChVectorD(*pos,0)))
-            spring.SetSpringCoefficient(k)
+            spring.Initialize(l1,l2,chrono.ChCoordsysD(chrono.ChVectorD(*p,0)))
+            spring.SetSpringCoefficient(kl)
             spring.SetDampingCoefficient(b)
             system.AddLink(spring)
             springs.append(spring)
@@ -178,11 +224,11 @@ def solve(ang,l,kl,c,dir,gnd,m,cs,vis=False):
     system.Add(joint_vertical)
 
     joint_link = chrono.ChLinkMateGeneric(True,True,True,True,True,True)
-    joint_link.Initialize(body,links[-1 if gnd > 0 else 0],chrono.ChFrameD(chrono.ChVectorD(0,0,0)))
+    joint_link.Initialize(body,links[0],chrono.ChFrameD(chrono.ChVectorD(0,0,0)))
     system.Add(joint_link)
 
     joint_foot = chrono.ChLinkMateGeneric(True,True,True,True,True,False)
-    joint_foot.Initialize(ground,links[3],chrono.ChFrameD(chrono.ChVectorD(*pf.flatten(),0)))
+    joint_foot.Initialize(ground,links[5],chrono.ChFrameD(chrono.ChVectorD(*pf.flatten(),0)))
     system.Add(joint_foot)
 
     class MotorTorque(chrono.ChFunction):
@@ -192,11 +238,10 @@ def solve(ang,l,kl,c,dir,gnd,m,cs,vis=False):
 
         def Get_y(self, t):
             y = self.body.GetPos().y
-            d = -1 if dir < 0 else 1
-            return d*((np.maximum(0,y-cs['em'])/(y-cs['em'])-1)*cs['tau'])
+            return (np.maximum(0,y-cs['em'])/(y-cs['em'])-1)*cs['tau']
 
     motor = chrono.ChLinkMotorRotationTorque()
-    motor.Initialize(links[0],links[-1],chrono.ChFrameD(chrono.ChVectorD(0,0,0)))
+    motor.Initialize(links[1],links[0],chrono.ChFrameD(chrono.ChVectorD(0,0,0)))
     motorTorque = MotorTorque(body)
     motor.SetTorqueFunction(motorTorque)
     system.Add(motor)
@@ -243,8 +288,6 @@ def solve(ang,l,kl,c,dir,gnd,m,cs,vis=False):
         )
 
     if vis:
-        import pychrono.irrlicht as chronoirr
-
         application = chronoirr.ChIrrApp(system, "Jump", chronoirr.dimension2du(800, 600),chronoirr.VerticalDir_Y)
         application.AddTypicalSky()
         application.AddTypicalLights()
