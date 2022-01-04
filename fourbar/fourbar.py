@@ -74,7 +74,7 @@ def solve(ang,l,w,c,m,cs,vis=False):
     pf = (rot @ pf.T).T
 
     ls = []
-    pad = 0.005 # 5mm pad at ends for wider hinge
+    pad = 0.006 # 6mm pad at ends for wider hinge
 
     # Ground
     p1 = ps[3,:]

@@ -34,12 +34,9 @@ idx = np.argmax(V)
 k_opt = K.flatten()[idx]
 r_opt = R.flatten()[idx]
 v_opt = V.flatten()[idx]
-
 print('k={:d} r={:.2f} v={:.2f}'.format(k_opt,r_opt,v_opt))
 
-plt.show()
 plt.contourf(K,R,V)
-
 plt.annotate(
     'vmax={:.2f}'.format(v_opt),
     xy=(k_opt, r_opt),
@@ -47,7 +44,6 @@ plt.annotate(
     arrowprops={'arrowstyle':'->'},
     bbox={'boxstyle':'round','fc':'w'}
 )
-
 plt.colorbar()
 plt.ylabel('r [m]')
 plt.xlabel('k [N/m]')
