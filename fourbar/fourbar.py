@@ -192,9 +192,9 @@ def solve(ang,l,w,c,m,cs,vis=False):
         joints.append(joint)
 
         if i == 1:
-            kl = prbm.k(tf,l[1],w[0])
+            kl = prbm.k(tf,l[1]-pad*2,w[0])
         elif i == 4:
-            kl = prbm.k(tf,l[4],w[1])
+            kl = prbm.k(tf,l[4]-pad,w[1])
         else:
             kl = 0.0001
 
