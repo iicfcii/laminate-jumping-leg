@@ -6,7 +6,7 @@ pi = np.pi
 cs = {
     'g': 9.81,
     'mb': 0.05,
-    'ml': 0.001,
+    'ml': 0.0001,
     'k': 100,
     'a': 1,
     'el': 0.1, # max leg extension
