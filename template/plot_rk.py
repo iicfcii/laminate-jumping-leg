@@ -17,7 +17,7 @@ cs = {
 }
 x0 = [0,0,0,0]
 
-K = np.arange(100,600,100)
+K = np.arange(10,150,20)
 R = np.arange(0.02,0.16,0.02)
 K, R = np.meshgrid(K,R)
 

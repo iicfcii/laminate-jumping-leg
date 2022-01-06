@@ -237,8 +237,7 @@ def solve(ang,l,w,c,m,cs,vis=False):
             self.body = body
 
         def Get_y(self, t):
-            y = self.body.GetPos().y
-            return (np.maximum(0,y-cs['em'])/(y-cs['em'])-1)*cs['tau']
+            return -cs['tau']
 
     motor = chrono.ChLinkMotorRotationTorque()
     motor.Initialize(links[1],links[0],chrono.ChFrameD(chrono.ChVectorD(0,0,0)))
@@ -267,7 +266,7 @@ def solve(ang,l,w,c,m,cs,vis=False):
         data['yb'].append(body.GetPos().y)
         data['dyb'].append(body.GetPos_dt().y)
 
-        data['rot'].append(motor.GetMotorRot())
+        data['rot'].append(links[1].GetRot().Q_to_Euler123().z)
 
     def end():
         # End points of every link should not be below ground

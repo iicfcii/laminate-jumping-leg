@@ -17,10 +17,10 @@ cs = {
 }
 x0 = [0,0,0,0]
 
-for r in [0.04,0.06]:
+for r in [0.06]:
     cs['r'] = r
     plt.figure()
-    for i, k in enumerate([100,250,500]):
+    for i, k in enumerate([20,70,120]):
         cs['k'] = k
         sol = jump.solve(x0, cs)
 

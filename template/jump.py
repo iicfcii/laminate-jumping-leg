@@ -21,7 +21,10 @@ L = Kb+Kl-Pb-Pl
 
 b = tau/r/(v*r)
 fb = b*(dys-dyb) # damping
-fm = (Max(0,yb-em)/(yb-em)-1)*tau/r # input force
+fm = (
+    -tau/r+ # input
+    Max(0,yb-ys-em)/(yb-ys-em)*((yb-ys-em)*10000+(dyb-dys)*10) # travel limit
+)
 
 dL_d_yb = diff(L,yb)
 dL_d_dyb = diff(L,dyb)
@@ -49,5 +52,5 @@ def solve(x0, cs):
     def jump(t, x):
         return dx_f(*x).flatten()
 
-    sol = solve_ivp(jump, [0,10], x0, events=[lift_off], max_step=step_sim)
+    sol = solve_ivp(jump, [0,1], x0, events=[lift_off], max_step=step_sim)
     return sol

@@ -9,17 +9,17 @@ l = [0.02,0.05,0.03,0.05,0.03]
 w = [0.01,0.01]
 c = 1
 
-ang = 2.5392781115115346
-l = [0.05133119102685123, 0.07156271945541892, 0.04178830004076037, 0.08471956947566413, 0.09986796790787311]
-w = [0.005022798687626824, 0.023896602212658928]
-c = 0.4682668244294177
+ang = 2.4830269227283264
+l = [0.05384202758599755, 0.07309516758321499, 0.04399063876117497, 0.08609901092274286, 0.09933572813456326]
+w = [0.00512773341811799, 0.010363010595285962]
+c = 0.28533428530517746
 
 print('Total leg length',np.sum(l))
 data = fourbar.solve(ang,l,w,c,opt.m,opt.cs,vis=True)
 print('Error yb',opt.error_yb(data))
 print('Error dyb',opt.error_dyb(data))
 print('Max fxb',opt.fxb_max(data))
-print('Max rot',np.amax(np.absolute(data['rot'])))
+print('Rot',data['rot'][0],data['rot'][-1])
 
 plt.figure()
 plt.subplot(211)
