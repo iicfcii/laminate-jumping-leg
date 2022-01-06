@@ -19,6 +19,7 @@ data = fourbar.solve(ang,l,w,c,opt.m,opt.cs,vis=True)
 print('Error yb',opt.error_yb(data))
 print('Error dyb',opt.error_dyb(data))
 print('Max fxb',opt.fxb_max(data))
+print('Max rot',np.amax(np.absolute(data['rot'])))
 
 plt.figure()
 plt.subplot(211)

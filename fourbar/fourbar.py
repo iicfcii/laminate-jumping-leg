@@ -254,6 +254,7 @@ def solve(ang,l,w,c,m,cs,vis=False):
         'tzb': [],
         'yb':[],
         'dyb':[],
+        'rot':[]
     }
     def record():
         data['t'].append(system.GetChTime())
@@ -265,6 +266,8 @@ def solve(ang,l,w,c,m,cs,vis=False):
 
         data['yb'].append(body.GetPos().y)
         data['dyb'].append(body.GetPos_dt().y)
+
+        data['rot'].append(motor.GetMotorRot())
 
     def end():
         # End points of every link should not be below ground
