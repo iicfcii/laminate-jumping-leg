@@ -196,10 +196,12 @@ def solve(ang,l,w,c,m,cs,vis=False):
         elif i == 4:
             kl = prbm.k(tf,l[4]-pad,w[1])
         else:
-            kl = 0.0001
+            kl = 0
 
         if i == 0:
             b = cs['tau']/(cs['v'])
+        elif i == 1 or i == 4:
+            b = 0
         else:
             b = 0
 
