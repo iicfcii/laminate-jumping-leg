@@ -14,6 +14,7 @@ def write(filename, keys, values):
 
 def read(filename, is_float=True, skip=0):
     keys = []
+    keys_cnt = {}
     values = []
     with open(filename, newline='') as csvfile:
         reader = csv.reader(csvfile)
@@ -21,9 +22,16 @@ def read(filename, is_float=True, skip=0):
             if i < skip: continue
             if i == skip:
                 for key in row:
-                    if key != '':
+                    if key == '': continue
+
+                    if key not in keys_cnt:
+                        keys_cnt[key] = 0
                         keys.append(key)
-                        values.append([])
+                    else:
+                        keys_cnt[key] = keys_cnt[key] + 1
+                        keys.append(key+str(keys_cnt[key]))
+                    values.append([])
+
             else:
                 for j, v in enumerate(row):
                     if j < len(keys):
