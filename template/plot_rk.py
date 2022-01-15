@@ -5,30 +5,31 @@ import numpy as np
 pi = np.pi
 cs = {
     'g': 9.81,
-    'mb': 0.05,
+    'mb': 0.03,
     'ml': 0.0001,
     'k': 100,
     'a': 1,
     'el': 0.1, # max leg extension
-    'tau': 0.215,
-    'v': 383/60*2*pi,
-    'em': 0.1,
+    'tau': 0.215*0.3,
+    'v': 383/60*2*pi*0.97,
+    'em': 0.05,
     'r': 0.06
 }
 x0 = [0,0,0,0]
 
-K = np.arange(10,150,20)
-R = np.arange(0.02,0.16,0.02)
+K = np.arange(10,110,10)
+R = np.arange(0.01,0.11,0.01)
 K, R = np.meshgrid(K,R)
 
 V = []
 for k, r in zip(K.flatten(),R.flatten()):
-        cs['k'] = k
-        cs['r'] = r
+    print('k={:d} r={:.2f}'.format(k,r))
+    cs['k'] = k
+    cs['r'] = r
 
-        sol = jump.solve(x0, cs)
-        v = sol.y[2,-1]
-        V.append(v)
+    sol = jump.solve(x0, cs)
+    v = sol.y[2,-1]
+    V.append(v)
 V = np.array(V).reshape(K.shape)
 idx = np.argmax(V)
 k_opt = K.flatten()[idx]
