@@ -11,9 +11,9 @@ import os.path
 chrono.SetChronoDataPath(os.path.join(os.path.abspath('../chrono_data/'),''))
 
 pi = np.pi
+tf = 16.5*2.54e-5
 wr = 0.02
-tr = 0.0014 # 0.8255,0.015,0.127,0.015,0.4191
-tf = 32.5*2.54e-5
+tr = np.sum([0.4191,0.015,0.127,0.015,0.4191])/1000
 rho = prbm.rho
 
 # Fourbar

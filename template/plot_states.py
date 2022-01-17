@@ -2,19 +2,17 @@ import matplotlib.pyplot as plt
 import jump
 import numpy as np
 
-pi = np.pi
-
 cs = {
     'g': 9.81,
     'mb': 0.03,
     'ml': 0.0001,
-    'k': 70,
+    'k': 50,
     'a': 1,
     'el': 0.1, # max leg extension
-    'tau': 0.215*0.3,
-    'v': 383/60*2*pi*0.97,
-    'em': 0.05,
-    'r': 0.06
+    'tau': 0.109872,
+    'v': 30.410616886749196,
+    'em': 0.06,
+    'r': 0.05
 }
 x0 = [0,0,0,0]
 

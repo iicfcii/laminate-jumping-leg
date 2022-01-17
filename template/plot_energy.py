@@ -2,25 +2,24 @@ import matplotlib.pyplot as plt
 import jump
 import numpy as np
 
-pi = np.pi
 cs = {
     'g': 9.81,
-    'mb': 0.05,
+    'mb': 0.03,
     'ml': 0.0001,
-    'k': 100,
+    'k': 50,
     'a': 1,
     'el': 0.1, # max leg extension
-    'tau': 0.215,
-    'v': 383/60*2*pi,
-    'em': 0.1,
-    'r': 0.06
+    'tau': 0.109872,
+    'v': 30.410616886749196,
+    'em': 0.06,
+    'r': 0.05
 }
 x0 = [0,0,0,0]
 
 for r in [0.06]:
     cs['r'] = r
     plt.figure()
-    for i, k in enumerate([20,70,120]):
+    for i, k in enumerate([50]):
         cs['k'] = k
         sol = jump.solve(x0, cs)
 

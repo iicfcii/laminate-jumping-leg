@@ -10,22 +10,22 @@ import jump
 pi = np.pi
 cs = {
     'g': 9.81,
-    'mb': 0.05,
+    'mb': 0.03,
     'ml': 0.0001,
-    'k': 70,
+    'k': 50,
     'a': 1,
     'el': 0.1, # max leg extension
-    'tau': 0.215,
-    'v': 383/60*2*pi,
-    'em': 0.1,
-    'r': 0.06
+    'tau': 0.109872,
+    'v': 30.410616886749196,
+    'em': 0.06,
+    'r': 0.05
 }
 
-m = 0.04
+m = 0.02
 ang_limit = (-pi,pi)
-l_limit = (0.04,0.1)
+l_limit = (0.04,0.06)
 w_limit = (0.005,0.02)
-fxb_limit = 1.5
+fxb_limit = 0.5
 e_max = 10
 
 bounds = [ang_limit]+[l_limit]*5+[w_limit]*2+[(-1,1)]*1
