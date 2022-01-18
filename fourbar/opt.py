@@ -24,7 +24,7 @@ cs = {
 m = 0.02
 ang_limit = (-pi,pi)
 l_limit = (0.04,0.06)
-w_limit = (0.005,0.02)
+w_limit = (0.01,0.02)
 fxb_limit = 0.5
 e_max = 10
 
