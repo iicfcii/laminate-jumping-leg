@@ -24,7 +24,8 @@ for r in [0.05]:
         sol = jump.solve(x0, cs)
 
         vmax = sol.y[2,-1]
-        f_spring = sol.y[1,:]*cs['k']
+        # f_spring = -sol.y[1,:]*cs['k']
+        f_spring = -np.sign(sol.y[1,:])*cs['k']*cs['el']*np.power(np.abs(sol.y[1,:]/cs['el']),cs['a'])
         dy_spring = sol.y[3,:]
         dy_body = sol.y[2,:]
 
