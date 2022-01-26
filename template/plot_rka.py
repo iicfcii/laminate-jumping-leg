@@ -8,7 +8,7 @@ cs = {
     'ml': 0.0001,
     'k': 50,
     'a': 1,
-    'el': 0.1, # max leg extension
+    'el': 0.05, # max leg extension
     'tau': 0.109872,
     'v': 30.410616886749196,
     'em': 0.06,
@@ -18,9 +18,8 @@ x0 = [0,0,0,0]
 
 K = np.arange(20,110,20)
 R = np.arange(0.02,0.11,0.02)
-A = np.arange(0.5,1.6,0.25)
+A = np.arange(0.5,1.6,0.2)
 K, R, A = np.meshgrid(K,R,A)
-print(K.shape)
 
 V = []
 for k, r, a in zip(K.flatten(),R.flatten(),A.flatten()):
@@ -49,20 +48,32 @@ print('Max k={:d} r={:.2f} a={:.2f} v={:.2f}'.format(k_max,r_max,a_max,v_max))
 print('Min k={:d} r={:.2f} a={:.2f} v={:.2f}'.format(k_min,r_min,a_min,v_min))
 
 
-fig, axes = plt.subplots(1,K.shape[2],sharex=True,sharey=True)
-for i,ax in enumerate(axes):
+fig, axes = plt.subplots(2,3,sharex=True,sharey=True)
+for i,ax in enumerate(axes.ravel()):
     contour = ax.contourf(K[:,:,i],R[:,:,i],V[:,:,i],vmin=v_min,vmax=v_max)
-    # ax.annotate(
-    #     'vmax={:.2f}'.format(v_opt),
-    #     xy=(k_opt, r_opt),
-    #     xytext=(10,10),textcoords='offset points',ha='left',va='bottom',
-    #     arrowprops={'arrowstyle':'->'},
-    #     bbox={'boxstyle':'round','fc':'w'}
-    # )
-    ax.set_title('a={:.2f}'.format(a))
+
+    idx_max = np.argmax(V[:,:,i])
+    k_max = K[:,:,i].flatten()[idx_max]
+    r_max = R[:,:,i].flatten()[idx_max]
+    v_max = V[:,:,i].flatten()[idx_max]
+
+    ax.annotate(
+        'vmax={:.2f}'.format(v_max),
+        xy=(k_max, r_max),
+        xytext=(15,15),textcoords='offset points',ha='center',va='bottom',
+        arrowprops={'arrowstyle':'->'},
+        bbox={'boxstyle':'round','fc':'w'}
+    )
+    ax.annotate(
+        'a={:.2f}'.format(A[0,0,i]),
+        xy=(0, 1),xycoords='axes fraction',
+        xytext=(10,-10),textcoords='offset points',ha='left',va='top',
+        bbox={'boxstyle':'round','fc':'w'}
+    )
 
 fig.colorbar(contour,ax=axes,aspect=20)
 
+fig.suptitle('v [m/s]')
 fig.supxlabel('k [N/m]')
 fig.supylabel('r [m]')
 
