@@ -6,8 +6,8 @@ import numpy as np
 step_sim = 0.0005
 pi = np.pi
 
-g, mb, ml, k, a, el = symbols('g mb ml k a el')
-tau, v, em, r  = symbols('tau v em r') # torque max, speed max, rotation range, moment arm,
+g, mb, ml, k, a, ds = symbols('g mb ml k a ds')
+tau, v, dl, r  = symbols('tau v dl r')
 yb, dyb, ddyb = symbols('yb dyb ddyb')
 ys, dys, ddys = symbols('ys dys ddys')
 
@@ -23,7 +23,7 @@ b = tau/r/(v*r)
 fb = b*(dys-dyb) # damping
 fm = (
     -tau/r+ # input
-    Max(0,yb-ys-em)/(yb-ys-em)*((yb-ys-em)*10000+(dyb-dys)*10) # travel limit
+    Max(0,yb-ys-dl)/(yb-ys-dl)*((yb-ys-dl)*10000+(dyb-dys)*10) # travel limit
 )
 
 dL_d_yb = diff(L,yb)
@@ -31,7 +31,7 @@ dL_d_dyb = diff(L,dyb)
 ddLddyb_d_t = diff(dL_d_dyb,dyb)*ddyb
 ddyb_e = solve(ddLddyb_d_t-dL_d_yb+fm-fb, ddyb)[0]
 
-dL_d_ys = diff(L,ys)-sign(ys)*k*el*Pow(abs(ys/el),a) # Add spring force
+dL_d_ys = diff(L,ys)-sign(ys)*k*ds*Pow(abs(ys/ds),a) # Add spring force
 dL_d_dys = diff(L,dys)
 ddLddys_d_t = diff(dL_d_dys,dys)*ddys
 ddys_e = solve(ddLddys_d_t-dL_d_ys-fm+fb, ddys, simplify=False)[0]

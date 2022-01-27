@@ -8,10 +8,10 @@ cs = {
     'ml': 0.0001,
     'k': 50,
     'a': 1,
-    'el': 0.05, # max leg extension
+    'ds': 0.05,
     'tau': 0.109872,
     'v': 30.410616886749196,
-    'em': 0.06,
+    'dl': 0.06,
     'r': 0.05
 }
 x0 = [0,0,0,0]
@@ -25,7 +25,7 @@ for i, k in enumerate(K):
 
     vmax = sol.y[2,-1]
     # f_spring = -sol.y[1,:]*cs['k']
-    f_spring = -np.sign(sol.y[1,:])*cs['k']*cs['el']*np.power(np.abs(sol.y[1,:]/cs['el']),cs['a'])
+    f_spring = -np.sign(sol.y[1,:])*cs['k']*cs['ds']*np.power(np.abs(sol.y[1,:]/cs['ds']),cs['a'])
     dy_spring = sol.y[3,:]
     dy_body = sol.y[2,:]
 
