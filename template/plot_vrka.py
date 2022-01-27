@@ -16,9 +16,9 @@ cs = {
 }
 x0 = [0,0,0,0]
 
-K = np.arange(20,110,20)
-R = np.arange(0.02,0.11,0.02)
-A = np.arange(0.5,1.6,0.2)
+K = np.arange(20,110,10)
+R = np.arange(0.02,0.11,0.01)
+A = np.arange(0.5,1.6,0.25)
 K, R, A = np.meshgrid(K,R,A)
 
 V = []
@@ -50,15 +50,19 @@ print('Min k={:d} r={:.2f} a={:.2f} v={:.2f}'.format(k_min,r_min,a_min,v_min))
 
 fig, axes = plt.subplots(2,3,sharex=True,sharey=True)
 for i,ax in enumerate(axes.ravel()):
-    contour = ax.contourf(K[:,:,i],R[:,:,i],V[:,:,i],vmin=v_min,vmax=v_max)
+    if i >= K.shape[2]:
+        ax.axis('off')
+        continue
+
+    contour = ax.contourf(K[:,:,i],R[:,:,i],V[:,:,i],np.linspace(v_min,v_max,10))
 
     idx_max = np.argmax(V[:,:,i])
     k_max = K[:,:,i].flatten()[idx_max]
     r_max = R[:,:,i].flatten()[idx_max]
-    v_max = V[:,:,i].flatten()[idx_max]
+    v_max_a= V[:,:,i].flatten()[idx_max]
 
     ax.annotate(
-        'vmax={:.2f}'.format(v_max),
+        'vmax={:.2f}'.format(v_max_a),
         xy=(k_max, r_max),
         xytext=(15,15),textcoords='offset points',ha='center',va='bottom',
         arrowprops={'arrowstyle':'->'},
@@ -71,10 +75,12 @@ for i,ax in enumerate(axes.ravel()):
         bbox={'boxstyle':'round','fc':'w'}
     )
 
-fig.colorbar(contour,ax=axes,aspect=20)
+cb = fig.colorbar(contour,ax=axes,aspect=20,format=lambda x,p: '{:.2f}'.format(x))
+cb.set_label('v [m/s]')
 
-fig.suptitle('v [m/s]')
-fig.supxlabel('k [N/m]')
-fig.supylabel('r [m]')
+fig.add_subplot(111, frameon=False)
+plt.tick_params(labelcolor='none', which='both', top=False, bottom=False, left=False, right=False)
+plt.xlabel('k [N/m]')
+plt.ylabel('r [m]',labelpad=8)
 
 plt.show()

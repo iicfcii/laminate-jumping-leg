@@ -24,7 +24,6 @@ for i, a in enumerate(A):
     sol = jump.solve(x0, cs)
 
     vmax = sol.y[2,-1]
-    # f_spring = -sol.y[1,:]*cs['k']
     f_spring = -np.sign(sol.y[1,:])*cs['k']*cs['ds']*np.power(np.abs(sol.y[1,:]/cs['ds']),cs['a'])
     dy_spring = sol.y[3,:]
     dy_body = sol.y[2,:]
@@ -51,6 +50,6 @@ plt.legend(
     loc='upper right'
 )
 
-plt.xlabel('Time [seconds]')
+plt.xlabel('Time [s]')
 plt.ylabel('Enery [W]')
 plt.show()
