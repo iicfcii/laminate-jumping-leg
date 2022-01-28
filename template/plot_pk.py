@@ -52,5 +52,5 @@ plt.legend(
 )
 
 plt.xlabel('Time [s]')
-plt.ylabel('Enery [W]')
+plt.ylabel('Power [W]')
 plt.show()
