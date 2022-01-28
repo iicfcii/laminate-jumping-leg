@@ -6,7 +6,7 @@ cs = {
     'g': 9.81,
     'mb': 0.03,
     'ml': 0.0001,
-    'k': 40,
+    'k': 30,
     'a': 1,
     'ds': 0.05, # max leg extension
     'tau': 0.109872,
@@ -16,7 +16,7 @@ cs = {
 }
 x0 = [0,0,0,0]
 
-A = [0.5,1,1.5]
+A = [0.3,1]
 V = []
 lines = []
 for i, a in enumerate(A):
@@ -45,7 +45,7 @@ type_legend = plt.legend(
 )
 plt.gca().add_artist(type_legend)
 plt.legend(
-    [lines[2],lines[5],lines[8]],
+    [lines[i] for i in np.arange(2,2+len(A)*3,3)],
     ['a={:.1f} vmax={:.2f}'.format(a,v) for a,v in zip(A,V)],
     loc='upper right'
 )
