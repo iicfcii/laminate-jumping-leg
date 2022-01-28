@@ -1,7 +1,7 @@
 import sys
 sys.path.append('../utils')
 
-from multiprocessing import Pool
+import multiprocessing
 import matplotlib.pyplot as plt
 import jump
 import numpy as np
@@ -38,8 +38,11 @@ K, R, A = np.meshgrid(K,R,A)
 KRA = np.array([K.ravel(),R.ravel(),A.ravel()]).T
 
 if __name__ == '__main__':
-    with Pool(None) as p:
-        V = p.map(sim, KRA)
+    V = []
+    p = multiprocessing.Pool()
+    for i,v in enumerate(p.imap(sim,KRA,4)):
+        V.append(v)
+        print('{:d}/{:d}'.format(i+1,KRA.shape[0]),end='\r')
 
     V = np.array(V).reshape((-1,1))
     res = np.concatenate((KRA,V),axis=1)

@@ -52,5 +52,5 @@ def solve(x0, cs):
     def jump(t, x):
         return dx_f(*x).flatten()
 
-    sol = solve_ivp(jump, [0,1], x0, events=[lift_off], max_step=step_sim)
+    sol = solve_ivp(jump, [0,0.5], x0, events=[lift_off], max_step=step_sim)
     return sol
