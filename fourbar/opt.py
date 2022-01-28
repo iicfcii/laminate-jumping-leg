@@ -13,7 +13,7 @@ cs = {
     'mb': 0.03,
     'ml': 0.0001,
     'k': 40,
-    'a': 0.5,
+    'a': 1.5,
     'ds': 0.05,
     'tau': 0.109872,
     'v': 30.410616886749196,
@@ -23,9 +23,9 @@ cs = {
 
 m = 0.02
 ang_limit = (-pi,pi)
-l_limit = (0.04,0.06)
+l_limit = (0.02,0.08)
 w_limit = (0.01,0.02)
-fxb_limit = 0.5
+fxb_limit = 10
 e_max = 10
 
 bounds = [ang_limit]+[l_limit]*5+[w_limit]*2+[(-1,1)]*1
