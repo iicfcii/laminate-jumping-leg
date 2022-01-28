@@ -1,38 +1,23 @@
+import sys
+sys.path.append('../utils')
+
 import matplotlib.pyplot as plt
 import jump
 import numpy as np
+import data
 
-cs = {
-    'g': 9.81,
-    'mb': 0.03,
-    'ml': 0.0001,
-    'k': 50,
-    'a': 1,
-    'ds': 0.05,
-    'tau': 0.109872,
-    'v': 30.410616886749196,
-    'dl': 0.06,
-    'r': 0.05
-}
-x0 = [0,0,0,0]
+f = data.read('../data/vrka.csv')
+R = np.array(f['r'])
+K = np.array(f['k'])
+A = np.array(f['a'])
+V = np.array(f['v'])
 
-K = np.arange(20,110,10)
-R = np.arange(0.02,0.11,0.01)
-A = np.arange(0.5,1.6,0.25)
-K, R, A = np.meshgrid(K,R,A)
+rka_shape = [len(np.unique(R)),len(np.unique(K)),len(np.unique(A))]
+R = R.reshape(rka_shape)
+K = K.reshape(rka_shape)
+A = A.reshape(rka_shape)
+V = V.reshape(rka_shape)
 
-V = []
-for k, r, a in zip(K.flatten(),R.flatten(),A.flatten()):
-    cs['k'] = k
-    cs['r'] = r
-    cs['a'] = a
-
-    sol = jump.solve(x0, cs)
-    v = sol.y[2,-1]
-    V.append(v)
-    print('k={:d} r={:.2f} a={:.2f}'.format(k,r,a))
-
-V = np.array(V).reshape(K.shape)
 idx_max = np.argmax(V)
 k_max = K.flatten()[idx_max]
 r_max = R.flatten()[idx_max]
@@ -44,17 +29,22 @@ k_min = K.flatten()[idx_min]
 r_min = R.flatten()[idx_min]
 a_min = A.flatten()[idx_min]
 v_min = V.flatten()[idx_min]
-print('Max k={:d} r={:.2f} a={:.2f} v={:.2f}'.format(k_max,r_max,a_max,v_max))
-print('Min k={:d} r={:.2f} a={:.2f} v={:.2f}'.format(k_min,r_min,a_min,v_min))
+print('Max k={:.0f} r={:.2f} a={:.2f} v={:.2f}'.format(k_max,r_max,a_max,v_max))
+print('Min k={:.0f} r={:.2f} a={:.2f} v={:.2f}'.format(k_min,r_min,a_min,v_min))
 
-
-fig, axes = plt.subplots(2,3,sharex=True,sharey=True)
-for i,ax in enumerate(axes.ravel()):
-    if i >= K.shape[2]:
+a_plots = A[0,0,:].flatten()
+fig, axes = plt.subplots(4,4,sharex=True,sharey=True)
+for j,ax in enumerate(axes.ravel()):
+    if j >= K.shape[2]:
         ax.axis('off')
         continue
 
-    contour = ax.contourf(K[:,:,i],R[:,:,i],V[:,:,i],np.linspace(v_min,v_max,10))
+    i = (np.abs(A[0,0,:].flatten()-a_plots[j])<1e-10).nonzero()[0][0]
+    contour = ax.contourf(
+        K[:,:,i],R[:,:,i],V[:,:,i],
+        np.linspace(0,v_max,11),
+        extend='min'
+    )
 
     idx_max = np.argmax(V[:,:,i])
     k_max = K[:,:,i].flatten()[idx_max]
@@ -62,7 +52,7 @@ for i,ax in enumerate(axes.ravel()):
     v_max_a= V[:,:,i].flatten()[idx_max]
 
     ax.annotate(
-        'vmax={:.2f}'.format(v_max_a),
+        '{:.2f}'.format(v_max_a),
         xy=(k_max, r_max),
         xytext=(15,15),textcoords='offset points',ha='center',va='bottom',
         arrowprops={'arrowstyle':'->'},
@@ -70,8 +60,8 @@ for i,ax in enumerate(axes.ravel()):
     )
     ax.annotate(
         'a={:.2f}'.format(A[0,0,i]),
-        xy=(0, 1),xycoords='axes fraction',
-        xytext=(10,-10),textcoords='offset points',ha='left',va='top',
+        xy=(1, 0),xycoords='axes fraction',
+        xytext=(-10,10),textcoords='offset points',ha='right',va='bottom',
         bbox={'boxstyle':'round','fc':'w'}
     )
 
