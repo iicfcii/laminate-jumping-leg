@@ -15,6 +15,7 @@ tf = 16.5*2.54e-5
 wr = 0.02
 tr = np.sum([0.4191,0.015,0.127,0.015,0.4191])/1000
 rho = prbm.rho
+pad = 0.006 # 6mm pad at ends for wider hinge
 
 # Fourbar
 #   b----c
@@ -52,15 +53,7 @@ def fk(bad,ad,ab,bc,cd,form=1):
 
     return pts, ts
 
-# l: ground crank coupler rocker ext
-# w: crank ext
-# c: fourbar cross form
-# dir: crank dir
-# m: body mass including motor, circuits, connectors
-def solve(ang,l,w,c,m,cs,vis=False):
-    step = 5e-6
-    tfinal = 0.2
-
+def leg(ang,l,c):
     # Forward kinematics
     ps, ts = fk(ang,*l[:4],form=c)
     assert ps is not None, 'No fourbar fk solution'
@@ -74,8 +67,6 @@ def solve(ang,l,w,c,m,cs,vis=False):
     pf = (rot @ pf.T).T
 
     ls = []
-    pad = 0.006 # 6mm pad at ends for wider hinge
-
     # Ground
     p1 = ps[3,:]
     p2 = ps[0,:]
@@ -101,14 +92,18 @@ def solve(ang,l,w,c,m,cs,vis=False):
     p2 = ps[3,:]
     ls.append(np.array([p1,p2]))
 
-    # plt.figure()
-    # for link in ls:
-    #     plt.plot(link[:,0],link[:,1],'-ok')
-    # plt.axis('scaled')
-    # r = 0.15
-    # plt.xlim([-r,r])
-    # plt.ylim([-r,r])
-    # plt.show()
+    return ps,pf,ls
+
+# l: ground crank coupler rocker ext
+# w: crank ext
+# c: fourbar cross form
+# dir: crank dir
+# m: body mass including motor, circuits, connectors
+def solve(ang,l,w,c,m,cs,vis=False):
+    step = 5e-6
+    tfinal = 0.2
+
+    ps,pf,ls = leg(ang,l,c)
 
     def pose(ps):
         p1 = ps[0,:]
