@@ -9,26 +9,19 @@ import jump
 
 legs = [
     {
-        'a': 0.5,
-        'ang': 1.5330165951890848,
-        'l': [0.07821086139798128, 0.05800230739903228, 0.05974491078404546, 0.039669563041889094, 0.07299110256333716],
-        'w': [0.01992913580520928, 0.019969342936040753],
-        'c': 0.6984033828096015
+        'a': 0.3,
+        'ang': 2.2075791077492672,
+        'l': [0.04392701858320386, 0.05137145517551715, 0.02399309493688156, 0.06309574318150324, 0.03708307130126535],
+        'w': [0.019999455957769828, 0.01032957786771581],
+        'c': 0.4939096230603035
     },
     {
         'a': 1,
-        'ang': 1.818981965059142,
-        'l': [0.04149849939200915, 0.07999850155041426, 0.04901079990098204, 0.05651422822074819, 0.07985902979555667],
-        'w': [0.014534840571903303, 0.01986429251336412],
-        'c': 0.80107402649113
+        'ang': 2.3804474791155825,
+        'l': [0.06755081787168496, 0.07997256244616045, 0.07753063929427381, 0.07901632753699994, 0.07855616289287963],
+        'w': [0.010109614087652333, 0.019987246920490132],
+        'c': 0.21294326973473754
     },
-    {
-        'a': 1.5,
-        'ang': 2.392958814026799,
-        'l': [0.0252396715905875, 0.07999154860624597, 0.02596436026202186, 0.07992545909210672, 0.07008131735322609],
-        'w': [0.010013014447389498, 0.01995920888969171],
-        'c': 0.03913435083553174
-    }
 ]
 
 for i,leg in enumerate(legs):
@@ -51,22 +44,20 @@ for i,leg in enumerate(legs):
     cs = opt.cs
     cs['a'] = leg['a']
     x0 = [0,0,0,0]
-    data_anchor = fourbar.solve(leg['ang'],leg['l'],leg['w'],leg['c'],opt.m,opt.cs,vis=False)
+    data_anchor = fourbar.solve(leg['ang'],leg['l'],leg['w'],leg['c'],opt.m,opt.cs,vis=True)
     sol_template = jump.solve(x0, cs)
 
     plt.subplot(3,1,2)
-    plt.plot(sol_template.t,sol_template.y[2,:],color=c)
-    plt.plot(data_anchor['t'],data_anchor['dyb'],'--',color=c)
+    plt.plot(sol_template.t,sol_template.y[2,:],color=c,label='slip')
+    plt.plot(data_anchor['t'],data_anchor['dyb'],'--',color=c,label='sim')
     plt.ylabel('dyb [m/s]')
+    if i == 0: plt.legend()
 
     plt.subplot(3,1,3)
     f_spring = -np.sign(sol_template.y[1,:])*cs['k']*cs['ds']*np.power(np.abs(sol_template.y[1,:]/cs['ds']),cs['a'])
     plt.plot(sol_template.t,f_spring,color=c)
-    settle_idx = 100
+    settle_idx = 50
     plt.plot(data_anchor['t'][settle_idx:],data_anchor['fy'][settle_idx:],'--',color=c)
     plt.ylabel('GRF [N]')
     plt.xlabel('Time [s]')
-
-
-
 plt.show()
