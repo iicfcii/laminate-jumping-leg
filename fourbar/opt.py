@@ -3,7 +3,7 @@ sys.path.append('../template')
 
 import numpy as np
 import matplotlib.pyplot as plt
-from scipy.optimize import differential_evolution, LinearConstraint
+from scipy.optimize import differential_evolution, NonlinearConstraint
 import fourbar
 import jump
 
@@ -13,7 +13,7 @@ cs = {
     'mb': 0.03,
     'ml': 0.0001,
     'k': 30,
-    'a': 1.5,
+    'a': 0.3,
     'ds': 0.05,
     'tau': 0.109872,
     'v': 30.410616886749196,
@@ -28,7 +28,19 @@ w_limit = (0.01,0.02)
 fxb_limit = 10
 e_max = 10
 
+def total_mass(l,w):
+    ml = (fourbar.tr*fourbar.wr*(l[0]+l[2]+l[3])+fourbar.tf*w[0]*(l[1])+fourbar.tf*w[1]*(l[4]))*fourbar.rho
+    return m + ml
+
+def mass_con(x):
+    ang,l,w,c = fromX(x)
+    return total_mass(l,w)
+
+eps = 1e-4
 bounds = [ang_limit]+[l_limit]*5+[w_limit]*2+[(-1,1)]*1
+cons = [
+    NonlinearConstraint(mass_con,cs['mb']-eps,cs['mb']+eps)
+]
 
 # Desired force
 x0 = [0,0,0,0]
@@ -101,6 +113,7 @@ if __name__ == '__main__':
     res = differential_evolution(
         obj,
         bounds=bounds,
+        constraints=cons,
         args=(error_yb,),
         popsize=10,
         maxiter=1000,

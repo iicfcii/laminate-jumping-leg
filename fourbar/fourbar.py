@@ -277,7 +277,7 @@ def solve(ang,l,w,c,m,cs,vis=False):
             y2 = pos[1]-length/2*np.sin(rot)
 
             eps = 1e-3
-            if y1 < pf[0,1]-eps or y2 < pf[0,1]-eps:
+            if (y1 < pf[0,1]+eps or y2 < pf[0,1]+eps) and i != 5: # Ignore foot link
                 collide = True
 
         return (
