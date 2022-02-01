@@ -23,8 +23,8 @@ cs = {
 
 m = 0.02
 ang_limit = (-pi,pi)
-l_limit = (0.02,0.08)
-w_limit = (0.01,0.02)
+l_limit = (0.02,0.1)
+w_limit = (0.01,0.03)
 fxb_limit = 10
 e_max = 10
 
@@ -36,7 +36,7 @@ def mass_con(x):
     ang,l,w,c = fromX(x)
     return total_mass(l,w)
 
-eps = 1e-4
+eps = 5e-4
 bounds = [ang_limit]+[l_limit]*5+[w_limit]*2+[(-1,1)]*1
 cons = [
     NonlinearConstraint(mass_con,cs['mb']-eps,cs['mb']+eps)
