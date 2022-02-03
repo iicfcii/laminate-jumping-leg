@@ -4,7 +4,7 @@ import numpy as np
 
 cs = {
     'g': 9.81,
-    'mb': 0.03,
+    'mb': 0.035,
     'ml': 0.0001,
     'k': 30,
     'a': 0.5,
@@ -14,12 +14,11 @@ cs = {
     'dl': 0.06,
     'r': 0.05
 }
-x0 = [0,0,0,0]
 
 plt.figure()
-for a in [0.3,1]:
+for a in [0.3]:
     cs['a'] = a
-    sol = jump.solve(x0, cs)
+    sol = jump.solve(cs)
     plt.subplot(221)
     plt.plot(sol.t,sol.y[0,:],label='a={:.1f}'.format(a))
     plt.title('yb')

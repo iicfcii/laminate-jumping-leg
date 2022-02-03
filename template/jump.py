@@ -21,9 +21,11 @@ L = Kb+Kl-Pb-Pl
 
 b = tau/r/(v*r)
 fb = b*(dys-dyb) # damping
+eps = 1e-6
 fm = (
-    -tau/r+ # input
-    Max(0,yb-ys-dl)/(yb-ys-dl)*((yb-ys-dl)*10000+(dyb-dys)*10) # travel limit
+    -tau/r # input
+    +Max(0,yb-ys-dl)/(yb-ys-dl)*((yb-ys-dl)*10000+(dyb-dys)*10) # lower travel limit
+    +Min(0,yb-ys+eps)/(yb-ys+eps)*((yb-ys+eps)*10000+(dyb-dys)*10) # upper travel limit
 )
 
 dL_d_yb = diff(L,yb)
@@ -46,7 +48,11 @@ def lift_off(t,x): # spring decompress
 lift_off.terminal = True
 lift_off.direction = 1
 
-def solve(x0, cs):
+def solve(cs):
+    # Initial condition after settle
+    d = -np.power((cs['mb']+cs['ml'])*cs['g']/cs['k']/cs['ds'],1/cs['a'])*cs['ds']
+    x0 = [d,d,0,0]
+
     dx_f = lambdify(x,dx.subs(cs))
 
     def jump(t, x):

@@ -13,7 +13,7 @@ chrono.SetChronoDataPath(os.path.join(os.path.abspath('../chrono_data/'),''))
 pi = np.pi
 tf = 16.5*2.54e-5
 wr = 0.02
-tr = np.sum([0.4191,0.015,0.127,0.015,0.4191])/1000
+tr = np.sum([0.4191,0.015,0.0508,0.015,0.4191])/1000
 rho = prbm.rho
 pad = 0.006 # 6mm pad at ends for wider hinge
 
@@ -101,7 +101,8 @@ def leg(ang,l,c):
 # m: body mass including motor, circuits, connectors
 def solve(ang,l,w,c,m,cs,vis=False):
     step = 5e-6
-    tfinal = 0.2
+    tsettle = 0.3
+    tfinal = tsettle+0.3
 
     ps,pf,ls = leg(ang,l,c)
 
@@ -116,7 +117,7 @@ def solve(ang,l,w,c,m,cs,vis=False):
         return center, angle, length
 
     system = chrono.ChSystemNSC()
-    system.Set_G_acc(chrono.ChVectorD(0,-9.81,0))
+    system.Set_G_acc(chrono.ChVectorD(0,-cs['g'],0))
 
     ground = chrono.ChBodyEasyBox(0.1,tr,wr,rho,True)
     ground.SetPos(chrono.ChVectorD(*pf.flatten(),0))
@@ -125,7 +126,7 @@ def solve(ang,l,w,c,m,cs,vis=False):
     system.Add(ground)
 
     wb = (m/rho)**(1/3)
-    body = chrono.ChBodyEasyBox(wb,wb,wb,rho,False)
+    body = chrono.ChBodyEasyBox(wb,wb,wb,rho,True)
     body.SetPos(chrono.ChVectorD(0,0,0))
     body.SetRot(chrono.Q_from_AngZ(0))
     system.Add(body)
@@ -196,7 +197,7 @@ def solve(ang,l,w,c,m,cs,vis=False):
         if i == 0:
             b = cs['tau']/(cs['v'])
         elif i == 1 or i == 4:
-            b = 0
+            b = 0.001
         else:
             b = 0
 
@@ -216,6 +217,10 @@ def solve(ang,l,w,c,m,cs,vis=False):
             system.AddLink(spring)
             springs.append(spring)
 
+    joint_settle = chrono.ChLinkMateGeneric(True,True,True,True,True,True)
+    joint_settle.Initialize(body,links[1],chrono.ChFrameD(chrono.ChVectorD(0,0,0)))
+    system.Add(joint_settle)
+
     joint_vertical = chrono.ChLinkMateGeneric(True,False,True,True,True,True)
     joint_vertical.Initialize(ground,body,chrono.ChFrameD(chrono.ChVectorD(0,0,0)))
     system.Add(joint_vertical)
@@ -228,17 +233,9 @@ def solve(ang,l,w,c,m,cs,vis=False):
     joint_foot.Initialize(ground,links[5],chrono.ChFrameD(chrono.ChVectorD(*pf.flatten(),0)))
     system.Add(joint_foot)
 
-    class MotorTorque(chrono.ChFunction):
-        def __init__(self, body):
-            super().__init__()
-            self.body = body
-
-        def Get_y(self, t):
-            return -cs['tau']
-
     motor = chrono.ChLinkMotorRotationTorque()
     motor.Initialize(links[1],links[0],chrono.ChFrameD(chrono.ChVectorD(0,0,0)))
-    motorTorque = MotorTorque(body)
+    motorTorque = chrono.ChFunction_Const(-cs['tau'])
     motor.SetTorqueFunction(motorTorque)
     system.Add(motor)
 
@@ -253,7 +250,9 @@ def solve(ang,l,w,c,m,cs,vis=False):
         'rot':[]
     }
     def record():
-        data['t'].append(system.GetChTime())
+        if system.GetChTime() < tsettle: return
+
+        data['t'].append(system.GetChTime()-tsettle)
         data['fx'].append(joint_foot.Get_react_force().x)
         data['fy'].append(joint_foot.Get_react_force().y)
 
@@ -281,7 +280,7 @@ def solve(ang,l,w,c,m,cs,vis=False):
                 collide = True
 
         return (
-            (joint_foot.Get_react_force().y < 1e-6 and system.GetChTime() > 1e-2) or
+            (joint_foot.Get_react_force().y < 1e-6 and system.GetChTime() > tsettle+1e-2) or
             collide or
             system.GetChTime() > tfinal
         )
@@ -301,6 +300,7 @@ def solve(ang,l,w,c,m,cs,vis=False):
         # application.SetVideoframeSave(True)
 
         while application.GetDevice().run():
+            if system.GetChTime() > tsettle: joint_settle.SetDisabled(True)
             record()
             application.BeginScene()
             application.DrawAll()
@@ -318,6 +318,7 @@ def solve(ang,l,w,c,m,cs,vis=False):
     else:
         system.SetChTime(0)
         while True:
+            if system.GetChTime() > tsettle: joint_settle.SetDisabled(True)
             record()
             system.DoStepDynamics(step)
             if end(): break

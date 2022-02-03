@@ -42,8 +42,8 @@ for j,ax in enumerate(axes.ravel()):
     i = (np.abs(A[0,0,:].flatten()-a_plots[j])<1e-10).nonzero()[0][0]
     contour = ax.contourf(
         K[:,:,i],R[:,:,i],V[:,:,i],
-        np.linspace(0,v_max,11),
-        extend='min'
+        np.linspace(np.maximum(v_min,0),v_max,11),
+        extend='neither' if v_min > 0 else 'min'
     )
 
     idx_max = np.argmax(V[:,:,i])

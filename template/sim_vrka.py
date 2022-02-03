@@ -25,14 +25,13 @@ def sim(params):
     cs['r'] = params[1]
     cs['a'] = params[2]
 
-    x0 = [0,0,0,0]
-    sol = jump.solve(x0, cs)
+    sol = jump.solve(cs)
     v = sol.y[2,-1]
     return v
 
 K = np.arange(10,110,10)
-R = np.arange(0.01,0.11,0.01)
-A = np.arange(0.1,1.61,0.1)
+R = np.arange(0.02,0.11,0.01)
+A = np.arange(0.2,1.71,0.1)
 K, R, A = np.meshgrid(K,R,A)
 
 KRA = np.array([K.ravel(),R.ravel(),A.ravel()]).T

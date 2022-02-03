@@ -29,7 +29,7 @@ fxb_limit = 10
 e_max = 10
 
 def total_mass(l,w):
-    ml = (fourbar.tr*fourbar.wr*(l[0]+l[2]+l[3])+fourbar.tf*w[0]*(l[1])+fourbar.tf*w[1]*(l[4]))*fourbar.rho
+    ml = (fourbar.tr*fourbar.wr*(l[0]+l[2]+l[3])+fourbar.tf*w[0]*l[1]+fourbar.tf*w[1]*l[4])*fourbar.rho
     return m + ml
 
 def mass_con(x):
@@ -43,8 +43,7 @@ cons = [
 ]
 
 # Desired force
-x0 = [0,0,0,0]
-sol = jump.solve(x0, cs)
+sol = jump.solve(cs)
 td = sol.t
 ybd = sol.y[0,:]
 dybd = sol.y[2,:]
@@ -103,10 +102,10 @@ def obj(x,e):
 
 def cb(x,convergence=0):
     ang,l,w,c = fromX(x)
-    print('ang =',ang)
-    print('l =',str(list(l)))
-    print('w =',str(list(w)))
-    print('c =',c)
+    print('ang: ',ang)
+    print('l: ',str(list(l)))
+    print('w: ',str(list(w)))
+    print('c: ',c)
     print('convergence =',convergence)
 
 if __name__ == '__main__':
@@ -125,8 +124,8 @@ if __name__ == '__main__':
     )
     ang,l,w,c = fromX(list(res.x))
     print('Result', res.message)
-    print('ang =',ang)
-    print('l =',str(list(l)))
-    print('w =',str(list(w)))
-    print('c =',c)
+    print('ang: ',ang)
+    print('l: ',str(list(l)))
+    print('w: ',str(list(w)))
+    print('c: ',c)
     print('Cost', res.fun)
