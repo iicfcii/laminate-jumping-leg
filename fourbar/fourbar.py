@@ -323,4 +323,5 @@ def solve(ang,l,w,c,m,cs,vis=False):
             system.DoStepDynamics(step)
             if end(): break
 
+    assert len(data['t']) > 0, 'Settle failed'
     return data
