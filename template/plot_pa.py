@@ -21,10 +21,10 @@ V = []
 lines = []
 for i, a in enumerate(A):
     cs['a'] = a
-    sol = jump.solve(x0, cs)
+    sol = jump.solve(x0,cs)
 
     vmax = sol.y[2,-1]
-    f_spring = -np.sign(sol.y[1,:])*cs['k']*cs['ds']*np.power(np.abs(sol.y[1,:]/cs['ds']),cs['a'])
+    f_spring = jump.f_spring(sol,cs)
     dy_spring = sol.y[3,:]
     dy_body = sol.y[2,:]
 

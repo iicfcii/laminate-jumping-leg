@@ -54,3 +54,7 @@ def solve(x0, cs):
 
     sol = solve_ivp(jump, [0,0.5], x0, events=[lift_off], max_step=step_sim)
     return sol
+
+def f_spring(sol, cs):
+    f_spring = -np.sign(sol.y[1,:])*cs['k']*cs['ds']*np.power(np.abs(sol.y[1,:]/cs['ds']),cs['a'])
+    return f_spring
