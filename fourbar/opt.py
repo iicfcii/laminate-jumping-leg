@@ -7,7 +7,6 @@ from scipy.optimize import differential_evolution, NonlinearConstraint
 import fourbar
 import jump
 
-pi = np.pi
 cs = {
     'g': 9.81,
     'mb': 0.03,
@@ -20,112 +19,78 @@ cs = {
     'dl': 0.06,
     'r': 0.05
 }
+e_max = 1
+bounds = [(-np.pi,np.pi)]+[(0.02,0.06)]*5+[(-1,1)]*1
 
-m = 0.02
-ang_limit = (-pi,pi)
-l_limit = (0.02,0.1)
-w_limit = (0.01,0.03)
-fxb_limit = 10
-e_max = 10
-
-def total_mass(l,w):
-    ml = (fourbar.tr*fourbar.wr*(l[0]+l[2]+l[3])+fourbar.tf*w[0]*l[1]+fourbar.tf*w[1]*l[4])*fourbar.rho
-    return m + ml
-
-def mass_con(x):
-    ang,l,w,c = fromX(x)
-    return total_mass(l,w)
-
-eps = 5e-4
-bounds = [ang_limit]+[l_limit]*5+[w_limit]*2+[(-1,1)]*1
-cons = [
-    NonlinearConstraint(mass_con,cs['mb']-eps,cs['mb']+eps)
-]
-
-# Desired force
-sol = jump.solve(cs)
-td = sol.t
-ybd = sol.y[0,:]
-dybd = sol.y[2,:]
-
-def fromX(x):
+def obj(x,plot=False):
     ang = x[0]
     l = x[1:6]
-    w = x[6:8]
-    c = x[8]
+    c = x[6]
 
-    return ang,l,w,c
-
-def error_yb(data):
-    num_step = 100
-    # Compare on the longer time range
-    tdd = np.linspace(0,np.maximum(data['t'][-1],td[-1]),num_step)
-
-    ybi = np.interp(tdd,data['t'],data['yb'])
-    ybdi = np.interp(tdd,td,ybd)
-
-    dybi = np.interp(tdd,data['t'],data['dyb'])
-    dybdi = np.interp(tdd,td,dybd)
-
-    # plt.figure()
-    # plt.plot(tdd,ybdi)
-    # plt.plot(tdd,ybi)
-    # plt.show()
-
-    # Normalized wrt max desired value
-    e = np.sqrt(np.sum((ybi-ybdi)**2)/num_step)/np.amax(np.abs(ybdi))
-    de = np.sqrt(np.sum((dybi-dybdi)**2)/num_step)/np.amax(np.abs(dybdi))
-    return 0.5*e+0.5*de
-
-def error_dyb(data):
-    e = -data['dyb'][-1]
-    return e
-
-def fxb_max(data):
-    ts = 1e-3
-    if data['t'][-1] <= ts: return None
-    return np.amax(np.abs(data['fxb'])[np.array(data['t']) > ts])
-
-def obj(x,e):
-    ang,l,w,c = fromX(x)
-
+    rots = np.arange(0,-cs['dl']/cs['r'],-0.1)+ang
     try:
-        data = fourbar.solve(ang,l,w,c,m,cs,vis=False)
+        xs,ys = fourbar.motion(rots,l,c,plot=plot)
     except AssertionError:
         return e_max
 
-    f = fxb_max(data)
-    if f is None or f > fxb_limit:
-        return e_max
+    xs_d = np.zeros(xs.shape)
+    ys_d = (rots-ang)*cs['r']+ys[0]
 
-    return e(data)
+    if plot:
+        plt.figure()
+        plt.plot(rots,ys_d)
+        plt.plot(rots,ys,'.')
+        plt.plot(rots,xs_d)
+        plt.plot(rots,xs,'.')
+
+    ex = np.sqrt(np.sum((xs-xs_d)**2)/xs.shape[0])
+    ey = np.sqrt(np.sum((ys-ys_d)**2)/ys.shape[0])
+    return ex+ey
 
 def cb(x,convergence=0):
-    ang,l,w,c = fromX(x)
-    print('ang: ',ang)
-    print('l: ',str(list(l)))
-    print('w: ',str(list(w)))
-    print('c: ',c)
-    print('convergence =',convergence)
+    print('x',x)
+    print('Convergence',convergence)
+
+def obj_spring(x,xm,plot=False):
+    w = x
+    ang = xm[0]
+    l = xm[1:6]
+    c = xm[6]
+
+    rots = np.linspace(0,-cs['dl']/cs['r'],3)+ang
+    data = fourbar.spring(rots,l,c,w,plot=plot)
+
+    if plot:
+        plt.figure()
+        for datum in data:
+            plt.plot(datum['x'],datum['f'])
+
+# obj_spring(
+#     [0.01,0.01],
+#     [2.6528534973470124, 0.030584825727719082, 0.04617399897456951, 0.020012887441194258, 0.05999632461943326, 0.059996858416849166, 0.5067485316220086],
+#     plot=True
+# )
+# plt.show()
 
 if __name__ == '__main__':
-    res = differential_evolution(
-        obj,
-        bounds=bounds,
-        constraints=cons,
-        args=(error_yb,),
-        popsize=10,
-        maxiter=1000,
-        tol=0.01,
-        callback=cb,
-        workers=-1,
-        polish=False,
-        disp=True
-    )
-    ang,l,w,c = fromX(list(res.x))
-    print('Result', res.message)
-    print('ang: ',ang)
-    print('l: ',str(list(l)))
-    print('w: ',str(list(w)))
-    print('c: ',c)
-    print('Cost', res.fun)
+    x = None
+    # x = [2.6528534973470124, 0.030584825727719082, 0.04617399897456951, 0.020012887441194258, 0.05999632461943326, 0.059996858416849166, 0.5067485316220086]
+
+    if x is not None:
+        obj(x,plot=True)
+    else:
+        res = differential_evolution(
+            obj,
+            bounds=bounds,
+            popsize=10,
+            maxiter=500,
+            tol=0.01,
+            callback=cb,
+            workers=-1,
+            polish=False,
+            disp=True
+        )
+        print('Result', res.message)
+        print('x',str(list(res.x)))
+        print('Cost', res.fun)
+        obj(res.x,plot=True)
