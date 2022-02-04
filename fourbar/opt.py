@@ -13,25 +13,25 @@ cs = {
     'ml': 0.0001,
     'k': 30,
     'a': 1,
-    'ds': 0.05,
+    'ds': 0.01,
     'tau': 0.109872,
     'v': 30.410616886749196,
     'dl': 0.06,
     'r': 0.05
 }
-e_max = 1
-bounds = [(-np.pi,np.pi)]+[(0.02,0.06)]*5+[(-1,1)]*1
+bounds_motion = [(-np.pi,np.pi)]+[(0.02,0.06)]*5+[(-1,1)]*1
+bounds_spring = [(0.01,0.03)]*2
 
-def obj(x,plot=False):
+def obj_motion(x,plot=False):
     ang = x[0]
     l = x[1:6]
     c = x[6]
 
-    rots = np.arange(0,-cs['dl']/cs['r'],-0.1)+ang
+    rots = np.linspace(0,-cs['dl']/cs['r'],10)+ang
     try:
         xs,ys = fourbar.motion(rots,l,c,plot=plot)
     except AssertionError:
-        return e_max
+        return 1
 
     xs_d = np.zeros(xs.shape)
     ys_d = (rots-ang)*cs['r']+ys[0]
@@ -58,30 +58,43 @@ def obj_spring(x,xm,plot=False):
     c = xm[6]
 
     rots = np.linspace(0,-cs['dl']/cs['r'],3)+ang
-    data = fourbar.spring(rots,l,c,w,plot=plot)
+    data = fourbar.spring(rots,l,c,w,cs['ds'],plot=plot)
+
+    x_d = np.linspace(-cs['ds'],cs['ds'],100)
+    f_d = -jump.f_spring(x_d,cs)
+
+    e = 0
+    for datum in data:
+        l = len(datum['x'])
+        x1 = datum['x'][int(l/4):int(l/4*3)]
+        x1.reverse()
+        f1 = datum['f'][int(l/4):int(l/4*3)]
+        f1.reverse()
+        x2 = datum['x'][int(l/4*3):]+datum['x'][:int(l/4)]
+        f2 = datum['f'][int(l/4*3):]+datum['f'][:int(l/4)]
+        f1_i = np.interp(x_d,x1,f1)
+        f2_i = np.interp(x_d,x2,f2)
+        f = (f1_i+f2_i)/2
+        e += np.sqrt(np.sum((f-f_d)**2)/f_d.shape[0])
 
     if plot:
         plt.figure()
+        plt.plot(x_d,f_d)
         for datum in data:
-            plt.plot(datum['x'],datum['f'])
+            plt.plot(datum['x'],datum['f'],'--')
 
-# obj_spring(
-#     [0.01,0.01],
-#     [2.6528534973470124, 0.030584825727719082, 0.04617399897456951, 0.020012887441194258, 0.05999632461943326, 0.059996858416849166, 0.5067485316220086],
-#     plot=True
-# )
-# plt.show()
+    return e
 
 if __name__ == '__main__':
-    x = None
-    # x = [2.6528534973470124, 0.030584825727719082, 0.04617399897456951, 0.020012887441194258, 0.05999632461943326, 0.059996858416849166, 0.5067485316220086]
+    xm = None
+    xs = None
+    xm = [2.6951962388449164, 0.030257190703705427, 0.04670519207473192, 0.020045213539287253, 0.05999409087062664, 0.05997409670936284, 0.870576427719403]
+    xs = [0.010019694051680383, 0.010012474886878299]
 
-    if x is not None:
-        obj(x,plot=True)
-    else:
+    if xm is None:
         res = differential_evolution(
-            obj,
-            bounds=bounds,
+            obj_motion,
+            bounds=bounds_motion,
             popsize=10,
             maxiter=500,
             tol=0.01,
@@ -91,6 +104,28 @@ if __name__ == '__main__':
             disp=True
         )
         print('Result', res.message)
-        print('x',str(list(res.x)))
+        print('xm',str(list(res.x)))
         print('Cost', res.fun)
-        obj(res.x,plot=True)
+        xm = res.x
+
+    if xs is None:
+        res = differential_evolution(
+            obj_spring,
+            bounds=bounds_spring,
+            args = (xm,),
+            popsize=10,
+            maxiter=500,
+            tol=0.01,
+            callback=cb,
+            workers=-1,
+            polish=False,
+            disp=True
+        )
+        print('Result', res.message)
+        print('xs',str(list(res.x)))
+        print('Cost', res.fun)
+        xs = res.x
+
+    obj_motion(xm,plot=True)
+    obj_spring(xs,xm,plot=True)
+    plt.show()

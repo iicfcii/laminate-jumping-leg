@@ -130,7 +130,7 @@ def motion(rots,l,c,plot=False):
 
     return xs, ys
 
-def spring(rots,l,c,w,plot=False):
+def spring(rots,l,c,w,ds,plot=False):
     step = 10e-5
     tfinal = 1
     tilt = leg(rots[0],l,c,is_prbm=True)[1]
@@ -239,7 +239,7 @@ def spring(rots,l,c,w,plot=False):
             links[5],
             chrono.ChFrameD(chrono.ChVectorD(*lk[5][1,:],0),chrono.Q_from_AngZ(np.pi/2))
         )
-        motorTorque = chrono.ChFunction_Sine(0,1/tfinal,0.01)
+        motorTorque = chrono.ChFunction_Sine(0,1/tfinal,ds)
         motor.SetMotionFunction(motorTorque)
         system.Add(motor)
 
