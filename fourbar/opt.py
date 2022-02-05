@@ -58,20 +58,21 @@ def obj_spring(x,xm,plot=False):
     c = xm[6]
 
     rots = np.linspace(0,-cs['dl']/cs['r'],3)+ang
-    data = fourbar.spring(rots,l,c,w,cs['ds'],plot=plot)
+    print(rots)
+    data = fourbar.spring(rots,l,c,w,cs['ds'],plot=False)
 
-    x_d = np.linspace(-cs['ds'],cs['ds'],100)
+    x_d = np.linspace(-cs['ds'],0,50)
     f_d = -jump.f_spring(x_d,cs)
 
     e = 0
     for datum in data:
         l = len(datum['x'])
-        x1 = datum['x'][int(l/4):int(l/4*3)]
+        x1 = datum['x'][:int(l/2)]
         x1.reverse()
-        f1 = datum['f'][int(l/4):int(l/4*3)]
+        f1 = datum['f'][:int(l/2)]
         f1.reverse()
-        x2 = datum['x'][int(l/4*3):]+datum['x'][:int(l/4)]
-        f2 = datum['f'][int(l/4*3):]+datum['f'][:int(l/4)]
+        x2 = datum['x'][int(l/2):]
+        f2 = datum['f'][int(l/2):]
         f1_i = np.interp(x_d,x1,f1)
         f2_i = np.interp(x_d,x2,f2)
         f = (f1_i+f2_i)/2
@@ -80,16 +81,16 @@ def obj_spring(x,xm,plot=False):
     if plot:
         plt.figure()
         plt.plot(x_d,f_d)
-        for datum in data:
-            plt.plot(datum['x'],datum['f'],'--')
-
+        for datum,rot in zip(data,rots):
+            plt.plot(datum['x'],datum['f'],'--',label='{:.1f}'.format(rot))
+        plt.legend()
     return e
 
 if __name__ == '__main__':
     xm = None
     xs = None
     xm = [2.6951962388449164, 0.030257190703705427, 0.04670519207473192, 0.020045213539287253, 0.05999409087062664, 0.05997409670936284, 0.870576427719403]
-    xs = [0.010019694051680383, 0.010012474886878299]
+    xs = [0.01,0.01]
 
     if xm is None:
         res = differential_evolution(
@@ -126,6 +127,6 @@ if __name__ == '__main__':
         print('Cost', res.fun)
         xs = res.x
 
-    obj_motion(xm,plot=True)
-    obj_spring(xs,xm,plot=True)
+    print(obj_motion(xm,plot=True))
+    print(obj_spring(xs,xm,plot=True))
     plt.show()

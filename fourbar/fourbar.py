@@ -239,7 +239,7 @@ def spring(rots,l,c,w,ds,plot=False):
             links[5],
             chrono.ChFrameD(chrono.ChVectorD(*lk[5][1,:],0),chrono.Q_from_AngZ(np.pi/2))
         )
-        motorTorque = chrono.ChFunction_Sine(0,1/tfinal,ds)
+        motorTorque = chrono.ChFunction_Sine(0,1/tfinal/2,-ds)
         motor.SetMotionFunction(motorTorque)
         system.Add(motor)
 
