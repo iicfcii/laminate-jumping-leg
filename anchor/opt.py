@@ -43,11 +43,14 @@ def obj_spring(x,xm,plot=False):
     l = xm[1:6]
     c = xm[6]
 
-    rots = np.linspace(0,-cs['dl']/cs['r'],3)+ang
-    try:
-        data = fourbar.stiffness(rots,l,c,ls,w,cs['ds'],plot=True)
-    except AssertionError:
-        return 10
+    rots = np.linspace(0,-cs['dl']/cs['r'],5)+ang
+    data = []
+    for rot in rots:
+        try:
+            system = fourbar.stiffness_triangle(rots[0],rot,l,c,ls,w,cs['ds'])
+        except AssertionError:
+            return 10
+        data.append(fourbar.sim(system,plot=False))
 
     x_d = np.linspace(-cs['ds'],0,50)
     f_d = -jump.f_spring(x_d,cs)
@@ -72,7 +75,7 @@ def obj_spring(x,xm,plot=False):
         for datum,rot in zip(data,rots):
             plt.plot(datum['x'],datum['f'],'--',label='{:.1f}'.format(rot))
         plt.legend()
-    return e
+    return e/len(rots)
 
 cs = {
     'g': 9.81,
@@ -93,7 +96,7 @@ if __name__ == '__main__':
     xm = None
     xs = None
     xm = [2.6951962388449164, 0.030257190703705427, 0.04670519207473192, 0.020045213539287253, 0.05999409087062664, 0.05997409670936284, 0.870576427719403]
-    xs = [0.03466434629761409, 0.012230820692471424, 0.00565811298564948]
+    xs = [0.034707282798141725, 0.012185578617920096, 0.0071837701584432385]
 
     if xm is None:
         res = differential_evolution(
