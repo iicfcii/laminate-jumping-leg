@@ -8,18 +8,14 @@ import fourbar
 import jump
 
 def obj_motion(x,plot=False):
-    ang = x[0]
-    l = x[1:6]
-    c = x[6]
-
-    rots = np.linspace(0,-cs['dl']/cs['r'],10)+ang
+    rots = np.linspace(0,-cs['dl']/cs['r'],10)+x[0]
     try:
-        xs,ys = fourbar.motion(rots,l,c,plot=plot)
+        xs,ys = fourbar.motion(rots,x,plot=plot)
     except AssertionError:
         return 1
 
     xs_d = np.zeros(xs.shape)
-    ys_d = (rots-ang)*cs['r']+ys[0]
+    ys_d = (rots-x[0])*cs['r']+ys[0]
 
     if plot:
         plt.figure()
@@ -36,21 +32,16 @@ def cb(x,convergence=0):
     print('x',x)
     print('Convergence',convergence)
 
-def obj_spring(x,xm,plot=False):
-    ls = x[:2]
-    w = x[2]
-    ang = xm[0]
-    l = xm[1:6]
-    c = xm[6]
-
-    rots = np.linspace(0,-cs['dl']/cs['r'],5)+ang
+def obj_stiffness(x,xm,plot=False):
+    rots = np.linspace(0,-cs['dl']/cs['r'],5)+xm[0]
     data = []
     for rot in rots:
         try:
-            system = fourbar.stiffness_triangle(rots[0],rot,l,c,ls,w,cs['ds'])
+            model = fourbar.model_spring(rot,x,xm,cs)
+            # model = fourbar.model_spring_triangle(rot,x,xm,cs)
         except AssertionError:
             return 10
-        data.append(fourbar.sim(system,plot=False))
+        data.append(fourbar.sim(model,plot=False))
 
     x_d = np.linspace(-cs['ds'],0,50)
     f_d = -jump.f_spring(x_d,cs)
@@ -90,13 +81,15 @@ cs = {
     'r': 0.05
 }
 bounds_motion = [(-np.pi,np.pi)]+[(0.02,0.06)]*5+[(-1,1)]*1
-bounds_spring = [(0.01,0.05)]*2+[(0.005,0.03)]
+bounds_stiffness = [(0.005,0.03)]*2
+# bounds_stiffness = [(0.01,0.05)]*2+[(0.005,0.03)]
 
 if __name__ == '__main__':
     xm = None
     xs = None
-    xm = [2.6951962388449164, 0.030257190703705427, 0.04670519207473192, 0.020045213539287253, 0.05999409087062664, 0.05997409670936284, 0.870576427719403]
-    xs = [0.034707282798141725, 0.012185578617920096, 0.0071837701584432385]
+    xm = [2.6935314437637747, 0.030244462243688645, 0.04668319649977162, 0.02002235749858264, 0.05998841948291793, 0.059996931859852574, 0.14061111190360398]
+    xs = [0.007096432689624491, 0.005123600911492247]
+    # xs = [0.034707282798141725, 0.012185578617920096, 0.0071837701584432385]
 
     if xm is None:
         res = differential_evolution(
@@ -117,8 +110,8 @@ if __name__ == '__main__':
 
     if xs is None:
         res = differential_evolution(
-            obj_spring,
-            bounds=bounds_spring,
+            obj_stiffness,
+            bounds=bounds_stiffness,
             args = (xm,),
             popsize=10,
             maxiter=500,
@@ -134,5 +127,5 @@ if __name__ == '__main__':
         xs = res.x
 
     print(obj_motion(xm,plot=True))
-    print(obj_spring(xs,xm,plot=True))
+    print(obj_stiffness(xs,xm,plot=True))
     plt.show()
