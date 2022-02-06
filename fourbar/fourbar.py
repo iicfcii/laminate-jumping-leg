@@ -14,7 +14,7 @@ tf = 16.5*2.54e-5
 wr = 0.02
 tr = np.sum([0.4191,0.015,0.0508,0.015,0.4191])/1000
 rho = prbm.rho
-pad = 0.006 # 6mm pad at ends for wider hinge
+pad = 0 # pad at ends for wider hinge
 
 # Fourbar
 #   b----c
@@ -52,7 +52,7 @@ def fk(bad,ad,ab,bc,cd,form=1):
 
     return pts, ts
 
-def leg(ang,l,c,tilt=None,is_prbm=False):
+def leg(ang,l,c,tilt=None):
     ps, ts = fk(ang,*l[:4],form=c)
     assert ps is not None, 'No fourbar fk solution'
     pf = np.array([[ps[2,0]+np.cos(ts[2])*l[4],ps[2,1]+np.sin(ts[2])*l[4]]])
@@ -66,42 +66,43 @@ def leg(ang,l,c,tilt=None,is_prbm=False):
     ps = (tilt @ ps.T).T
     pf = (tilt @ pf.T).T
 
-    if not is_prbm:
-        links = [
-            ps[0:2,:],
-            ps[1:3,:],
-            ps[2:4,:],
-            np.array([ps[3,:],ps[0,:]]),
-            np.array([ps[2,:],pf[0,:]])
-        ]
-    else:
-        links = []
-        # Ground
-        p1 = ps[3,:]
-        p2 = ps[0,:]
-        links.append(np.array([p1,p2]))
-        # Crank
-        p1 = ps[0,:]
-        p2 = ps[1,:]
-        pj = (p2-p1)*((1-pad*2/l[1])*(1-prbm.gamma)+pad/l[1])+p1
-        links.append(np.array([p1,pj]))
-        links.append(np.array([pj,p2]))
-        # Coupler
-        p1 = ps[1,:]
-        p2 = ps[2,:]
-        links.append(np.array([p1,p2]))
-        # Ext
-        p1 = ps[2,:]
-        p2 = pf[0,:]
-        pj = (p2-p1)*((1-pad/l[4])*(1-prbm.gamma)+pad/l[4])+p1
-        links.append(np.array([p1,pj]))
-        links.append(np.array([pj,p2]))
-        # Rocker
-        p1 = ps[2,:]
-        p2 = ps[3,:]
-        links.append(np.array([p1,p2]))
+    lk = [
+        ps[0:2,:],
+        ps[1:3,:],
+        ps[2:4,:],
+        np.array([ps[3,:],ps[0,:]]),
+        np.array([ps[2,:],pf[0,:]])
+    ]
 
-    return links, tilt
+    return lk, tilt
+
+def spring(ls,lk):
+    #     b
+    #   /  \
+    # a-----c (crank)
+    ab = ls[0]
+    bc = ls[1]
+    ac = np.linalg.norm(lk[0][1,:]-lk[0][0,:])
+
+    assert ab+bc>ac, 'Cannot form a triangle'
+
+    # bac within 0 to pi
+    bac = np.arccos((ab**2+ac**2-bc**2)/2/ab/ac)
+    ang = np.arctan2(lk[0][1,1],lk[0][1,0])
+
+    a = lk[0][0,:]
+    c = lk[0][1,:]
+    b = np.array([ab*np.cos(bac+ang),ab*np.sin(bac+ang)])+a
+
+    j = (b-a)*((1-pad*2/ab)*(1-prbm.gamma)+pad/ab)
+
+    lks = [
+        np.array([a,j]),
+        np.array([j,b]),
+        np.array([b,c])
+    ]
+
+    return lks
 
 def motion(rots,l,c,plot=False):
     lk, tilt = leg(rots[0],l,c)
@@ -130,10 +131,10 @@ def motion(rots,l,c,plot=False):
 
     return xs, ys
 
-def spring(rots,l,c,w,ds,plot=False):
+def stiffness(rots,l,c,ls,w,ds,plot=False):
     step = 10e-5
     tfinal = 1
-    tilt = leg(rots[0],l,c,is_prbm=True)[1]
+    tilt = leg(rots[0],l,c)[1]
 
     def pose(ps):
         p1 = ps[0,:]
@@ -145,20 +146,25 @@ def spring(rots,l,c,w,ds,plot=False):
 
         return center, angle, length
 
-    def sim(rot,l,c,w):
-        lk = leg(rot,l,c,tilt=tilt,is_prbm=True)[0]
+    def sim(rot):
+        lk = leg(rot,l,c,tilt=tilt)[0]
+        lks = spring(ls,lk)
         system = chrono.ChSystemNSC()
         system.Set_G_acc(chrono.ChVectorD(0,0,0))
 
         links = []
         for i in range(len(lk)):
             pos, rot, length = pose(lk[i])
-            if i == 1 or i == 2:
+            link = chrono.ChBodyEasyBox(length,tr,wr,rho,True)
+            link.SetPos(chrono.ChVectorD(*pos,0))
+            link.SetRot(chrono.Q_from_AngZ(rot))
+            system.Add(link)
+            links.append(link)
+        for i in range(len(lks)):
+            pos, rot, length = pose(lks[i])
+            if i != 2:
                 tl = tf
-                wl = w[0]
-            elif i == 4 or i == 5:
-                tl = tf
-                wl = w[1]
+                wl = w
             else:
                 tl = tr
                 wl = wr
@@ -167,9 +173,8 @@ def spring(rots,l,c,w,ds,plot=False):
             link.SetRot(chrono.Q_from_AngZ(rot))
             system.Add(link)
             links.append(link)
-
-        links[0].SetBodyFixed(True)
-        links[1].SetBodyFixed(True)
+        links[3].SetBodyFixed(True)
+        links[5].SetBodyFixed(True)
 
         # Joints and Springs
         class RotSpringTorque(chrono.TorqueFunctor):
@@ -186,59 +191,72 @@ def spring(rots,l,c,w,ds,plot=False):
         springs = []
         springTorques = []
         for i in range(len(links)):
-            if i == 6: # rocker to ground
-                l1_i = i
-                l2_i = 0
-            elif i == 5: # rocker to coupler
-                l1_i = 3
-                l2_i = 6
+            if i == 3:
+                bodies = [links[0],links[5]]
+                fixed = [False,False]
+                pos = lk[i][1,:]
+            elif i == 0:
+                bodies = [links[1],links[7]]
+                fixed = [False,False]
+                pos = lk[i][1,:]
+            elif i == 1:
+                bodies = [links[2],links[4]]
+                fixed = [False,True]
+                pos = lk[i][1,:]
+            elif i == 2:
+                bodies = [links[3]]
+                fixed = [False]
+                pos = lk[i][1,:]
+            elif i == 5:
+                bodies = [links[6]]
+                fixed = [False]
+                pos = lks[0][1,:]
+            elif i == 6:
+                bodies = [links[7]]
+                fixed = [False]
+                pos = lks[1][1,:]
             else:
-                l1_i = i
-                l2_i = i+1
+                bodies = []
+                fixed = []
 
-            l1 = links[l1_i]
-            l2 = links[l2_i]
-            p = lk[l1_i][1,:]
-
-            if i != 3:
-                joint = chrono.ChLinkMateGeneric(True,True,True,True,True,False)
-            else: # coupler to start of ext
-                joint = chrono.ChLinkMateGeneric(True,True,True,True,True,True)
-            joint.Initialize(l1,l2,chrono.ChFrameD(chrono.ChVectorD(*p,0)))
-            system.Add(joint)
-            joints.append(joint)
-
-            if i == 1:
-                kl = prbm.k(tf,l[1]-pad*2,w[0])
-            elif i == 4:
-                kl = prbm.k(tf,l[4]-pad,w[1])
+            if i == 5:
+                k = prbm.k(tf,ls[0]-pad*2,w)
             else:
-                kl = 0
+                k = 0
 
             b = 0
 
-            try:
-                spring = chrono.ChLinkRotSpringCB()
-                spring.Initialize(l1,l2,chrono.ChCoordsysD(chrono.ChVectorD(*p,0)))
-                springTorques.append(RotSpringTorque(kl,b))
-                spring.RegisterTorqueFunctor(springTorques[i])
-                system.AddLink(spring)
-                springs.append(spring)
-            except AttributeError:
-                # Accommodate develop version of chrono
-                spring = chrono.ChLinkRSDA()
-                spring.Initialize(l1,l2,chrono.ChCoordsysD(chrono.ChVectorD(*p,0)))
-                spring.SetSpringCoefficient(kl)
-                spring.SetDampingCoefficient(b)
-                system.AddLink(spring)
-                springs.append(spring)
+            for bd,f in zip(bodies,fixed):
+                joint = chrono.ChLinkMateGeneric(True,True,True,True,True,f)
+                joint.Initialize(links[i],bd,chrono.ChFrameD(chrono.ChVectorD(*pos,0)))
+                system.Add(joint)
+                joints.append(joint)
+
+                if f: continue
+
+                try:
+                    spring_link = chrono.ChLinkRotSpringCB()
+                    spring_link.Initialize(links[i],bd,chrono.ChCoordsysD(chrono.ChVectorD(*pos,0)))
+                    springTorques.append(RotSpringTorque(k,b))
+                    spring_link.RegisterTorqueFunctor(springTorques[-1])
+                    system.AddLink(spring_link)
+                    springs.append(spring_link)
+                except AttributeError:
+                    # Accommodate develop version of chrono
+                    spring_link = chrono.ChLinkRSDA()
+                    spring_link.Initialize(links[i],bd,chrono.ChCoordsysD(chrono.ChVectorD(*pos,0)))
+                    spring_link.SetSpringCoefficient(k)
+                    spring_link.SetDampingCoefficient(b)
+                    system.AddLink(spring_link)
+                    springs.append(spring_link)
 
         motor = chrono.ChLinkMotorLinearPosition()
         motor.Initialize(
-            links[0],
-            links[5],
-            chrono.ChFrameD(chrono.ChVectorD(*lk[5][1,:],0),chrono.Q_from_AngZ(np.pi/2))
+            links[3],
+            links[4],
+            chrono.ChFrameD(chrono.ChVectorD(*lk[4][1,:],0),chrono.Q_from_AngZ(np.pi/2))
         )
+        motor.SetGuideConstraint(False,True,True,True,False)
         motorTorque = chrono.ChFunction_Sine(0,1/tfinal/2,-ds)
         motor.SetMotionFunction(motorTorque)
         system.Add(motor)
@@ -271,10 +289,10 @@ def spring(rots,l,c,w,ds,plot=False):
                 application.DrawAll()
 
                 # Draw axis for scale and orientation
-                l = 0.1
-                chronoirr.drawSegment(application.GetVideoDriver(),chrono.ChVectorD(0,0,0),chrono.ChVectorD(l,0,0),chronoirr.SColor(1,255,0,0))
-                chronoirr.drawSegment(application.GetVideoDriver(),chrono.ChVectorD(0,0,0),chrono.ChVectorD(0,l,0),chronoirr.SColor(1,0,255,0))
-                chronoirr.drawSegment(application.GetVideoDriver(),chrono.ChVectorD(0,0,0),chrono.ChVectorD(0,0,l),chronoirr.SColor(1,0,0,255))
+                s = 0.1
+                chronoirr.drawSegment(application.GetVideoDriver(),chrono.ChVectorD(0,0,0),chrono.ChVectorD(s,0,0),chronoirr.SColor(1,255,0,0))
+                chronoirr.drawSegment(application.GetVideoDriver(),chrono.ChVectorD(0,0,0),chrono.ChVectorD(0,s,0),chronoirr.SColor(1,0,255,0))
+                chronoirr.drawSegment(application.GetVideoDriver(),chrono.ChVectorD(0,0,0),chrono.ChVectorD(0,0,s),chronoirr.SColor(1,0,0,255))
 
                 application.DoStep()
                 application.EndScene()
@@ -286,7 +304,7 @@ def spring(rots,l,c,w,ds,plot=False):
             # r = 0.12
             # plt.xlim([-r,r])
             # plt.ylim([-r,r])
-            # for link in lk:
+            # for link in lk+lks:
             #     plt.plot(link[:,0],link[:,1],'.-k')
         else:
             system.SetChTime(0)
@@ -297,9 +315,4 @@ def spring(rots,l,c,w,ds,plot=False):
 
         return datum
 
-    data = []
-    for rot in rots:
-        datum = sim(rot,l,c,w)
-        data.append(datum)
-
-    return data
+    return [sim(rot) for rot in rots]

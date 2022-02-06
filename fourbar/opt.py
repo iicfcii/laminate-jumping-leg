@@ -7,21 +7,6 @@ from scipy.optimize import differential_evolution, NonlinearConstraint
 import fourbar
 import jump
 
-cs = {
-    'g': 9.81,
-    'mb': 0.03,
-    'ml': 0.0001,
-    'k': 30,
-    'a': 1,
-    'ds': 0.01,
-    'tau': 0.109872,
-    'v': 30.410616886749196,
-    'dl': 0.06,
-    'r': 0.05
-}
-bounds_motion = [(-np.pi,np.pi)]+[(0.02,0.06)]*5+[(-1,1)]*1
-bounds_spring = [(0.01,0.03)]*2
-
 def obj_motion(x,plot=False):
     ang = x[0]
     l = x[1:6]
@@ -52,14 +37,17 @@ def cb(x,convergence=0):
     print('Convergence',convergence)
 
 def obj_spring(x,xm,plot=False):
-    w = x
+    ls = x[:2]
+    w = x[2]
     ang = xm[0]
     l = xm[1:6]
     c = xm[6]
 
     rots = np.linspace(0,-cs['dl']/cs['r'],3)+ang
-    print(rots)
-    data = fourbar.spring(rots,l,c,w,cs['ds'],plot=False)
+    try:
+        data = fourbar.stiffness(rots,l,c,ls,w,cs['ds'],plot=True)
+    except AssertionError:
+        return 10
 
     x_d = np.linspace(-cs['ds'],0,50)
     f_d = -jump.f_spring(x_d,cs)
@@ -86,11 +74,26 @@ def obj_spring(x,xm,plot=False):
         plt.legend()
     return e
 
+cs = {
+    'g': 9.81,
+    'mb': 0.03,
+    'ml': 0.0001,
+    'k': 30,
+    'a': 1,
+    'ds': 0.01,
+    'tau': 0.109872,
+    'v': 30.410616886749196,
+    'dl': 0.06,
+    'r': 0.05
+}
+bounds_motion = [(-np.pi,np.pi)]+[(0.02,0.06)]*5+[(-1,1)]*1
+bounds_spring = [(0.01,0.05)]*2+[(0.005,0.03)]
+
 if __name__ == '__main__':
     xm = None
     xs = None
     xm = [2.6951962388449164, 0.030257190703705427, 0.04670519207473192, 0.020045213539287253, 0.05999409087062664, 0.05997409670936284, 0.870576427719403]
-    xs = [0.01,0.01]
+    xs = [0.03466434629761409, 0.012230820692471424, 0.00565811298564948]
 
     if xm is None:
         res = differential_evolution(
