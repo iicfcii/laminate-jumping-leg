@@ -37,8 +37,7 @@ def obj_stiffness(x,xm,plot=False):
     data = []
     for rot in rots:
         try:
-            model = fourbar.model_spring(rot,x,xm,cs)
-            # model = fourbar.model_spring_triangle(rot,x,xm,cs)
+            model = fourbar.model_spring_fourbar(rot,x,xm,cs)
         except AssertionError:
             return 10
         data.append(fourbar.sim(model,plot=False))
@@ -81,15 +80,13 @@ cs = {
     'r': 0.05
 }
 bounds_motion = [(-np.pi,np.pi)]+[(0.02,0.06)]*5+[(-1,1)]*1
-bounds_stiffness = [(0.005,0.03)]*2
-# bounds_stiffness = [(0.01,0.05)]*2+[(0.005,0.03)]
+bounds_stiffness = [(0.01,0.06)]*3+[(0.01,0.03)]
 
 if __name__ == '__main__':
     xm = None
     xs = None
     xm = [2.6935314437637747, 0.030244462243688645, 0.04668319649977162, 0.02002235749858264, 0.05998841948291793, 0.059996931859852574, 0.14061111190360398]
-    xs = [0.007096432689624491, 0.005123600911492247]
-    # xs = [0.034707282798141725, 0.012185578617920096, 0.0071837701584432385]
+    # xs = [0.03,0.05,0.03,0.01]
 
     if xm is None:
         res = differential_evolution(

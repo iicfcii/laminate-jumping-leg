@@ -15,7 +15,7 @@ wr = 0.02
 tr = np.sum([0.4191,0.015,0.0508,0.015,0.4191])/1000
 rho = prbm.rho
 pad = 0 # pad at ends for wider hinge
-step = 10e-5
+step = 2e-5
 tfinal = 1
 
 # Fourbar
@@ -139,6 +139,35 @@ def leg_w_spring_triangle(ang,l,c,tilt,ls):
         np.array([a,j]),
         np.array([j,b]),
         np.array([b,c])
+    ]
+
+    return lk+lks
+
+def leg_w_spring_fourbar(ang,l,c,tilt,ls):
+    lk = leg(ang,l,c,tilt=tilt)[0]
+
+    ang_ab = pose(lk[1])[1]
+    ang_ad = pose(lk[0])[1]
+    ad = l[1]
+    cd = ls[0]
+    bc = ls[1]
+    ab = ls[2]
+
+    ps, ts = fk(-(ang_ad-ang_ab),ad,ab,bc,cd,form=-1)
+    assert ps is not None, 'No fourbar fk solution'
+    ang_tilt = ang_ad+np.pi
+    tilt = np.array([[np.cos(ang_tilt),-np.sin(ang_tilt)],[np.sin(ang_tilt),np.cos(ang_tilt)]])
+    ps = (tilt @ ps.T).T+np.tile(lk[0][1,:],(4,1))
+
+    a = ps[0,:]
+    b = ps[1,:]
+    j = (b-a)*((1-pad*2/ab)*(1-prbm.gamma)+pad/ab)+a
+
+    lks = [
+        np.array([ps[3,:],ps[2,:]]),
+        np.array([ps[2,:],ps[1,:]]),
+        np.array([b,j]),
+        np.array([j,a])
     ]
 
     return lk+lks
@@ -360,6 +389,119 @@ def model_spring_triangle(rot,x,xm,cs):
 
         if i == 5:
             k = prbm.k(tf,ls[0]-pad*2,w)
+        else:
+            k = 0
+
+        b = 0
+
+        for bd,f in zip(bodies,fixed):
+            joint = chrono.ChLinkMateGeneric(True,True,True,True,True,f)
+            joint.Initialize(links[i],bd,chrono.ChFrameD(chrono.ChVectorD(*pos,0)))
+            system.Add(joint)
+            joints.append(joint)
+
+            if f: continue
+
+            try:
+                spring_link = chrono.ChLinkRotSpringCB()
+                spring_link.Initialize(links[i],bd,chrono.ChCoordsysD(chrono.ChVectorD(*pos,0)))
+                springTorques.append(RotSpringTorque(k,b))
+                spring_link.RegisterTorqueFunctor(springTorques[-1])
+                system.AddLink(spring_link)
+                springs.append(spring_link)
+            except AttributeError:
+                # Accommodate develop version of chrono
+                spring_link = chrono.ChLinkRSDA()
+                spring_link.Initialize(links[i],bd,chrono.ChCoordsysD(chrono.ChVectorD(*pos,0)))
+                spring_link.SetSpringCoefficient(k)
+                spring_link.SetDampingCoefficient(b)
+                system.AddLink(spring_link)
+                springs.append(spring_link)
+
+    motor = chrono.ChLinkMotorLinearPosition()
+    motor.SetName('motor')
+    motor.Initialize(
+        links[3],
+        links[4],
+        chrono.ChFrameD(chrono.ChVectorD(*lk[4][1,:],0),chrono.Q_from_AngZ(np.pi/2))
+    )
+    motor.SetGuideConstraint(False,True,True,True,False)
+    motorTorque = chrono.ChFunction_Sine(0,1/tfinal/2,-ds)
+    motor.SetMotionFunction(motorTorque)
+    system.Add(motor)
+
+    return system
+
+def model_spring_fourbar(rot,x,xm,cs):
+    ls = x[:3]
+    w = x[3]
+    ang = xm[0]
+    l = xm[1:6]
+    c = xm[6]
+    ds = cs['ds']
+
+    tilt = leg(ang,l,c)[1]
+    lk = leg_w_spring_fourbar(rot,l,c,tilt,ls)
+
+    system = chrono.ChSystemNSC()
+    system.Set_G_acc(chrono.ChVectorD(0,-9.81,0))
+
+    links = []
+    for i in range(len(lk)):
+        if i == 7 or i == 8:
+            tl = tf
+            wl = w
+        else:
+            tl = tr
+            wl = wr
+
+        pos, rot, length = pose(lk[i])
+
+        link = chrono.ChBodyEasyBox(length,tl,wl,rho,True)
+        link.SetPos(chrono.ChVectorD(*pos,0))
+        link.SetRot(chrono.Q_from_AngZ(rot))
+        system.Add(link)
+        links.append(link)
+    links[3].SetBodyFixed(True)
+    links[5].SetBodyFixed(True)
+
+    # Joints and Springs
+    joints = []
+    springs = []
+    springTorques.clear()
+    for i in range(len(links)):
+        if i == 3:
+            bodies = [links[0],links[5]]
+            fixed = [False,False]
+        elif i == 0:
+            bodies = [links[1]]
+            fixed = [False]
+        elif i == 1:
+            bodies = [links[2],links[4]]
+            fixed = [False,True]
+        elif i == 2:
+            bodies = [links[3]]
+            fixed = [False]
+        elif i == 5:
+            bodies = [links[6]]
+            fixed = [False]
+        elif i == 6:
+            bodies = [links[7]]
+            fixed = [False]
+        elif i == 7:
+            bodies = [links[8]]
+            fixed = [False]
+        elif i == 8:
+            bodies = [links[1]]
+            fixed = [True]
+        else:
+            bodies = []
+            fixed = []
+
+        pos = lk[i][1,:]
+
+        if i == 7:
+            k = prbm.k(tf,ls[2]-pad*2,w)
         else:
             k = 0
 
