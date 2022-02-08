@@ -15,8 +15,8 @@ wr = 0.02
 tr = np.sum([0.4191,0.015,0.0508,0.015,0.4191])/1000
 rho = prbm.rho
 pad = 0 # pad at ends for wider hinge
-step = 2e-5
-tfinal = 1
+step = 5e-5
+tfinal = 0.5
 
 # Fourbar
 #   b----c
@@ -123,10 +123,11 @@ def leg_w_spring_triangle(ang,l,c,tilt,ls):
     bc = ls[1]
     ac = np.linalg.norm(lk[0][1,:]-lk[0][0,:])
 
-    assert ab+bc>ac, 'Cannot form a triangle'
+    cos_bac = (ab**2+ac**2-bc**2)/2/ab/ac
+    assert np.abs(cos_bac) <= 1, 'Cannot form a triangle'
 
     # bac within 0 to pi
-    bac = np.arccos((ab**2+ac**2-bc**2)/2/ab/ac)
+    bac = np.arccos(cos_bac)
     ang = np.arctan2(lk[0][1,1],lk[0][1,0])
 
     a = lk[0][0,:]
