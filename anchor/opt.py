@@ -34,7 +34,7 @@ def cb(x,convergence=0):
 
 def obj_stiffness(x,plot=False):
     try:
-        datum = fourbar.stiffness(x,cs,plot=True)
+        datum = fourbar.stiffness(x,cs,plot=plot)
     except AssertionError:
         return 10
 
@@ -42,21 +42,26 @@ def obj_stiffness(x,plot=False):
     f_d = -jump.f_spring(x_d,cs)
 
     l = len(datum['x'])
+
     x1 = datum['x'][:int(l/2)]
     x1.reverse()
+    x1 = np.array(x1)*cs['r']
+    x2 = datum['x'][int(l/2):]
+    x2 = np.array(x2)*cs['r']
+
     f1 = datum['f'][:int(l/2)]
     f1.reverse()
-    x2 = datum['x'][int(l/2):]
     f2 = datum['f'][int(l/2):]
     f1_i = np.interp(x_d,x1,f1)
     f2_i = np.interp(x_d,x2,f2)
-    f = (f1_i+f2_i)/2
+
+    f = (f1_i+f2_i)/2/cs['r']
     e = np.sqrt(np.sum((f-f_d)**2)/f_d.shape[0])
 
     if plot:
         plt.figure()
         plt.plot(x_d,f_d)
-        plt.plot(datum['x'],datum['f'],'--')
+        plt.plot(x_d,f,'--')
     return e
 
 cs = {
@@ -72,14 +77,17 @@ cs = {
     'r': 0.05
 }
 bounds_motion = [(-np.pi,np.pi)]+[(0.02,0.06)]*5+[(-1,1)]*1
-bounds_stiffness = [(0.01,0.05)]*3+[(0.01,0.04)]
+bounds_stiffness = [(0,0.1)]+[(0.01,0.1)]*3+[(0.01,0.04)]
 
 if __name__ == '__main__':
     xm = None
     xs = None
     xm = [2.6935314437637747, 0.030244462243688645, 0.04668319649977162, 0.02002235749858264, 0.05998841948291793, 0.059996931859852574, 0.14061111190360398]
-    # xs = [0.049977324199468084, 0.012748118355220984, 0.03734113445368627, 0.013260239307051544] # 0.8
-    xs = [0.04999977426575902, 0.02323485141300379, 0.031013464836097404, 0.010000048019932458] # 1
+
+    # a = 1, 0.5, 1.5
+    xs = [6.970085451959984e-06, 0.05226738296756783, 0.05429323856448088, 0.07139280469863389, 0.010012365357000428]
+    # xs = [0.01328031868440848, 0.042725285213718434, 0.04409477242287453, 0.09958790568855153, 0.010074384675696383]
+    # xs = [7.024017432230578e-06, 0.09999434872218227, 0.065678171577909, 0.035168059578512254, 0.010000828244387612]
 
     if xm is None:
         res = differential_evolution(

@@ -89,12 +89,16 @@ def leg(ang,l,c,tilt=None):
     return lk, tilt
 
 def spring(ls):
-    #     b
-    #   /  \
-    # a-----c
-    ac = ls[0]
-    ab = ls[1]
+    #        b
+    #      /  \
+    #    d     \
+    #   /       \
+    # a----------c
+    ad = ls[0]
+    db = ls[1] # Flexible
     bc = ls[2]
+    ac = ls[3]
+    ab = ad+db
 
 
     cos_bac = (ab**2+ac**2-bc**2)/2/ab/ac
@@ -107,7 +111,7 @@ def spring(ls):
     b = np.array([ab*np.cos(bac),ab*np.sin(bac)])
     c = np.array([ac,0])
 
-    j = (b-a)*((1-pad*2/ab)*(1-prbm.gamma)+pad/ab)
+    j = (b-a)*((1-ad/ab)*(1-prbm.gamma)+ad/ab)
 
     lks = [
         np.array([c,a]),
@@ -161,8 +165,8 @@ class RotSpringTorque(chrono.TorqueFunctor):
         return torque
 
 def stiffness(x,cs,plot=False):
-    ls = x[:3]
-    w = x[3]
+    ls = x[:4]
+    w = x[4]
 
     lk = spring(ls)
 
@@ -211,7 +215,7 @@ def stiffness(x,cs,plot=False):
         pos = lk[i][1,:]
 
         if i == 1:
-            k = prbm.k(tf,ls[0],w)
+            k = prbm.k(tf,ls[1],w)
         else:
             k = 0
 
@@ -242,7 +246,6 @@ def stiffness(x,cs,plot=False):
                 springs.append(spring_link)
 
     motor = chrono.ChLinkMotorRotationAngle()
-    # motor.SetName('motor')
     motor.Initialize(
         links[1],
         links[0],
@@ -257,8 +260,8 @@ def stiffness(x,cs,plot=False):
         'f': [],
     }
     def record():
-        datum['x'].append(motor.GetMotorRot()*cs['r'])
-        datum['f'].append(motor.GetMotorTorque()/cs['r'])
+        datum['x'].append(motor.GetMotorRot())
+        datum['f'].append(motor.GetMotorTorque())
 
     if plot:
         application = chronoirr.ChIrrApp(system, "Jump", chronoirr.dimension2du(800, 600),chronoirr.VerticalDir_Y)
