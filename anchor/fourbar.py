@@ -88,7 +88,7 @@ def leg(ang,l,c,tilt=None):
 
     return lk, tilt
 
-def spring(ls):
+def spring(ls,c):
     #        b
     #      /  \
     #    d     \
@@ -106,6 +106,7 @@ def spring(ls):
 
     # bac within 0 to pi
     bac = np.arccos(cos_bac)
+    if c < 0: bac = -bac
 
     a = np.array([0,0])
     b = np.array([ab*np.cos(bac),ab*np.sin(bac)])
@@ -167,8 +168,9 @@ class RotSpringTorque(chrono.TorqueFunctor):
 def stiffness(x,cs,plot=False):
     ls = x[:4]
     w = x[4]
+    c = x[5]
 
-    lk = spring(ls)
+    lk = spring(ls,c)
 
     system = chrono.ChSystemNSC()
     system.Set_G_acc(chrono.ChVectorD(0,0,0))
@@ -251,7 +253,7 @@ def stiffness(x,cs,plot=False):
         links[0],
         chrono.ChFrameD(chrono.ChVectorD(0,0,0))
     )
-    motorTorque = chrono.ChFunction_Sine(0,1/tfinal/2,-cs['ds']/cs['r'])
+    motorTorque = chrono.ChFunction_Sine(0,1/tfinal/2,-cs['dsm']/cs['r'])
     motor.SetAngleFunction(motorTorque)
     system.Add(motor)
 
