@@ -142,9 +142,8 @@ def motion(rots,x,plot=False):
     if plot:
         plt.figure()
         plt.axis('scaled')
-        r = 0.12
-        plt.xlim([-r,r])
-        plt.ylim([-r,r])
+        plt.xlim([-0.06,0.06])
+        plt.ylim([-0.12,0.01])
         for lk in lks:
             for link in lk:
                 plt.plot(link[:,0],link[:,1],'k',linewidth=0.5)
