@@ -16,7 +16,8 @@ tr = np.sum([0.4191,0.015,0.0508,0.015,0.4191])/1000
 rho = prbm.rho
 pad = 0 # pad at ends for wider hinge
 step = 5e-5
-tfinal = 1
+tfinal = 1.5
+tsettle = 0.5
 
 # Fourbar
 #   b----c
@@ -123,6 +124,18 @@ def spring(ls,c):
 
     return lks
 
+def leg_spring(ang,l,c,ls,cs):
+    lk, tilt = leg(ang,l,c)
+    lks = spring(ls,cs)
+
+    ang_crank = pose(lk[0])[1]
+    rot = np.array([[np.cos(ang_crank),-np.sin(ang_crank)],[np.sin(ang_crank),np.cos(ang_crank)]])
+
+    lks = [(rot @ ps.T).T for ps in lks]
+
+    return lk+lks
+
+
 def motion(rots,x,plot=False):
     ang = x[0]
     l = x[1:6]
@@ -163,6 +176,34 @@ class RotSpringTorque(chrono.TorqueFunctor):
     def __call__(self,time,angle,vel,link):
         torque = -self.k*angle-self.b*vel
         return torque
+
+class MotorTorque(chrono.ChFunction):
+    def __init__(self, ground, crank, tau, b, range):
+        super().__init__()
+        self.ground = ground
+        self.crank = crank
+        self.tau = tau
+        self.b = b
+
+        rg = self.ground.GetRot().Q_to_Euler123().z-np.pi
+        rc = self.crank.GetRot().Q_to_Euler123().z
+        self.ang_limit = rc-rg-range
+
+    def Get_y(self, t):
+        rg = self.ground.GetRot().Q_to_Euler123().z-np.pi
+        wg = chrono.ChVectorD()
+        self.ground.GetRot_dt().Qdt_to_Wabs(wg,self.ground.GetRot())
+
+        rc = self.crank.GetRot().Q_to_Euler123().z
+        wc = chrono.ChVectorD()
+        self.crank.GetRot_dt().Qdt_to_Wabs(wc,self.crank.GetRot())
+
+        damper = -(wc.z-wg.z)*self.b
+        torque = -self.tau
+        if rc-rg > self.ang_limit:
+            return damper+torque
+        else:
+            return damper
 
 def stiffness(x,cs,plot=False):
     ls = x[:4]
@@ -275,6 +316,205 @@ def stiffness(x,cs,plot=False):
         application.AssetUpdateAll()
 
         application.SetTimestep(step)
+        # application.SetVideoframeSaveInterval(int(1/step/2000))
+        # application.SetVideoframeSave(True)
+
+        while application.GetDevice().run():
+            record()
+            application.BeginScene()
+            application.DrawAll()
+
+            # Draw axis for scale and orientation
+            s = 0.1
+            chronoirr.drawSegment(application.GetVideoDriver(),chrono.ChVectorD(0,0,0),chrono.ChVectorD(s,0,0),chronoirr.SColor(1,255,0,0))
+            chronoirr.drawSegment(application.GetVideoDriver(),chrono.ChVectorD(0,0,0),chrono.ChVectorD(0,s,0),chronoirr.SColor(1,0,255,0))
+            chronoirr.drawSegment(application.GetVideoDriver(),chrono.ChVectorD(0,0,0),chrono.ChVectorD(0,0,s),chronoirr.SColor(1,0,0,255))
+
+            application.DoStep()
+            application.EndScene()
+
+            if system.GetChTime() > tfinal: application.GetDevice().closeDevice()
+
+        # plt.figure()
+        # plt.axis('scaled')
+        # r = 0.12
+        # plt.xlim([-r,r])
+        # plt.ylim([-r,r])
+        # for link in lk:
+        #     plt.plot(link[:,0],link[:,1],'.-k')
+    else:
+        system.SetChTime(0)
+        while True:
+            record()
+            system.DoStepDynamics(step)
+            if system.GetChTime() > tfinal: break
+
+    return datum
+
+def jump(xm,xs,cs,plot=False):
+    ang = xm[0]
+    l = xm[1:6]
+    c1 = xm[6]
+
+    ls = xs[:4]
+    w = xs[4]
+    c2 = xs[5]
+
+    lk = leg_spring(ang,l,c1,ls,c2)
+
+    system = chrono.ChSystemNSC()
+    system.Set_G_acc(chrono.ChVectorD(0,-9.81,0))
+
+    chrono.ChCollisionModel.SetDefaultSuggestedEnvelope(0.001)
+    chrono.ChCollisionModel.SetDefaultSuggestedMargin(0.001)
+
+    contact_mat = chrono.ChMaterialSurfaceNSC()
+    contact_mat.SetFriction(0.8)
+    contact_mat.SetRestitution(0.3)
+
+    ground = chrono.ChBodyEasyBox(0.1,tr,wr,rho,True,True,contact_mat)
+    ground.SetPos(chrono.ChVectorD(lk[4][1,0],lk[4][1,1]-0.01,0))
+    ground.SetRot(chrono.Q_from_AngZ(0))
+    ground.SetBodyFixed(True)
+    system.Add(ground)
+
+    m = 0.02
+    wb = (m/rho)**(1/3)
+    body = chrono.ChBodyEasyBox(wb,wb,wb,rho,True)
+    body.SetPos(chrono.ChVectorD(0,0,0))
+    body.SetRot(chrono.Q_from_AngZ(0))
+    system.Add(body)
+
+    links = []
+    for i in range(len(lk)):
+        if i == 7:
+            tl = tf
+            wl = w
+        else:
+            tl = tr
+            wl = wr
+
+        pos, rot, length = pose(lk[i])
+
+        if i == 4:
+            link = chrono.ChBodyEasyBox(length,tl,wl,rho,True,True,contact_mat)
+        else:
+            link = chrono.ChBodyEasyBox(length,tl,wl,rho,True)
+        link.SetPos(chrono.ChVectorD(*pos,0))
+        link.SetRot(chrono.Q_from_AngZ(rot))
+        system.Add(link)
+        links.append(link)
+
+    # Joints and Springs
+    joints = []
+    springs = []
+    springTorques.clear()
+    for i in range(len(links)):
+        if i == 0:
+            bodies = [links[1]]
+            fixed = [False]
+        elif i == 1:
+            bodies = [links[2],links[4]]
+            fixed = [False,True]
+        elif i == 2:
+            bodies = [links[3]]
+            fixed = [False]
+        elif i == 3:
+            bodies = [links[0]]
+            fixed = [False]
+        elif i == 5:
+            bodies = [links[0],links[6]]
+            fixed = [True,False]
+        elif i == 6:
+            bodies = [links[7]]
+            fixed = [False]
+        elif i == 7:
+            bodies = [links[8]]
+            fixed = [False]
+        elif i == 8:
+            bodies = [links[5]]
+            fixed = [False]
+        else:
+            bodies = []
+            fixed = []
+
+        pos = lk[i][1,:]
+
+        if i == 6:
+            k = prbm.k(tf,ls[1],w)
+            b = 0.0005
+        else:
+            k = 0
+            b = 0
+
+        for bd,f in zip(bodies,fixed):
+            joint = chrono.ChLinkMateGeneric(True,True,True,True,True,f)
+            joint.Initialize(links[i],bd,chrono.ChFrameD(chrono.ChVectorD(*pos,0)))
+            system.Add(joint)
+            joints.append(joint)
+
+            if f: continue
+
+            try:
+                spring_link = chrono.ChLinkRotSpringCB()
+                spring_link.Initialize(links[i],bd,chrono.ChCoordsysD(chrono.ChVectorD(*pos,0)))
+                springTorques.append(RotSpringTorque(k,b))
+                spring_link.RegisterTorqueFunctor(springTorques[-1])
+                system.AddLink(spring_link)
+                springs.append(spring_link)
+            except AttributeError:
+                # Accommodate develop version of chrono
+                spring_link = chrono.ChLinkRSDA()
+                spring_link.Initialize(links[i],bd,chrono.ChCoordsysD(chrono.ChVectorD(*pos,0)))
+                spring_link.SetSpringCoefficient(k)
+                spring_link.SetDampingCoefficient(b)
+                system.AddLink(spring_link)
+                springs.append(spring_link)
+
+    joint_vertical = chrono.ChLinkMateGeneric(True,False,True,True,True,True)
+    joint_vertical.Initialize(ground,body,chrono.ChFrameD(chrono.ChVectorD(0,0,0)))
+    system.Add(joint_vertical)
+
+    joint_body = chrono.ChLinkMateGeneric(True,True,True,True,True,True)
+    joint_body.Initialize(body,links[3],chrono.ChFrameD(chrono.ChVectorD(0,0,0)))
+    system.Add(joint_body)
+
+    joint_crank = chrono.ChLinkMateGeneric(True,True,True,True,True,True)
+    joint_crank.Initialize(body,links[6],chrono.ChFrameD(chrono.ChVectorD(0,0,0)))
+    system.Add(joint_crank)
+
+    motor = chrono.ChLinkMotorRotationTorque()
+    motor.Initialize(links[6],links[3],chrono.ChFrameD(chrono.ChVectorD(0,0,0)))
+    motorTorque = MotorTorque(links[3],links[6],cs['tau'],cs['tau']/cs['v'],cs['dl']/cs['r'])
+    motor.SetTorqueFunction(motorTorque)
+    system.Add(motor)
+
+    datum = {
+        't': [],
+        'y': [],
+        'dy': [],
+        'fy': []
+    }
+    def record():
+        if system.GetChTime() < tsettle: return
+
+        joint_crank.SetDisabled(True)
+        datum['t'].append(system.GetChTime())
+        datum['y'].append(body.GetPos().y)
+        datum['dy'].append(body.GetPos_dt().y)
+        datum['fy'].append(ground.GetContactForce().y)
+
+    if plot:
+        application = chronoirr.ChIrrApp(system, "Jump", chronoirr.dimension2du(800, 600),chronoirr.VerticalDir_Y)
+        application.AddTypicalSky()
+        application.AddTypicalLights()
+        y_offset = 0
+        z_offset = -0.15
+        application.AddTypicalCamera(chronoirr.vector3df(0, y_offset, z_offset),chronoirr.vector3df(0, y_offset, 0))
+        application.AssetBindAll()
+        application.AssetUpdateAll()
+
+        application.SetTimestep(2e-5)
         # application.SetVideoframeSaveInterval(int(1/step/2000))
         # application.SetVideoframeSave(True)
 
