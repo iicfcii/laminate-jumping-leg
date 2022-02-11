@@ -11,11 +11,11 @@ ddtheta = (tau-dtheta*tau/v)/I
 x = Matrix([theta, dtheta])
 dx = Matrix([dtheta, ddtheta])
 
-def solve(x0, cs):
+def solve(cs):
     dx_f = lambdify(x,dx.subs(cs))
 
     def spin(t, x):
         return dx_f(*x).flatten()
 
-    sol = solve_ivp(spin, [0,1], x0, max_step=step_sim)
+    sol = solve_ivp(spin, [0,1], [0,0], max_step=step_sim)
     return sol
