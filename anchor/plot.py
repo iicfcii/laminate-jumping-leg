@@ -12,100 +12,80 @@ opt.obj_motion(xm,plot=True)
 
 springs = [
     {
-        'k': 30,
-        'a': 0.3,
-        'x': [0.06537370705668276, 0.023284162574029352, 0.07996217581835618, 0.010672120755835596, 0.01000126926198963, -0.024262242372249054]
+        'k': 60,
+        'a': 0.6,
+        'x': [0.022719555787812505, 0.023043317483742193, 0.02764335338361519, 0.018813653588212513, 0.012424828688381656, -0.6971887222380353]
     },
     {
-        'k': 30,
+        'k': 60,
         'a': 1,
-        'x': [0.010000735732930893, 0.06728554648775059, 0.02533001000361058, 0.0799974768780288, 0.010002220051112223, -0.69425169936661]
+        'x': [0.010001950482507765, 0.04039852621473746, 0.027650636112590013, 0.057829100440527456, 0.010006477628465193, -0.17417191968543333]
     },
     {
-        'k': 30,
-        'a': 1.5,
-        'x': [0.010012720468809341, 0.14991587258031291, 0.13002315167020076, 0.06158692662450015, 0.010000461060269049, 0.44561305776894566]
+        'k': 60,
+        'a': 1.4,
+        'x': [0.010003966955005869, 0.07850835338751745, 0.057705589820291635, 0.04314961391846071, 0.010002695668866359, 0.25747308323053986]
     }
 ]
 
-s = {
-    'k': 50,
-    'a': 1,
-    'x': [0.010006806410504887, 0.04627745489917783, 0.0281204554460621, 0.06394194293073623, 0.010000796922791955, -0.1384887158574043]
-}
-# s = springs[1]
-xs = s['x']
+for i,s in enumerate(springs):
+    cs = opt.cs
+    cs['k'] = s['k']
+    cs['a'] = s['a']
+    x = s['x']
+    ls = x[:4]
+    w = x[4]
+    c = x[5]
 
-cs = opt.cs
-cs['k'] = s['k']
-cs['a'] = s['a']
+    lk = fourbar.spring(ls,c)
+    sol = jump.solve(cs)
+    cs['dsm'] = -np.min(sol.y[1,:])
 
-datum = fourbar.jump(xm,xs,cs,plot=True)
-plt.figure()
-plt.plot(datum['t'],datum['y'])
-plt.figure()
-plt.plot(datum['t'],datum['dy'])
+    sdatum = fourbar.stiffness(x,cs,plot=False)
+    x_d = np.linspace(-cs['dsm'],0,50)
+    f_d = -jump.f_spring(x_d,cs)
+    f = np.interp(x_d,sdatum['x'],sdatum['f'])/cs['r']
+    x_d = -x_d
+    f_d = -f_d
+    f = -f
 
-# plt.figure()
-# for i,s in enumerate(springs):
-#     cs = opt.cs
-#     cs['k'] = s['k']
-#     cs['a'] = s['a']
-#     x = s['x']
-#
-#     ls = x[:4]
-#     w = x[4]
-#     c = x[5]
-#     lk = fourbar.spring(ls,c)
-#
-#     sol = jump.solve(cs)
-#     cs['dsm'] = -np.min(sol.y[1,:])
-#     x_d = np.linspace(-cs['dsm'],0,50)
-#     f_d = -jump.f_spring(x_d,cs)
-#
-#     datum = fourbar.stiffness(x,cs,plot=False)
-#     l = len(datum['x'])
-#
-#     x1 = datum['x'][:int(l/2)]
-#     x1.reverse()
-#     x1 = np.array(x1)*cs['r']
-#     x2 = datum['x'][int(l/2):]
-#     x2 = np.array(x2)*cs['r']
-#
-#     f1 = datum['f'][:int(l/2)]
-#     f1.reverse()
-#     f2 = datum['f'][int(l/2):]
-#     f1_i = np.interp(x_d,x1,f1)
-#     f2_i = np.interp(x_d,x2,f2)
-#     f = (f1_i+f2_i)/2/cs['r']
-#
-#     x_d = -x_d
-#     f_d = -f_d
-#     f = -f
-#
-#     c = 'C{:d}'.format(i+1)
-#
-#     plt.subplot(2,3,i+1)
-#     plt.axis('scaled')
-#     r = 0.01
-#     plt.xlim([-0.01,0.11])
-#     plt.ylim([-0.06,0.14])
-#     lines = []
-#     line_styles = [':','-','--','-']
-#     line_widths = [2,4,2,2]
-#     for j,link in enumerate(lk):
-#         lines.append(plt.plot(link[:,0],link[:,1],line_styles[j],color=c,linewidth=line_widths[j])[0])
-#     if i == 0: plt.legend(lines[:3],['input','ground','flexure'])
-#     if i == 0: plt.ylabel('y [m]')
-#     if i == 1: plt.xlabel('x [m]')
-#
-#     plt.subplot(212)
-#     plt.plot(x_d,f_d,color=c,label='a={:.1f}'.format(s['a']))
-#     plt.plot(x_d,f,'o',color=c,markerfacecolor='none')
-#     r = np.amax(f_d)
-#     plt.ylim([-0.1*r,1.1*r])
-#     plt.ylabel('torque/r [N]')
-#     plt.xlabel('angle*r [m]')
-#     plt.legend()
-#
+    jdatum = fourbar.jump(xm,x,cs,plot=False)
+    t_idx = np.nonzero(np.array(jdatum['t']) > sol.t[-1])[0][0]
+    t_j = jdatum['t'][:t_idx]
+    y_j = jdatum['y'][:t_idx]
+    dy_j = jdatum['dy'][:t_idx]
+
+    c = 'C{:d}'.format(i+1)
+
+    plt.figure('spring')
+    plt.subplot(2,3,i+1)
+    plt.axis('scaled')
+    r = 0.01
+    plt.xlim([-0.01,0.08])
+    plt.ylim([-0.03,0.06])
+    lines = []
+    line_styles = [':','-','--','-']
+    line_widths = [2,4,2,2]
+    for j,link in enumerate(lk):
+        lines.append(plt.plot(link[:,0],link[:,1],line_styles[j],color=c,linewidth=line_widths[j])[0])
+    if i == 0: plt.legend(lines[:3],['input','ground','flexure'])
+    if i == 0: plt.ylabel('y [m]')
+    if i == 1: plt.xlabel('x [m]')
+    if i != 0: plt.tick_params(axis='y',which='both',labelleft=False)
+    plt.title('a={:.1f}'.format(s['a']))
+
+    plt.subplot(212)
+    plt.plot(x_d,f_d,color=c)
+    plt.plot(x_d,f,'o',color=c,markerfacecolor='none')
+    r = np.amax(f_d)
+    plt.ylim([-0.1*r,1.1*r])
+    plt.ylabel('torque/r [N]')
+    plt.xlabel('angle*r [m]')
+
+    plt.figure('jump')
+    plt.plot(sol.t,sol.y[2,:],color=c)
+    plt.plot(t_j,dy_j,'o',color=c,markerfacecolor='none',markevery=100)
+    plt.ylabel('dy [m/s]')
+    plt.xlabel('t [s]')
+
 plt.show()

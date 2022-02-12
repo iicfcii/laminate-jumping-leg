@@ -9,13 +9,13 @@ import data
 
 cs = {
     'g': 9.81,
-    'mb': 0.03,
+    'mb': 0.025,
     'ml': 0.0001,
     'k': 50,
     'a': 1,
     'ds': 0.05,
-    'tau': 0.109872,
-    'v': 30.410616886749196,
+    'tau': 0.15085776558260747,
+    'v': 47.75363911922214,
     'dl': 0.06,
     'r': 0.05
 }
@@ -31,7 +31,7 @@ def sim(params):
 
 K = np.arange(10,110,10)
 R = np.arange(0.02,0.11,0.01)
-A = np.arange(0.2,1.71,0.1)
+A = np.arange(0.6,1.41,0.1)
 K, R, A = np.meshgrid(K,R,A)
 
 KRA = np.array([K.ravel(),R.ravel(),A.ravel()]).T

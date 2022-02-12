@@ -11,13 +11,9 @@ import os.path
 chrono.SetChronoDataPath(os.path.join(os.path.abspath('../chrono_data/'),''))
 
 tf = 16.5*2.54e-5
-wr = 0.02
+wr = 0.01
 tr = np.sum([0.4191,0.015,0.0508,0.015,0.4191])/1000
 rho = prbm.rho
-pad = 0 # pad at ends for wider hinge
-step = 5e-5
-tfinal = 1.5
-tsettle = 0.5
 
 # Fourbar
 #   b----c
@@ -206,6 +202,9 @@ class MotorTorque(chrono.ChFunction):
             return damper
 
 def stiffness(x,cs,plot=False):
+    step = 5e-5
+    tfinal = 1
+
     ls = x[:4]
     w = x[4]
     c = x[5]
@@ -302,6 +301,12 @@ def stiffness(x,cs,plot=False):
         'f': [],
     }
     def record():
+        # rg = links[0].GetRot().Q_to_Euler123().z+np.pi
+        # rc = links[1].GetRot().Q_to_Euler123().z
+        # dr = np.fmod(np.abs(rg-rc),2*np.pi)
+        # if dr > np.pi: dr = 2*np.pi-dr
+        # assert dr > 10/180*np.pi, 'Crank and ground are too close'
+
         datum['x'].append(motor.GetMotorRot())
         datum['f'].append(motor.GetMotorTorque())
 
@@ -349,9 +354,32 @@ def stiffness(x,cs,plot=False):
             system.DoStepDynamics(step)
             if system.GetChTime() > tfinal: break
 
+    # Reorder data
+    l = len(datum['x'])
+
+    x1 = datum['x'][:int(l/2)]
+    x1.reverse()
+    x1 = np.array(x1)*cs['r']
+    x2 = datum['x'][int(l/2):]
+    x2 = np.array(x2)*cs['r']
+
+    f1 = datum['f'][:int(l/2)]
+    f1.reverse()
+    f2 = datum['f'][int(l/2):]
+    f2_i = np.interp(x1,x2,f2)
+
+    f = (f1+f2_i)/2
+
+    datum['x'] = x1
+    datum['f'] = f
+
     return datum
 
 def jump(xm,xs,cs,plot=False):
+    step = 2e-5
+    tfinal = 1
+    tsettle = 0.5
+
     ang = xm[0]
     l = xm[1:6]
     c1 = xm[6]
@@ -499,7 +527,7 @@ def jump(xm,xs,cs,plot=False):
         if system.GetChTime() < tsettle: return
 
         joint_crank.SetDisabled(True)
-        datum['t'].append(system.GetChTime())
+        datum['t'].append(system.GetChTime()-tsettle)
         datum['y'].append(body.GetPos().y)
         datum['dy'].append(body.GetPos_dt().y)
         datum['fy'].append(ground.GetContactForce().y)
@@ -514,7 +542,7 @@ def jump(xm,xs,cs,plot=False):
         application.AssetBindAll()
         application.AssetUpdateAll()
 
-        application.SetTimestep(2e-5)
+        application.SetTimestep(step)
         # application.SetVideoframeSaveInterval(int(1/step/2000))
         # application.SetVideoframeSave(True)
 
