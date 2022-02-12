@@ -376,7 +376,7 @@ def stiffness(x,cs,plot=False):
     return datum
 
 def jump(xm,xs,cs,plot=False):
-    step = 2e-5
+    step = 1e-5
     tfinal = 1
     tsettle = 0.5
 
