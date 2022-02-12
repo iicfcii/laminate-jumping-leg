@@ -301,11 +301,11 @@ def stiffness(x,cs,plot=False):
         'f': [],
     }
     def record():
-        # rg = links[0].GetRot().Q_to_Euler123().z+np.pi
-        # rc = links[1].GetRot().Q_to_Euler123().z
-        # dr = np.fmod(np.abs(rg-rc),2*np.pi)
-        # if dr > np.pi: dr = 2*np.pi-dr
-        # assert dr > 10/180*np.pi, 'Crank and ground are too close'
+        rg = links[0].GetRot().Q_to_Euler123().z+np.pi
+        rc = links[1].GetRot().Q_to_Euler123().z
+        dr = np.fmod(np.abs(rg-rc),2*np.pi)
+        if dr > np.pi: dr = 2*np.pi-dr
+        assert dr > 10/180*np.pi, 'Crank and ground are too close'
 
         datum['x'].append(motor.GetMotorRot())
         datum['f'].append(motor.GetMotorTorque())
