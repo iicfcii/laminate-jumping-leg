@@ -8,7 +8,7 @@ from NatNetClient import NatNetClient
 import data
 
 
-CLIENT_ADDR = "192.168.1.166"
+CLIENT_ADDR = "192.168.1.188"
 SERVER_ADDR = "192.168.1.166"
 lm_pos = [0,0,0]
 
@@ -28,9 +28,9 @@ def receive_mocap_data(mocap_data):
     #         lm.id_num,
     #         lm.pos
     #     ))
-    
+
     global lm_pos
-    
+
     lm_list = mocap_data.labeled_marker_data.labeled_marker_list
     if len(lm_list) == 0: return
     lm_pos = lm_list[0].pos
@@ -46,12 +46,12 @@ if __name__ == '__main__':
     # streaming_client.connected(), 'Cannot connect.'
 
     motor = serial.Serial()
-    motor.port = 'COM7'
+    motor.port = '/dev/tty.usbserial-014343C7'
     motor.baudrate = 115200
     motor.open()
-    
+
     sensor = ati.init()
-    
+
     time.sleep(2)
 
     t = []
@@ -64,15 +64,15 @@ if __name__ == '__main__':
     while tc < 1:
         ati.single_read(sensor)
         f = ati.recv(sensor)
-    
+
         tc = time.time()-t0
-        
+
         t.append(tc)
         y.append(lm_pos[2])
         grf.append(f[2])
-    
+
     motor.write((0).to_bytes(1,'big',signed=True))
-    
+
     motor.close()
     streaming_client.shutdown()
 
