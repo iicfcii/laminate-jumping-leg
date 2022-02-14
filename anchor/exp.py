@@ -42,8 +42,7 @@ if __name__ == '__main__':
     streaming_client.set_use_multicast(True)
     streaming_client.set_print_level(0)
     streaming_client.mocap_data_listener = receive_mocap_data
-    streaming_client.run(), 'Cannot start client.'
-    # streaming_client.connected(), 'Cannot connect.'
+    streaming_client.run()
 
     motor = serial.Serial()
     motor.port = '/dev/tty.usbserial-014343C7'
@@ -58,12 +57,16 @@ if __name__ == '__main__':
     y = []
     grf = []
 
-    motor.write((127).to_bytes(1,'big',signed=True))
+    jump = False
     tc = 0
     t0 = time.time()
-    while tc < 1:
+    while tc < 1.5:
         ati.single_read(sensor)
         f = ati.recv(sensor)
+
+        if tc > 0.5 and not jump:
+            motor.write((127).to_bytes(1,'big',signed=True))
+            jump = True
 
         tc = time.time()-t0
 
@@ -76,7 +79,7 @@ if __name__ == '__main__':
     motor.close()
     streaming_client.shutdown()
 
-    file_name = '../data/test.csv'
+    file_name = '../data/leg_40_1_3.csv'
     data.write(
         file_name,
         ['t','y','grf'],
