@@ -79,7 +79,7 @@ if __name__ == '__main__':
     motor.close()
     streaming_client.shutdown()
 
-    file_name = '../data/leg_40_1_3.csv'
+    file_name = '../data/test.csv'
     data.write(
         file_name,
         ['t','y','grf'],
