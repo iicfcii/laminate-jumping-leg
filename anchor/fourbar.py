@@ -383,7 +383,7 @@ class MotorTorqueDC(chrono.ChFunction):
             return damping
 
 def jump(xm,xs,cs,plot=False):
-    step = 1e-6
+    step = 10e-6
     tfinal = 0.8
     tsettle = 0.4
 
@@ -520,10 +520,10 @@ def jump(xm,xs,cs,plot=False):
 
     cs_m = {
         'V': 9,
-        'K': 1/0.1*9.81/1000,
-        'b': 0.0609658891195507,
-        'R': 0.14311864123002638,
-        'L': 0.03306177446894332,
+        'b': 0.0010859700645237166,
+        'K': 0.12241858043114288,
+        'R': 7.3,
+        'L': 580e-6,
         'step': step,
         'tsettle': tsettle
     }

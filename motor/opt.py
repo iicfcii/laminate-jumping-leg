@@ -8,13 +8,10 @@ import spin
 import spin_dc
 import data
 
-TAU = 1.6*9.81/100
-V = 330/60*2*np.pi
 I_LOAD = 0.04*0.09**2+25399/1e3/1e6
-K = 1/0.1*9.81/1000
+R = 7.3
+L = 580e-6
 VOLTS = [6,9]
-
-DC = True
 
 def read():
     ti = np.linspace(0,1,100)
@@ -74,29 +71,18 @@ def obj(x,plot=False):
         't': exp['t']
     }
     for v in VOLTS:
-        if not DC:
-            r = v/9
-            cs = {
-                'tau': x[0]*r,
-                'v': x[1]*r,
-                'I': I_LOAD
-            }
-            sol = spin.solve(cs)
-            t = sol.t
-            w = sol.y[1,:]
-        else:
-            r = v/9
-            cs = {
-                'V': v,
-                'J': I_LOAD,
-                'K': 1/0.1*9.81/1000,
-                'b': x[0],
-                'R': x[1],
-                'L': x[2]
-            }
-            sol = spin_dc.solve(cs)
-            t = sol.t
-            w = sol.y[0,:]
+        r = v/9
+        cs = {
+            'V': v,
+            'J': I_LOAD,
+            'b': x[0],
+            'K': x[1], # 1/0.1*9.81/1000,
+            'R': R,
+            'L': L
+        }
+        sol = spin_dc.solve(cs)
+        t = sol.t
+        w = sol.y[0,:]
 
         wi = np.interp(exp['t'],t,w)
         e += np.sqrt(np.sum((wi-exp[v])**2)/len(exp['t']))
@@ -115,18 +101,12 @@ def cb(x,convergence=0):
     print('x',x)
     print('Convergence',convergence)
 
-if not DC:
-    bounds=[(TAU*0.5,TAU*1.5),(V*0.5,V*1.5)]
-else:
-    bounds=[(0,0.1),(0,1),(0,1)]
+bounds=[(0,0.01),(0.05,0.15)]
+x = [0.0010859700645237166, 0.12241858043114288]
 
 if __name__ == '__main__':
-    x = None
-    if not DC:
-        x = [0.15085776558260747, 47.75363911922214]
-    else:
-        x = [0.0609658891195507, 0.14311864123002638, 0.03306177446894332]
-
+    # x = None
+    
     if x is None:
         res = differential_evolution(
             obj,
