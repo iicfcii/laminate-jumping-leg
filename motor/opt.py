@@ -14,7 +14,7 @@ I_LOAD = 0.04*0.09**2+25399/1e3/1e6
 K = 1/0.1*9.81/1000
 VOLTS = [6,9]
 
-DC = False
+DC = True
 
 def read():
     ti = np.linspace(0,1,100)
@@ -96,7 +96,7 @@ def obj(x,plot=False):
             }
             sol = spin_dc.solve(cs)
             t = sol.t
-            w = sol.y[1,:]
+            w = sol.y[0,:]
 
         wi = np.interp(exp['t'],t,w)
         e += np.sqrt(np.sum((wi-exp[v])**2)/len(exp['t']))
@@ -125,7 +125,7 @@ if __name__ == '__main__':
     if not DC:
         x = [0.15085776558260747, 47.75363911922214]
     else:
-        x = [0.05985932470647342, 0.026312113633061407, 0.021797921521118535]
+        x = [0.0609658891195507, 0.14311864123002638, 0.03306177446894332]
 
     if x is None:
         res = differential_evolution(

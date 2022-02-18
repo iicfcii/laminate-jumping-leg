@@ -173,34 +173,6 @@ class RotSpringTorque(chrono.TorqueFunctor):
         torque = -self.k*angle-self.b*vel
         return torque
 
-class MotorTorque(chrono.ChFunction):
-    def __init__(self, ground, crank, tau, b, range):
-        super().__init__()
-        self.ground = ground
-        self.crank = crank
-        self.tau = tau
-        self.b = b
-
-        rg = self.ground.GetRot().Q_to_Euler123().z-np.pi
-        rc = self.crank.GetRot().Q_to_Euler123().z
-        self.ang_limit = rc-rg-range
-
-    def Get_y(self, t):
-        rg = self.ground.GetRot().Q_to_Euler123().z-np.pi
-        wg = chrono.ChVectorD()
-        self.ground.GetRot_dt().Qdt_to_Wabs(wg,self.ground.GetRot())
-
-        rc = self.crank.GetRot().Q_to_Euler123().z
-        wc = chrono.ChVectorD()
-        self.crank.GetRot_dt().Qdt_to_Wabs(wc,self.crank.GetRot())
-
-        damper = -(wc.z-wg.z)*self.b
-        torque = -self.tau
-        if rc-rg > self.ang_limit:
-            return damper+torque
-        else:
-            return damper
-
 def stiffness(x,cs,plot=False):
     step = 5e-5
     tfinal = 1
@@ -375,9 +347,45 @@ def stiffness(x,cs,plot=False):
 
     return datum
 
+class MotorTorqueDC(chrono.ChFunction):
+    def __init__(self,ground,crank,cs,range):
+        super().__init__()
+        self.ground = ground
+        self.crank = crank
+        self.cs = cs
+
+        rg = self.ground.GetRot().Q_to_Euler123().z-np.pi
+        rc = self.crank.GetRot().Q_to_Euler123().z
+        self.ang_limit = rc-rg-range
+
+        self.i = 0
+
+    def Get_y(self, t):
+        rg = self.ground.GetRot().Q_to_Euler123().z-np.pi
+        wg = chrono.ChVectorD()
+        self.ground.GetRot_dt().Qdt_to_Wabs(wg,self.ground.GetRot())
+
+        rc = self.crank.GetRot().Q_to_Euler123().z
+        wc = chrono.ChVectorD()
+        self.crank.GetRot_dt().Qdt_to_Wabs(wc,self.crank.GetRot())
+
+        dtheta = wc.z-wg.z
+
+        if t > self.cs['tsettle']:
+            di = (self.cs['V']-self.cs['K']*dtheta-self.cs['R']*self.i)/self.cs['L']
+            self.i = di*self.cs['step']+self.i
+            torque = -self.cs['K']*self.i-self.cs['b']*dtheta
+        else:
+            torque = 0
+
+        if rc-rg > self.ang_limit:
+            return torque
+        else:
+            return 0
+
 def jump(xm,xs,cs,plot=False):
-    step = 1e-5
-    tfinal = 1
+    step = 2e-6
+    tfinal = 1.0
     tsettle = 0.5
 
     ang = xm[0]
@@ -470,7 +478,7 @@ def jump(xm,xs,cs,plot=False):
 
         if i == 6:
             k = prbm.k(tf,ls[1],w)
-            b = 0.0005
+            b = 0.001
         else:
             k = 0
             b = 0
@@ -511,9 +519,18 @@ def jump(xm,xs,cs,plot=False):
     joint_crank.Initialize(body,links[6],chrono.ChFrameD(chrono.ChVectorD(0,0,0)))
     system.Add(joint_crank)
 
+    cs_m = {
+        'V': 9,
+        'K': 1/0.1*9.81/1000,
+        'b': 0.0609658891195507,
+        'R': 0.14311864123002638,
+        'L': 0.03306177446894332,
+        'step': step,
+        'tsettle': tsettle
+    }
     motor = chrono.ChLinkMotorRotationTorque()
     motor.Initialize(links[6],links[3],chrono.ChFrameD(chrono.ChVectorD(0,0,0)))
-    motorTorque = MotorTorque(links[3],links[6],cs['tau'],cs['tau']/cs['v'],cs['dl']/cs['r'])
+    motorTorque = MotorTorqueDC(links[3],links[6],cs_m,cs['dl']/cs['r'])
     motor.SetTorqueFunction(motorTorque)
     system.Add(motor)
 

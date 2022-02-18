@@ -42,32 +42,32 @@ def read(cs,n):
     return t,dy,dy_raw
 
 lines = []
-for i,s in enumerate(opt.springs[3:6]):
+for i,s in enumerate(opt.springs[3:4]):
     cs = opt.cs
     cs['k'] = s['k']
     cs['a'] = s['a']
 
     # Simulation result
-    sol = jump.solve(cs)
-    t_t = sol.t
-    dy_t = sol.y[2,:]
+    # sol = jump.solve(cs)
+    # t_t = sol.t
+    # dy_t = sol.y[2,:]
 
-    # datum = fourbar.jump(opt.xm,s['x'],cs,plot=False)
-    # tf = np.nonzero(np.array(datum['t']) > t[-1])[0][0]
-    # t_a = datum['t'][:tf]
-    # dy_a = datum['dy'][:tf]
+    datum = fourbar.jump(opt.xm,s['x'],cs,plot=True)
+    tf = np.nonzero(np.array(datum['t']) > 0.1)[0][0]
+    t_a = datum['t'][:tf]
+    dy_a = datum['dy'][:tf]
 
     color = 'C{:d}'.format(i)
     for n in [1,2,3]:
         t,dy,dy_raw = read(cs,n)
         ls = plt.plot(t,dy,color=color)
         if n == 1: lines.append(ls[0])
-    lines.append(plt.plot(t_t,dy_t,'--',color=color)[0])
-    # lines.append(plt.plot(t_a,dy_a,'-.',color=color)[0])
+    # lines.append(plt.plot(t_t,dy_t,'--',color=color)[0])
+    lines.append(plt.plot(t_a,dy_a,'-.',color=color)[0])
 
-type_legend = plt.legend([lines[0],lines[1]],['exp','slip'],loc='upper right')
-plt.legend([lines[0],lines[2],lines[4]],['40','60','80'],loc='lower right',title='k [N/m]')
-plt.gca().add_artist(type_legend)
+# type_legend = plt.legend([lines[0],lines[1]],['exp','slip'],loc='upper right')
+# plt.legend([lines[0],lines[2],lines[4]],['40','60','80'],loc='lower right',title='k [N/m]')
+# plt.gca().add_artist(type_legend)
 plt.ylabel('dy [m/s]')
 plt.xlabel('Time [s]')
 plt.show()
