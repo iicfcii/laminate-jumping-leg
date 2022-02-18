@@ -361,6 +361,8 @@ class MotorTorqueDC(chrono.ChFunction):
         self.i = 0
 
     def Get_y(self, t):
+        if t < self.cs['tsettle']: return 0
+
         rg = self.ground.GetRot().Q_to_Euler123().z-np.pi
         wg = chrono.ChVectorD()
         self.ground.GetRot_dt().Qdt_to_Wabs(wg,self.ground.GetRot())
@@ -370,23 +372,20 @@ class MotorTorqueDC(chrono.ChFunction):
         self.crank.GetRot_dt().Qdt_to_Wabs(wc,self.crank.GetRot())
 
         dtheta = wc.z-wg.z
-
-        if t > self.cs['tsettle']:
-            di = (self.cs['V']-self.cs['K']*dtheta-self.cs['R']*self.i)/self.cs['L']
-            self.i = di*self.cs['step']+self.i
-            torque = -self.cs['K']*self.i-self.cs['b']*dtheta
-        else:
-            torque = 0
+        di = (self.cs['V']-self.cs['K']*dtheta-self.cs['R']*self.i)/self.cs['L']
+        self.i = di*self.cs['step']+self.i
+        torque = -self.cs['K']*self.i
+        damping = -self.cs['b']*dtheta
 
         if rc-rg > self.ang_limit:
-            return torque
+            return torque+damping
         else:
-            return 0
+            return damping
 
 def jump(xm,xs,cs,plot=False):
-    step = 2e-6
-    tfinal = 1.0
-    tsettle = 0.5
+    step = 1e-6
+    tfinal = 0.8
+    tsettle = 0.4
 
     ang = xm[0]
     l = xm[1:6]
@@ -478,7 +477,7 @@ def jump(xm,xs,cs,plot=False):
 
         if i == 6:
             k = prbm.k(tf,ls[1],w)
-            b = 0.001
+            b = 0.0002
         else:
             k = 0
             b = 0

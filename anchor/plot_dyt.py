@@ -9,17 +9,17 @@ import jump
 import opt
 import data
 
-sos = butter(10,10,'lowpass',fs=360,output='sos')
+sos = butter(5,20,'lowpass',fs=360,output='sos')
 
-def read(cs,n):
-    d = data.read('../data/leg_{:d}_{:d}_{:d}.csv'.format(cs['k'],int(cs['a']*10),n))
+def read(k,a,n):
+    d = data.read('../data/leg_{:d}_{:d}_{:d}.csv'.format(k,int(a*10),n))
     t = np.array(d['t'])
     y = np.array(d['y'])
     grf = np.array(d['grf'])
 
     # Select time range
-    ti = np.nonzero(t > 0.51)[0][0]
-    tf = np.nonzero(t > 0.7)[0][0]
+    ti = np.nonzero(t > 0.503)[0][0]
+    tf = np.nonzero(t > 1.0)[0][0]
     t = t[ti:tf]
     y = y[ti:tf]
 
@@ -34,39 +34,36 @@ def read(cs,n):
     dy = sosfiltfilt(sos,dy_raw)
 
     # Select end time again after filter
-    tf = np.nonzero(t > 0.1)[0][0]
-    t = t[:tf]
-    dy_raw = dy_raw[:tf]
-    dy = dy[:tf]
+    ti = np.linspace(0,0.1,50)
+    dy_rawi = np.interp(ti,t,dy_raw)
+    dyi = np.interp(ti,t,dy)
 
-    return t,dy,dy_raw
+    return ti,dyi,dy_rawi
 
 lines = []
-for i,s in enumerate(opt.springs[3:4]):
-    cs = opt.cs
-    cs['k'] = s['k']
-    cs['a'] = s['a']
+for i,s in enumerate(opt.springs[3:6]):
+    k = s['k']
+    a = s['a']
 
-    # Simulation result
-    # sol = jump.solve(cs)
-    # t_t = sol.t
-    # dy_t = sol.y[2,:]
-
-    datum = fourbar.jump(opt.xm,s['x'],cs,plot=True)
+    datum = data.read('../data/leg_{:d}_{:d}_full_1.csv'.format(k,int(a*10)))
     tf = np.nonzero(np.array(datum['t']) > 0.1)[0][0]
     t_a = datum['t'][:tf]
     dy_a = datum['dy'][:tf]
 
     color = 'C{:d}'.format(i)
+    dys = []
     for n in [1,2,3]:
-        t,dy,dy_raw = read(cs,n)
-        ls = plt.plot(t,dy,color=color)
-        if n == 1: lines.append(ls[0])
-    # lines.append(plt.plot(t_t,dy_t,'--',color=color)[0])
-    lines.append(plt.plot(t_a,dy_a,'-.',color=color)[0])
+        t,dy,dy_raw = read(k,a,n)
+        dys.append(dy)
+        # plt.plot(t,dy_raw,color=color)
+        # ls = plt.plot(t,dy,color=color)
+        # if n == 1: lines.append(ls[0])
+    plt.fill_between(t, np.amax(dys,axis=0), np.amin(dys,axis=0), alpha=.5, linewidth=0)
+    lines.append(plt.plot(t,np.average(dys,axis=0),'-',color=color)[0])
+    lines.append(plt.plot(t_a,dy_a,'--',color=color)[0])
 
-# type_legend = plt.legend([lines[0],lines[1]],['exp','slip'],loc='upper right')
-# plt.legend([lines[0],lines[2],lines[4]],['40','60','80'],loc='lower right',title='k [N/m]')
+# type_legend = plt.legend([lines[0],lines[1],lines[2]],['exp','SLIP','full'],loc='upper right')
+# plt.legend([lines[0],lines[3],lines[6]],['40','60','80'],loc='lower right',title='k [N/m]')
 # plt.gca().add_artist(type_legend)
 plt.ylabel('dy [m/s]')
 plt.xlabel('Time [s]')
