@@ -9,7 +9,7 @@ import spin_dc
 import data
 
 I_LOAD = 0.04*0.09**2+25399/1e3/1e6
-R = 7.3
+R = 4
 L = 580e-6
 VOLTS = [6,9]
 
@@ -76,7 +76,7 @@ def obj(x,plot=False):
             'V': v,
             'J': I_LOAD,
             'b': x[0],
-            'K': x[1], # 1/0.1*9.81/1000,
+            'K': x[1],
             'R': R,
             'L': L
         }
@@ -102,11 +102,10 @@ def cb(x,convergence=0):
     print('Convergence',convergence)
 
 bounds=[(0,0.01),(0.05,0.15)]
-x = [0.0010859700645237166, 0.12241858043114288]
+x = None
+x = [0.0020102339366792265, 0.06690302083110711]
 
 if __name__ == '__main__':
-    # x = None
-    
     if x is None:
         res = differential_evolution(
             obj,

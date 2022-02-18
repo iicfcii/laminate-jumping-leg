@@ -1,5 +1,6 @@
-import sys
+import sys, os
 sys.path.append('../template')
+sys.path.append('../utils')
 
 import numpy as np
 import matplotlib.pyplot as plt
@@ -9,6 +10,7 @@ import jump
 import opt
 import data
 
+cwd = os.getcwd()
 for i,s in enumerate(opt.springs[3:6]):
     cs = opt.cs
     cs['k'] = s['k']
@@ -19,11 +21,15 @@ for i,s in enumerate(opt.springs[3:6]):
     # t_t = sol.t
     # dy_t = sol.y[2,:]
 
-    datum = fourbar.jump(opt.xm,s['x'],cs,plot=True)
+    datum = fourbar.jump(opt.xm,s['x'],cs,plot=False)
 
-    file_name = '../data/leg_{:d}_{:d}_full_2.csv'.format(cs['k'],int(cs['a'])*10)
+    # Note: cwd seems to change after chrono vis in Mac
+    file_name = os.path.join(
+        cwd,
+        '../data/leg_{:d}_{:d}_full.csv'.format(cs['k'],int(cs['a'])*10)
+    )
     data.write(
         file_name,
-        ['t','y','dy','fy'],
-        [datum['t'],datum['y'],datum['dy'],datum['fy']]
+        list(datum.keys()),
+        list(datum.values())
     )

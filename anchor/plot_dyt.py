@@ -18,7 +18,7 @@ def read(k,a,n):
     grf = np.array(d['grf'])
 
     # Select time range
-    ti = np.nonzero(t > 0.503)[0][0]
+    ti = np.nonzero(t > 0.5)[0][0]
     tf = np.nonzero(t > 1.0)[0][0]
     t = t[ti:tf]
     y = y[ti:tf]
@@ -45,7 +45,7 @@ for i,s in enumerate(opt.springs[3:6]):
     k = s['k']
     a = s['a']
 
-    datum = data.read('../data/leg_{:d}_{:d}_full_1.csv'.format(k,int(a*10)))
+    datum = data.read('../data/leg_{:d}_{:d}_full.csv'.format(k,int(a*10)))
     tf = np.nonzero(np.array(datum['t']) > 0.1)[0][0]
     t_a = datum['t'][:tf]
     dy_a = datum['dy'][:tf]

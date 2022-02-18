@@ -371,11 +371,11 @@ class MotorTorqueDC(chrono.ChFunction):
         wc = chrono.ChVectorD()
         self.crank.GetRot_dt().Qdt_to_Wabs(wc,self.crank.GetRot())
 
-        dtheta = wc.z-wg.z
+        dtheta = -(wc.z-wg.z)
         di = (self.cs['V']-self.cs['K']*dtheta-self.cs['R']*self.i)/self.cs['L']
         self.i = di*self.cs['step']+self.i
         torque = -self.cs['K']*self.i
-        damping = -self.cs['b']*dtheta
+        damping = self.cs['b']*dtheta
 
         if rc-rg > self.ang_limit:
             return torque+damping
@@ -477,7 +477,7 @@ def jump(xm,xs,cs,plot=False):
 
         if i == 6:
             k = prbm.k(tf,ls[1],w)
-            b = 0.0002
+            b = 0.0005
         else:
             k = 0
             b = 0
@@ -520,9 +520,9 @@ def jump(xm,xs,cs,plot=False):
 
     cs_m = {
         'V': 9,
-        'b': 0.0010859700645237166,
-        'K': 0.12241858043114288,
-        'R': 7.3,
+        'b': 0.0020102339366792265,
+        'K': 0.06690302083110711,
+        'R': 4,
         'L': 580e-6,
         'step': step,
         'tsettle': tsettle
@@ -537,7 +537,8 @@ def jump(xm,xs,cs,plot=False):
         't': [],
         'y': [],
         'dy': [],
-        'fy': []
+        'fy': [],
+        'i': []
     }
     def record():
         if system.GetChTime() < tsettle: return
@@ -547,6 +548,7 @@ def jump(xm,xs,cs,plot=False):
         datum['y'].append(body.GetPos().y)
         datum['dy'].append(body.GetPos_dt().y)
         datum['fy'].append(ground.GetContactForce().y)
+        datum['i'].append(motorTorque.i)
 
     if plot:
         application = chronoirr.ChIrrApp(system, "Jump", chronoirr.dimension2du(800, 600),chronoirr.VerticalDir_Y)
