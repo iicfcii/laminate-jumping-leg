@@ -9,9 +9,9 @@ import spin_dc
 import data
 
 I_LOAD = 0.04*0.09**2+25399/1e3/1e6
-R = 4
+R = 10
 L = 580e-6
-VOLTS = [6,9]
+VOLTS = [3,6,9]
 
 def read():
     ti = np.linspace(0,1,100)
@@ -22,13 +22,17 @@ def read():
         dthetai = []
         for trial in [1,2]:
             # Exp motor data
-            d = data.read('../data/HPCB100_{:d}V_{:d}.csv'.format(v,trial),skip=6)
-            t = np.array(d['Time (Seconds)'])
-            x = np.array(d['X'])
-            x1 = np.array(d['X1'])
-            z = np.array(d['Z'])
-            z1 = np.array(d['Z1'])
-            theta = np.arctan2(z1-z,x1-x)
+            d = data.read('../data/hpcb100_{:d}V_1_{:d}.csv'.format(v,trial))
+            t = np.array(d['t'])
+            t1 = np.array(d['t1'])
+
+            assert np.sum(t-t1) == 0
+
+            x = np.array(d['x'])
+            x1 = np.array(d['x1'])
+            y = np.array(d['y'])
+            y1 = np.array(d['y1'])
+            theta = np.arctan2(y1-y,x1-x)
             dtheta = (theta[1:]-theta[:-1])/(t[1:]-t[:-1])
             t = t[1:]
 
@@ -39,12 +43,12 @@ def read():
 
             # Remove ddtehta jump
             ddtheta = np.concatenate(([0],(dtheta[1:]-dtheta[:-1])/(t[1:]-t[:-1])))
-            not_ddtheta_jumps = np.abs(ddtheta) < 1000
+            not_ddtheta_jumps = np.abs(ddtheta) < 500
             dtheta = dtheta[not_ddtheta_jumps]
             t = t[not_ddtheta_jumps]
 
             # Find start index
-            i = np.nonzero(dtheta < -0.1)[0][0]
+            i = np.nonzero(t > 0.51)[0][0]
             dtheta = dtheta[i:]
             t = t[i:]
             t = t-t[0]
@@ -60,6 +64,8 @@ def read():
             dthetai.append(np.interp(ti,t,dtheta))
 
         dthetai = np.sum(dthetai,axis=0)/len(dthetai)
+        # plt.plot(ti,dthetai)
+        # plt.show()
         exp[v] = dthetai
     return exp
 
@@ -67,11 +73,8 @@ exp = read()
 
 def obj(x,plot=False):
     e = 0
-    sim = {
-        't': exp['t']
-    }
+    sim = {}
     for v in VOLTS:
-        r = v/9
         cs = {
             'V': v,
             'J': I_LOAD,
@@ -86,24 +89,27 @@ def obj(x,plot=False):
 
         wi = np.interp(exp['t'],t,w)
         e += np.sqrt(np.sum((wi-exp[v])**2)/len(exp['t']))
-        sim[v] = wi
+        sim[v] = sol
     e = e/len(VOLTS)
 
     if plot:
         plt.figure()
         for v in VOLTS:
             plt.plot(exp['t'],exp[v])
-            plt.plot(sim['t'],sim[v])
+            plt.plot(sim[v].t,sim[v].y[0,:])
 
+        plt.figure()
+        for v in VOLTS:
+            plt.plot(sim[v].t,sim[v].y[1,:])
     return e
 
 def cb(x,convergence=0):
     print('x',x)
     print('Convergence',convergence)
 
-bounds=[(0,0.01),(0.05,0.15)]
+bounds=[(0,0.01),(0,0.2)]
 x = None
-x = [0.0020102339366792265, 0.06690302083110711]
+x = [0.0009869882154543786, 0.13423431546352482]
 
 if __name__ == '__main__':
     if x is None:

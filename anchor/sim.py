@@ -21,7 +21,7 @@ for i,s in enumerate(opt.springs[3:6]):
     # t_t = sol.t
     # dy_t = sol.y[2,:]
 
-    datum = fourbar.jump(opt.xm,s['x'],cs,plot=False)
+    datum = fourbar.jump(opt.xm,s['x'],cs,plot=True)
 
     # Note: cwd seems to change after chrono vis in Mac
     file_name = os.path.join(
