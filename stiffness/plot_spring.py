@@ -14,29 +14,29 @@ def read(*args):
         name = '../data/test.csv'
     else:
         k,a,n = args
-        name = '../data/stiffness_{:d}_{:d}_{:d}.csv'.format(k,int(a*10),n)
+        name = '../data/stiffness_s_{:d}_{:d}_{:d}.csv'.format(k,int(a*10),n)
     d = data.read(name)
     t = np.array(d['t'])
-    z = np.array(d['z'])
-    fz = np.array(d['fz'])
+    rz = np.array(d['rz'])
+    tz = np.array(d['tz'])
 
     # Force bias
     to = np.nonzero(t > 1)[0][0]
-    fz_offset = np.average(fz[:to])
+    tz_offset = np.average(tz[:to])
 
     # Select inital point
-    fz = -(fz-fz_offset)
-    i = np.nonzero(fz > 0.005)[0][0]
-    fz = fz[i:]
-    z = z[i:]
-    z = -(z-z[0])
+    tz = tz-tz_offset
+    i = np.nonzero(tz > 0.0001)[0][0]
+    tz = tz[i:]
+    rz = rz[i:]
+    rz = -(rz-rz[0])
 
     # Fit
-    k = np.linalg.lstsq(z.reshape((-1,1)),fz,rcond=None)[0][0]
-    zp = np.arange(0,0.04,0.001)
-    fzp = zp*k
+    k = np.linalg.lstsq(rz.reshape((-1,1)),tz,rcond=None)[0][0]
+    rzp = np.arange(0,0.801,0.02)
+    tzp = rzp*k
 
-    return z,fz,zp,fzp,k
+    return rz,tz,rzp,tzp,k
 
 if __name__ == '__main__':
     plt.figure()
@@ -45,6 +45,6 @@ if __name__ == '__main__':
 
         c = 'C{:d}'.format(i)
         plt.plot(z,fz,'.',color=c)
-        plt.plot(zp,fzp,color=c,label='{:.1f}'.format(kp))
+        plt.plot(zp,fzp,color=c,label='{:.4f}'.format(kp))
     plt.legend()
     plt.show()

@@ -80,7 +80,7 @@ if __name__ == '__main__':
         [t,z,fz]
     )
 
-    z,fz,zp,fzp,kp = read()
-    plt.plot(z,fz,'.')
-    plt.plot(zp,fzp)
+    rz,tz,rzp,tzp,k = read()
+    plt.plot(rz,tz,'.')
+    plt.plot(rzp,rzp)
     plt.show()
