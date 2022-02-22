@@ -52,7 +52,7 @@ def sim(x,r,plot=False):
         plt.xlim([-0.02,0.08])
         plt.ylim([-0.05,0.05])
 
-        for lk in [lks[0],lks[-1]]:
+        for lk in [lks[int(n)] for n in np.linspace(0,len(lks)-1,3)]:
             for link in lk:
                 plt.plot(link[:,0],link[:,1],'.-k')
 
