@@ -4,13 +4,15 @@ sys.path.append('../template')
 import numpy as np
 import matplotlib.pyplot as plt
 from scipy.optimize import differential_evolution, NonlinearConstraint
-import fourbar
+import geom
+import motion
+import stiffness
 import jump
 
 def obj_motion(x,plot=False):
-    rots = np.linspace(0,-cs['dl']/cs['r'],10)+x[0]
+    rots = np.linspace(0,-cs['dl']/cs['r'],50)+x[0]
     try:
-        xs,ys = fourbar.motion(rots,x,plot=plot)
+        xs,ys = motion.sim(rots,x,plot=plot)
     except AssertionError:
         return 1
 
@@ -35,26 +37,25 @@ def cb(x,convergence=0):
 
 def obj_stiffness(x,m,plot=False):
     try:
-        datum = fourbar.stiffness(x,cs,plot=plot)
+        rz,tz = stiffness.sim(x,cs['dsm']/cs['r'],plot=plot)
     except AssertionError:
         return 10
 
-    x_d = np.linspace(-cs['dsm'],0,50)
+    x_d = np.linspace(0,cs['dsm'],50)
     f_d = -jump.f_spring(x_d,cs)
-    f = np.interp(x_d,datum['x'],datum['f'])/cs['r']
+    f = np.interp(x_d,rz*cs['r'],tz/cs['r'])
     e = np.sqrt(np.sum((f-f_d)**2)/f_d.shape[0])
 
     mass_spring = (
-        (x[0]+x[2]+x[3])*fourbar.tr*fourbar.wr*fourbar.rho+
-        x[1]*fourbar.tf*x[4]*fourbar.rho
+        (x[0]+x[2]+x[3])*geom.tr*geom.wr*geom.rho+
+        x[1]*geom.tf*x[4]*geom.rho
     )
     em = np.abs(m-mass_spring)
 
     if plot:
         plt.figure()
-        plt.plot(-x_d,-f_d)
-        plt.plot(-x_d,-f,'--')
-        # plt.plot(-np.array(datum['x'])*cs['r'],-np.array(datum['f'])/cs['r'],'--')
+        plt.plot(x_d,f_d)
+        plt.plot(x_d,f,'--')
         print('mass error',em)
 
     return e+5*em
@@ -64,7 +65,7 @@ cs = {
     'mb': 0.025,
     'ml': 0.0001,
     'k': 80,
-    'a': 1.4,
+    'a': 1,
     'ds': 0.05,
     'tau': 0.15085776558260747,
     'v': 47.75363911922214,
@@ -74,64 +75,14 @@ cs = {
 sol = jump.solve(cs)
 cs['dsm'] = -np.min(sol.y[1,:]) # spring travel range that needs to be matched
 bounds_motion = [(-np.pi,np.pi)]+[(0.02,0.06)]*5+[(-1,1)]*1
-bounds_stiffness = [(0.01,0.15)]*4+[(0.01,0.03)]+[(-1,1)]*1
+bounds_stiffness = [(0.01,0.15)]*4+[(0.01,0.02)]+[(-1,1)]*1
 
-xm = [2.6935314437637747, 0.030244462243688645, 0.04668319649977162, 0.02002235749858264, 0.05998841948291793, 0.059996931859852574, 0.14061111190360398]
-springs = [
-    {
-        'k': 40,
-        'a': 0.6,
-        'x': [0.01873827104162616, 0.02806787363125099, 0.031059340682086066, 0.01678021004645687, 0.01216246716261322, -0.9110247494808081]
-    },
-    {
-        'k': 60,
-        'a': 0.6,
-        'x': [0.022719555787812505, 0.023043317483742193, 0.02764335338361519, 0.018813653588212513, 0.012424828688381656, -0.6971887222380353]
-    },
-    {
-        'k': 80,
-        'a': 0.6,
-        'x': [0.02645817609803363, 0.019255140323088185, 0.024537695187959396, 0.021801699065303846, 0.010504557378155996, -0.8922823063272325]
-    },
-    {
-        'k': 40,
-        'a': 1,
-        'x': [0.010012131658306514, 0.05429677864028192, 0.035094721706915084, 0.0739106305463264, 0.01000406293402808, -0.3856909524602533]
-    },
-    {
-        'k': 60,
-        'a': 1,
-        'x': [0.010001950482507765, 0.04039852621473746, 0.027650636112590013, 0.057829100440527456, 0.010006477628465193, -0.17417191968543333]
-    },
-    {
-        'k': 80,
-        'a': 1,
-        'x': [0.010002857765228523, 0.03302683572682277, 0.02177805127743359, 0.048108483937276375, 0.010006617251138208, -0.4908704598225935]
-
-    },
-    {
-        'k': 40,
-        'a': 1.4,
-        'x': [0.01000084823520056, 0.0987368832726395, 0.09424337856355897, 0.05295371989810913, 0.01002637466123165, 0.7551193325175176]
-    },
-    {
-        'k': 60,
-        'a': 1.4,
-        'x': [0.010054699319005767, 0.07351665894667067, 0.06464472377895077, 0.042061331551113794, 0.01000897221556764, 0.07885124682829492]
-    },
-    {
-        'k': 80,
-        'a': 1.4,
-        'x': [0.010097299615116129, 0.06042533137942364, 0.050572388949174416, 0.036647568879639957, 0.010011377415757075, 0.013018350790240607]
-    }
-]
+xm = None
+xs = None
+xm = [2.6775408653380985, 0.03036417405484591, 0.0464765616668893, 0.020002243415270026, 0.0599916804667389, 0.059987624409487315, 0.2754885043894606]
+xs = [0.010001175538910098, 0.024674273697069246, 0.02190461070929748, 0.04077732988661197, 0.01003214979581677, -0.14967386689132633]
 
 if __name__ == '__main__':
-    xm = None
-    xs = None
-    xm = [2.6935314437637747, 0.030244462243688645, 0.04668319649977162, 0.02002235749858264, 0.05998841948291793, 0.059996931859852574, 0.14061111190360398]
-    xs = [0.010012131658306514, 0.05429677864028192, 0.035094721706915084, 0.0739106305463264, 0.01000406293402808, -0.3856909524602533]
-
     if xm is None:
         res = differential_evolution(
             obj_motion,
@@ -149,7 +100,7 @@ if __name__ == '__main__':
         print('Cost', res.fun)
         xm = res.x
 
-    mass_spring = cs['mb']-0.02-np.sum(xm[1:6])*fourbar.tr*fourbar.wr*fourbar.rho
+    mass_spring = cs['mb']-0.02-np.sum(xm[1:6])*geom.tr*geom.wr*geom.rho
     if xs is None:
         res = differential_evolution(
             obj_stiffness,

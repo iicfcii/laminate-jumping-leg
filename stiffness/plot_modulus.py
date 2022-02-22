@@ -16,14 +16,13 @@ def read(n):
     f = np.array(d['(N)'])
 
     # Rmove not useful data
-    xf = np.nonzero(x > 0.5)[0][0]
+    xf = np.nonzero(x > 1)[0][0]
     dx_raw = x[:xf]/l
     sigma_raw = f[:xf]/A
 
     # Select deformation range
     xi = np.nonzero(x > 0.06)[0][0] # Avoid slack region
-    xf = np.nonzero(f > 100)[0][0] # Max 100N is enough
-    print(xi,xf)
+    xf = np.nonzero(sigma_raw > 1e7)[0][0] # Max 100N is enough
     dx = dx_raw[xi:xf]
     sigma = sigma_raw[xi:xf]
 
@@ -45,7 +44,7 @@ if __name__ == '__main__':
         sigmap = dxp*E+b
 
         c = 'C{:d}'.format(i)
-        plt.plot(dx,sigma,'.',color=c,markersize=0.5)
+        plt.plot(dx,sigma,'.',color=c,markersize=2,markevery=5)
         plt.plot(dxp,sigmap,color=c)
     print('Youngs modulus {:.2f} GPa'.format(np.average(Es)))
     plt.xlabel('Strain')
