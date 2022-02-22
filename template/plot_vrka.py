@@ -33,7 +33,7 @@ print('Max k={:.0f} r={:.2f} a={:.2f} v={:.2f}'.format(k_max,r_max,a_max,v_max))
 print('Min k={:.0f} r={:.2f} a={:.2f} v={:.2f}'.format(k_min,r_min,a_min,v_min))
 
 a_plots = A[0,0,:].flatten()
-fig, axes = plt.subplots(4,4,sharex=True,sharey=True)
+fig, axes = plt.subplots(3,3,sharex=True,sharey=True)
 for j,ax in enumerate(axes.ravel()):
     if j >= K.shape[2]:
         ax.axis('off')

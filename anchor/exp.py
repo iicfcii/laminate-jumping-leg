@@ -6,13 +6,12 @@ import time
 import ati
 from NatNetClient import NatNetClient
 import data
-import numpy as np
+
 
 CLIENT_ADDR = "192.168.1.188"
 SERVER_ADDR = "192.168.1.166"
+lm_pos = [0,0,0]
 
-lm_list = []
-updated = False
 def receive_mocap_data(mocap_data):
     # print('Frame number: {}, Timestamp {}'.format(
     #     mocap_data.prefix_data.frame_number,
@@ -30,11 +29,11 @@ def receive_mocap_data(mocap_data):
     #         lm.pos
     #     ))
 
-    global lm_list
-    global updated
+    global lm_pos
 
     lm_list = mocap_data.labeled_marker_data.labeled_marker_list
-    updated = True
+    if len(lm_list) == 0: return
+    lm_pos = lm_list[0].pos
 
 if __name__ == '__main__':
     streaming_client = NatNetClient()
@@ -50,15 +49,20 @@ if __name__ == '__main__':
     motor.baudrate = 115200
     motor.open()
 
+    sensor = ati.init()
+
     time.sleep(2)
 
     t = []
-    lm = {}
+    y = []
+    grf = []
 
     jump = False
     tc = 0
     t0 = time.time()
-    while tc < 2.5:
+    while tc < 1.5:
+        ati.single_read(sensor)
+        f = ati.recv(sensor)
 
         if tc > 0.5 and not jump:
             motor.write((127).to_bytes(1,'big',signed=True))
@@ -67,34 +71,17 @@ if __name__ == '__main__':
         tc = time.time()-t0
 
         t.append(tc)
-        if updated:
-            for m in lm_list:
-                if m.id_num not in lm:
-                    lm[m.id_num] = {}
-                    lm[m.id_num]['t'] = [tc]
-                    lm[m.id_num]['pos'] = [m.pos]
-                else:
-                    lm[m.id_num]['t'].append(tc)
-                    lm[m.id_num]['pos'].append(m.pos)
-            updated = False
+        y.append(lm_pos[2])
+        grf.append(f[2])
 
     motor.write((0).to_bytes(1,'big',signed=True))
 
     motor.close()
     streaming_client.shutdown()
 
-    keys = []
-    values = []
-
-    for k in lm.keys():
-        t = lm[k]['t']
-        p = np.array(lm[k]['pos'])
-        keys += ['t','x','y','z']
-        values += [t,p[:,0],p[:,1],p[:,2]]
-
     file_name = '../data/test.csv'
     data.write(
         file_name,
-        keys,
-        values
+        ['t','y','grf'],
+        [t,y,grf]
     )

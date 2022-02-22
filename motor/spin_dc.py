@@ -1,15 +1,17 @@
 from sympy import *
 from scipy.integrate import solve_ivp
+import matplotlib.pyplot as plt
 
 step_sim = 0.0005
 
-v, I, tau = symbols('v I tau')
-theta, dtheta = symbols('theta dtheta')
+V, J, K, b, R, L = symbols('V J K b R L')
+dtheta, i = symbols('dtheta i')
 
-ddtheta = (tau-dtheta*tau/v)/I
+ddtheta = -b/J*dtheta+K/J*i
+di = -K/L*dtheta-R/L*i+V/L
 
-x = Matrix([theta, dtheta])
-dx = Matrix([dtheta, ddtheta])
+x = Matrix([dtheta, i])
+dx = Matrix([ddtheta, di])
 
 def solve(cs):
     dx_f = lambdify(x,dx.subs(cs))
