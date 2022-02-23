@@ -5,10 +5,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import data
 
-SIGMA_MAX = 50e6
-SIGMA_MIN = 10e6
-
-def read(n,sigma_th=SIGMA_MIN):
+def read(n):
     l = 150
     w = 20
     h = 0.45
@@ -25,10 +22,9 @@ def read(n,sigma_th=SIGMA_MIN):
 
     # Select deformation range
     xi = np.nonzero(x > 0.06)[0][0] # Avoid slack region
-    if sigma_th < SIGMA_MIN: sigma_th = SIGMA_MIN
-    if sigma_th > SIGMA_MAX: sigma_th  = SIGMA_MAX
-    xf = np.nonzero(sigma_raw > sigma_th)[0][0]
-    # xf = -1
+    # Esitmated average stress
+    # GRF*r*t/2/(w*t^3/12)*0.1
+    xf = np.nonzero(sigma_raw > 30e6)[0][0]
     dx = dx_raw[xi:xf]
     sigma = sigma_raw[xi:xf]
 
@@ -40,10 +36,10 @@ def read(n,sigma_th=SIGMA_MIN):
 
     return dx_raw,sigma_raw,E,b
 
-def value(sigma_th=SIGMA_MIN):
+def value():
     Es = []
     for i,n in enumerate([1,2,3]):
-        dx,sigma,E,b = read(n,sigma_th)
+        dx,sigma,E,b = read(n)
         Es.append(E)
 
     return np.average(Es)

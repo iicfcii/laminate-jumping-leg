@@ -5,19 +5,19 @@ import geom
 # PRBM
 gamma = 0.85
 Ktheta = 2.65
-E_default = 9.13e9
+E = 8.34e9
 
-def prbm_k(t,l,w,E):
+def prbm_k(t,l,w):
     I = w*t**3/12
     k = gamma*Ktheta*E*I/l
     return k
 
-def sim(x,r,E=E_default,plot=False):
+def sim(x,r,plot=False):
     ls = x[:4]
     w = x[4]
     c = x[5]
 
-    k = prbm_k(geom.tf,ls[1]-geom.pad,w,E)
+    k = prbm_k(geom.tf,ls[1]-geom.pad,w)
     lk = geom.spring(0,ls,c)
 
     lks = []
