@@ -21,13 +21,13 @@ def str_movel(pose):
 
 # Base to foot of leg
 Tbc = m3d.Transform()
-Tbc.pos = m3d.Vector(-4/1000, (-25.4*22-1)/1000, 0.072)
-Tbc.orient = m3d.Orientation.new_euler((0, 0, -np.pi/2+31/180*np.pi), encoding='XYZ')
+Tbc.pos = m3d.Vector(-4/1000, (-25.4*22-1)/1000, 0.070)
+Tbc.orient = m3d.Orientation.new_euler((0, 0, -np.pi/2+30/180*np.pi), encoding='XYZ')
 
 # Tool pose wrt virtual rotation
 Tct = m3d.Transform()
-Tct.pos = m3d.Vector(-32/1000,0,0)
-Tct.orient = m3d.Orientation.new_euler((np.pi, 0, -np.pi/4-np.pi/2), encoding='XYZ')
+Tct.pos = m3d.Vector(-70/1000,0,0)
+Tct.orient = m3d.Orientation.new_euler((np.pi, 0, np.pi/4), encoding='XYZ')
 
 MOVEL_INIT = to_movel(Tbc*Tct)
 
@@ -86,8 +86,10 @@ if __name__ == '__main__':
         [t,rz,tz]
     )
 
-    rz,tz,rzp,tzp,kp = plot_spring.read()
+    rz,tz,kp = plot_spring.read()
     print(kp)
+    rzp = np.linspace(0,0.8,100)
+    tzp = kp*rzp
     plt.plot(rz,tz,'.')
     plt.plot(rzp,tzp)
     plt.show()

@@ -5,7 +5,10 @@ import matplotlib.pyplot as plt
 import numpy as np
 import data
 
-def read(n):
+SIGMA_MAX = 50e6
+SIGMA_MIN = 10e6
+
+def read(n,sigma_th=SIGMA_MIN):
     l = 150
     w = 20
     h = 0.45
@@ -16,13 +19,16 @@ def read(n):
     f = np.array(d['(N)'])
 
     # Rmove not useful data
-    xf = np.nonzero(x > 1)[0][0]
+    xf = np.nonzero(x > 1.5)[0][0]
     dx_raw = x[:xf]/l
     sigma_raw = f[:xf]/A
 
     # Select deformation range
     xi = np.nonzero(x > 0.06)[0][0] # Avoid slack region
-    xf = np.nonzero(sigma_raw > 1e7)[0][0] # Max 100N is enough
+    if sigma_th < SIGMA_MIN: sigma_th = SIGMA_MIN
+    if sigma_th > SIGMA_MAX: sigma_th  = SIGMA_MAX
+    xf = np.nonzero(sigma_raw > sigma_th)[0][0]
+    # xf = -1
     dx = dx_raw[xi:xf]
     sigma = sigma_raw[xi:xf]
 
@@ -33,6 +39,14 @@ def read(n):
     )[0]
 
     return dx_raw,sigma_raw,E,b
+
+def value(sigma_th=SIGMA_MIN):
+    Es = []
+    for i,n in enumerate([1,2,3]):
+        dx,sigma,E,b = read(n,sigma_th)
+        Es.append(E)
+
+    return np.average(Es)
 
 if __name__ == '__main__':
     plt.figure()

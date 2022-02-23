@@ -1,12 +1,15 @@
 import sys
 sys.path.append('../utils')
 sys.path.append('../anchor')
+sys.path.append('../template')
 
 import time
 import matplotlib.pyplot as plt
 import numpy as np
 import data
 import stiffness
+import jump
+import modulus
 
 def read(*args):
     if len(args) == 0:
@@ -30,6 +33,10 @@ def read(*args):
     rz = rz[i:]
     rz = -(rz-rz[0])
 
+    # i = np.nonzero(rz > 0.2)[0][0]
+    # tz = tz[:i]
+    # rz = rz[:i]
+
     # Fit
     k = np.linalg.lstsq(rz.reshape((-1,1)),tz,rcond=None)[0][0]
 
@@ -44,7 +51,16 @@ if __name__ == '__main__':
     plt.figure()
     for i, k in enumerate([40,60,80]):
         rz,tz,kp = read(k,1,1)
-        rzp,tzp = stiffness.sim(xs[i],0.8,plot=False)
+
+        E = modulus.value()
+        # k_d = k/2
+        # r = 0.05
+        # d = 0.8*r
+        # tau = k_d*r*d
+        # sigma_th = tau*0.00045/2/(0.00045**3*0.01/12)*0.1
+        # E = modulus.value(sigma_th)
+
+        rzp,tzp = stiffness.sim(xs[i],0.8,E,plot=False)
 
         c = 'C{:d}'.format(i)
         plt.plot(rz,tz,'.',color=c,markersize=0.5)
