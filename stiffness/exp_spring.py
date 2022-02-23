@@ -21,8 +21,8 @@ def str_movel(pose):
 
 # Base to foot of leg
 Tbc = m3d.Transform()
-Tbc.pos = m3d.Vector(-4/1000, (-25.4*22-1)/1000, 0.070)
-Tbc.orient = m3d.Orientation.new_euler((0, 0, -np.pi/2+30/180*np.pi), encoding='XYZ')
+Tbc.pos = m3d.Vector(-4/1000, (-25.4*22-1)/1000, 0.068)
+Tbc.orient = m3d.Orientation.new_euler((0, 0, -np.pi/2-35/180*np.pi), encoding='XYZ')
 
 # Tool pose wrt virtual rotation
 Tct = m3d.Transform()
@@ -30,6 +30,7 @@ Tct.pos = m3d.Vector(-70/1000,0,0)
 Tct.orient = m3d.Orientation.new_euler((np.pi, 0, np.pi/4), encoding='XYZ')
 
 MOVEL_INIT = to_movel(Tbc*Tct)
+ROT_MAX = 0.6
 
 if __name__ == '__main__':
     ur5 = urx.Robot("192.168.1.103")
@@ -48,7 +49,7 @@ if __name__ == '__main__':
     time.sleep(2)
 
     t0 = time.time()
-    drs = np.arange(0,0.9,0.02)
+    drs = np.arange(0,-ROT_MAX,-0.02)
     drs = np.concatenate(([0,0],drs))
 
     t = []
@@ -88,7 +89,7 @@ if __name__ == '__main__':
 
     rz,tz,kp = plot_spring.read()
     print(kp)
-    rzp = np.linspace(0,0.8,100)
+    rzp = np.linspace(0,ROT_MAX,100)
     tzp = kp*rzp
     plt.plot(rz,tz,'.')
     plt.plot(rzp,tzp)
