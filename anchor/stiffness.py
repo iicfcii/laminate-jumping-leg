@@ -29,7 +29,7 @@ def sim(x,r,plot=False):
         alpha = geom.pose(lk[1])[1]
         beta = geom.pose(lk[0])[1]
 
-        assert beta > 10/180*np.pi, 'angle between motor arm and crank too small'
+        assert np.abs(beta) > 20/180*np.pi, 'angle between motor arm and crank too small'
 
         # Static analysis
         dtheta = geom.limit_ang(theta-np.pi)
