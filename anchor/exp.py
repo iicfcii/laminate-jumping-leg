@@ -1,17 +1,18 @@
 import sys
 sys.path.append('../utils')
 
+import matplotlib.pyplot as plt
 import serial
 import time
 import ati
 from NatNetClient import NatNetClient
 import data
 
-
 CLIENT_ADDR = "192.168.1.188"
 SERVER_ADDR = "192.168.1.166"
-lm_pos = [0,0,0]
 
+lm_pos = [0,0,0]
+updated = False
 def receive_mocap_data(mocap_data):
     # print('Frame number: {}, Timestamp {}'.format(
     #     mocap_data.prefix_data.frame_number,
@@ -30,10 +31,12 @@ def receive_mocap_data(mocap_data):
     #     ))
 
     global lm_pos
+    global updated
 
     lm_list = mocap_data.labeled_marker_data.labeled_marker_list
     if len(lm_list) == 0: return
     lm_pos = lm_list[0].pos
+    updated = True
 
 if __name__ == '__main__':
     streaming_client = NatNetClient()
@@ -71,8 +74,12 @@ if __name__ == '__main__':
         tc = time.time()-t0
 
         t.append(tc)
-        y.append(lm_pos[2])
         grf.append(f[2])
+        if updated:
+            y.append(lm_pos[2])
+            updated = False
+        else:
+            y.append(None)
 
     motor.write((0).to_bytes(1,'big',signed=True))
 
