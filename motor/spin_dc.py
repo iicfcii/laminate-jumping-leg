@@ -19,5 +19,5 @@ def solve(cs):
     def spin(t, x):
         return dx_f(*x).flatten()
 
-    sol = solve_ivp(spin, [0,1], [0,0], max_step=step_sim)
+    sol = solve_ivp(spin, [0,0.5], [0,0], max_step=step_sim)
     return sol
