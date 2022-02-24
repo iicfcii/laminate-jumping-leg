@@ -8,7 +8,7 @@ import data
 def read(n):
     l = 150
     w = 20
-    h = 0.45
+    h = 0.46
     A = w*h*1e-6
 
     d = data.read('../data/modulus_15mil_150mm_20mm_{:d}.csv'.format(n),skip=21)

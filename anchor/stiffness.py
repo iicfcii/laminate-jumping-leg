@@ -5,7 +5,7 @@ import geom
 # PRBM
 gamma = 0.85
 Ktheta = 2.65
-E = 8.34e9
+E = 8.14e9
 
 def prbm_k(t,l,w):
     I = w*t**3/12
