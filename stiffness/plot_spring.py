@@ -1,15 +1,12 @@
 import sys
 sys.path.append('../utils')
 sys.path.append('../anchor')
-sys.path.append('../template')
 
 import time
 import matplotlib.pyplot as plt
 import numpy as np
 import data
 import stiffness
-import jump
-import modulus
 
 def read(*args):
     if len(args) == 0:
@@ -53,6 +50,11 @@ if __name__ == '__main__':
     print(kp)
     rzp = np.linspace(0,0.4,100)
     tzp = kp*rzp
+
+    x = [0.010000897288774138, 0.02343236540444324, 0.02195971892153175, 0.03965828492826137, 0.010040296505912559, -0.8920380658275215]
+    rzs,tzs = stiffness.sim(x,0.4,plot=False)
+
     plt.plot(rz,tz,'.')
-    plt.plot(rzp,tzp)
+    # plt.plot(rzp,tzp)
+    plt.plot(rzs,tzs)
     plt.show()
