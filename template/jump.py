@@ -3,15 +3,19 @@ from scipy.integrate import solve_ivp
 import matplotlib.pyplot as plt
 import numpy as np
 
-def f_spring(ys,k,a):
-    return -k*ys
+def f_spring(ys,k,a,d):
+    import sympy.core
+    if isinstance(ys,sympy.core.symbol.Symbol):
+        return -sign(ys)*k*d*Pow(abs(ys/d),a)
+    else:
+        return -np.sign(ys)*k*d*np.power(np.abs(ys/d),a)
 
 g, m, r, k, a, d = symbols('g m r k a d')
 b, K, I, R, L, V = symbols('b K I R L V')
 dyb, ys, dtheta, i, yb = symbols('dyb ys dtheta i yb')
 
 # Spring force
-fs = f_spring(ys,k,a)
+fs = f_spring(ys,k,a,d)
 # Wall force
 fw = (Max(0,yb-ys-d)/(yb-ys-d))*((yb-ys-d)*10000+dtheta*r*50)
 f = fs+fw

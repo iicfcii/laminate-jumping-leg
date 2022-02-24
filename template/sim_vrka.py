@@ -7,18 +7,7 @@ import jump
 import numpy as np
 import data
 
-cs = {
-    'g': 9.81,
-    'mb': 0.025,
-    'ml': 0.0001,
-    'k': 50,
-    'a': 1,
-    'ds': 0.05,
-    'tau': 0.15085776558260747,
-    'v': 47.75363911922214,
-    'dl': 0.06,
-    'r': 0.05
-}
+cs = jump.cs
 
 def sim(params):
     cs['k'] = params[0]
@@ -26,7 +15,7 @@ def sim(params):
     cs['a'] = params[2]
 
     sol = jump.solve(cs)
-    v = sol.y[2,-1]
+    v = sol.y[0,-1]
     return v
 
 K = np.arange(10,110,10)

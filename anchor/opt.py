@@ -9,6 +9,7 @@ import motion
 import stiffness
 import jump
 
+a = 1.0
 d = 0.06
 r = 0.05
 rot = 0.5
@@ -46,7 +47,7 @@ def obj_stiffness(x,m,plot=False):
         return 10
 
     x_d = np.linspace(0,rot*r,50)
-    f_d = -jump.f_spring(x_d,k,1)
+    f_d = -jump.f_spring(x_d,k,a,d)
     f = np.interp(x_d,rz*r,tz/r)
     e = np.sqrt(np.sum((f-f_d)**2)/f_d.shape[0])
 
