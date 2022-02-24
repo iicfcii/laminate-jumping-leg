@@ -4,7 +4,7 @@ sys.path.append('../utils')
 from scipy.optimize import differential_evolution
 import matplotlib.pyplot as plt
 import numpy as np
-import spin_dc
+import spin
 import data
 
 I_LOAD = 0.04*0.09**2 # Weights
@@ -83,7 +83,7 @@ def obj(x,ws,plot=False):
                 'R': R,
                 'L': L
             }
-            sol = spin_dc.solve(cs)
+            sol = spin.solve(cs)
             w = np.interp(t,sol.t,sol.y[0,:])
             e += np.sqrt(np.sum((w-ws[i])**2)/len(t))
             sols.append(sol)

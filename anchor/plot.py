@@ -1,10 +1,12 @@
 import sys
 sys.path.append('../utils')
+sys.path.append('../template')
 
 import numpy as np
 import matplotlib.pyplot as plt
 from scipy.signal import butter, sosfiltfilt
 import data
+import jump
 
 sos = butter(2,50,'lowpass',fs=1000,output='sos')
 sos_dy = butter(2,50,'lowpass',fs=360,output='sos')
@@ -40,9 +42,9 @@ def read(*args):
         ti += 0.005
     assert grf_bias is not None, 'Cant find no load bias'
 
-    ti = t[np.nonzero(t > 0.505)[0][0]]
+    ti = t[np.nonzero(t > 0.51)[0][0]]
     tf = t[np.nonzero(grf > grf_bias)[0][0]]
-    # ti = 0.3
+    # ti = 0.5
     # tf = 0.8
 
     # Select
@@ -77,12 +79,41 @@ def read(*args):
 
 if __name__ == '__main__':
     plt.figure()
-    for n in [1,2,3]:
-        t,grf,dy = read(80,1,n)
+    for i,k in enumerate([80]):
+        c = 'C{:d}'.format(i)
 
-        c = 'C{:d}'.format(n-1)
+        ts = []
+        grfs = []
+        dys = []
+        for n in [1,2,3]:
+            t,grf,dy = read(k,1,n)
+            ts.append(t)
+            grfs.append(grf)
+            dys.append(dy)
+
+            plt.subplot(211)
+            plt.plot(t,dy,'.',color=c,markersize=1)
+            plt.subplot(212)
+            plt.plot(t,grf,'.',color=c,markersize=1)
+
+        tf = np.amin([np.amax(ts[i]) for i in range(len(ts))])
+        t = np.linspace(0,tf,100)
+        grfs = [np.interp(t,ts[i],grfs[i]) for i in range(len(grfs))]
+        dys = [np.interp(t,ts[i],dys[i]) for i in range(len(dys))]
+
+        grf = np.mean(grfs,axis=0)
+        dy = np.mean(dys,axis=0)
+
         plt.subplot(211)
         plt.plot(t,dy,color=c)
         plt.subplot(212)
         plt.plot(t,grf,color=c)
-    plt.show()
+
+        cs = jump.cs
+        cs['k'] = 68
+        sol = jump.solve(cs)
+        plt.subplot(211)
+        plt.plot(sol.t,sol.y[0,:],'--',color=c)
+        plt.subplot(212)
+        plt.plot(sol.t,-sol.y[1,:]*cs['k'],'--',color=c)
+        plt.show()
