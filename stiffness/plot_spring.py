@@ -46,15 +46,17 @@ def read(*args):
     return rz,tz,k
 
 if __name__ == '__main__':
-    rz,tz,kp = read(80,1,3)
-    print(kp)
-    rzp = np.linspace(0,0.4,100)
-    tzp = kp*rzp
+    for i,k in enumerate([80]):
+        c = 'C{:d}'.format(i)
+        for n in [1,2,3]:
+            rz,tz,kp = read(80,1,n)
+            print(kp)
+            plt.plot(rz,tz,'.',color=c,markersize=1)
+        rzp = np.linspace(0,0.4,100)
+        tzp = k*0.05*0.05*rzp
+        plt.plot(rzp,tzp,color=c)
 
-    x = [0.010000897288774138, 0.02343236540444324, 0.02195971892153175, 0.03965828492826137, 0.010040296505912559, -0.8920380658275215]
-    rzs,tzs = stiffness.sim(x,0.4,plot=False)
-
-    plt.plot(rz,tz,'.')
-    # plt.plot(rzp,tzp)
-    plt.plot(rzs,tzs)
+    # x = [0.01000070524617546, 0.022578982818760737, 0.025663408327849472, 0.04118928197560169, 0.010298609259904563, -0.006784923455315561]
+    # rzs,tzs = stiffness.sim(x,0.4,plot=False)
+    # plt.plot(rzs,tzs)
     plt.show()

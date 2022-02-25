@@ -18,8 +18,8 @@ def sim(params):
     v = sol.y[0,-1]
     return v
 
-K = np.arange(10,110,10)
-R = np.arange(0.02,0.11,0.01)
+K = np.arange(10,111,10)
+R = np.arange(0.02,0.121,0.01)
 A = np.arange(0.6,1.41,0.1)
 K, R, A = np.meshgrid(K,R,A)
 
