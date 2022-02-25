@@ -118,6 +118,19 @@ def spring(ang,ls,c):
 
     return lk
 
+def bbox(lks):
+    ps = np.array(lks).reshape((-1,2))
+    cx = (np.amax(ps[:,0])+np.amin(ps[:,0]))/2
+    cy = (np.amax(ps[:,1])+np.amin(ps[:,1]))/2
+    pad = 0.005
+    dx = np.amax(ps[:,0])-np.amin(ps[:,0])
+    dy = np.amax(ps[:,1])-np.amin(ps[:,1])
+
+    return (
+        cx-dx/2-pad,cx+dx/2+pad,
+        cy-dy/2-pad,cy+dy/2+pad
+    )
+
 def leg_spring(ang,l,c,ls,cs):
     lk, tilt = leg(ang,l,c)
     lks = spring(ls,cs)

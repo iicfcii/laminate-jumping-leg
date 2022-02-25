@@ -19,11 +19,13 @@ def sim(rots,x,plot=False):
     ys = lks[:,4,1,1]
 
     if plot:
+        lks_r = [lks[int(n)] for n in np.linspace(0,len(lks)-1,3)]
+        bbox = geom.bbox(lks_r)
         plt.figure()
         plt.axis('scaled')
-        plt.xlim([-0.06,0.06])
-        plt.ylim([-0.12,0.01])
-        for lk in [lks[int(n)] for n in np.linspace(0,len(lks)-1,3)]:
+        plt.xlim(bbox[:2])
+        plt.ylim(bbox[2:])
+        for lk in lks_r:
             for link in lk:
                 plt.plot(link[:,0],link[:,1],'k')
 

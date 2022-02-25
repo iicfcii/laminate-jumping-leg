@@ -47,12 +47,14 @@ def sim(x,r,plot=False):
     taus = np.array(taus)
 
     if plot:
+        lks_r = [lks[int(n)] for n in np.linspace(0,len(lks)-1,3)]
+        bbox = geom.bbox(lks_r)
         plt.figure()
         plt.axis('scaled')
-        plt.xlim([-0.02,0.08])
-        plt.ylim([-0.05,0.05])
+        plt.xlim(bbox[:2])
+        plt.ylim(bbox[2:])
 
-        for lk in [lks[int(n)] for n in np.linspace(0,len(lks)-1,3)]:
+        for lk in lks_r:
             for link in lk:
                 plt.plot(link[:,0],link[:,1],'.-k')
 

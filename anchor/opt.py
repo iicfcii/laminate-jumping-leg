@@ -9,11 +9,18 @@ import motion
 import stiffness
 import jump
 
-a = 1.0
-d = 0.06
-r = 0.05
-rot = 0.5
-k = 80
+cs = jump.cs
+cs['k'] = 20
+cs['a'] = 1.0
+cs['r'] = 0.06
+
+d = cs['d']
+r = cs['r']
+k = cs['k']
+a = cs['a']
+
+sol = jump.solve(cs,plot=True)
+rot = -np.amin(sol.y[1,:])/r*1.2
 
 def obj_motion(x,plot=False):
     rots = np.linspace(0,-d/r,50)+x[0]
@@ -65,13 +72,13 @@ def obj_stiffness(x,m,plot=False):
 
     return e+5*em
 
-bounds_motion = [(-np.pi,np.pi)]+[(0.02,0.06)]*5+[(-1,1)]*1
+bounds_motion = [(-np.pi,np.pi)]+[(0.01,0.06)]*5+[(-1,1)]*1
 bounds_stiffness = [(0.01,0.1)]*4+[(0.01,0.02)]+[(-1,1)]*1
 
 xm = None
 xs = None
-xm = [2.6781291969012333, 0.03047198019852562, 0.04640660688263967, 0.02002618942597291, 0.05998754200403933, 0.05965694209816338, 0.31866042049334675]
-# xs = [0.01000070524617546, 0.022578982818760737, 0.025663408327849472, 0.04118928197560169, 0.010298609259904563, -0.006784923455315561]
+xm = [2.7304563891629736, 0.018164191509064176, 0.05064236571753332, 0.0100203056411408, 0.05996472346660402, 0.05964275563306244, 0.48964802947541886]
+xs = [0.010000981639302908, 0.04141110349458153, 0.04329610757653969, 0.06840294338757574, 0.010011579253171563, -0.055473045908571605]
 
 if __name__ == '__main__':
     if xm is None:
@@ -92,6 +99,8 @@ if __name__ == '__main__':
         xm = res.x
 
     mass_spring = 0.005-np.sum(xm[1:6])*geom.tr*geom.wr*geom.rho
+    assert mass_spring > 0.001
+
     if xs is None:
         res = differential_evolution(
             obj_stiffness,
@@ -110,6 +119,11 @@ if __name__ == '__main__':
         print('Cost', res.fun)
         xs = res.x
 
-    print(obj_motion(xm,plot=True))
-    print(obj_stiffness(xs,mass_spring,plot=True))
+    print('ckrank range', d/r)
+    print('spring Mass', mass_spring)
+    print('spring range', rot)
+    print('xm',str(list(xm)))
+    print('xs',str(list(xs)))
+    print('xm error',obj_motion(xm,plot=True))
+    print('xs error',obj_stiffness(xs,mass_spring,plot=True))
     plt.show()

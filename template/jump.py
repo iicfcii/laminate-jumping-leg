@@ -34,7 +34,7 @@ cs = {
     'r': 0.05,
     'k': 40,
     'a': 1,
-    'd': 0.0685,
+    'd': 0.06,
     'b': 0.0006566656814173122,
     'K': 0.14705778874626846,
     'I': 9.345234544905957e-05,
@@ -49,7 +49,7 @@ def lift_off(t,x):
 lift_off.terminal = True
 lift_off.direction = 1
 
-def solve(cs):
+def solve(cs,plot=False):
     # Initial condition after settle
     ys_i = -cs['m']*cs['g']/cs['k']
     yb_i = ys_i
@@ -61,10 +61,10 @@ def solve(cs):
         return dx_f(*x).flatten()
 
     sol = solve_ivp(f,[0,1],x0,events=[lift_off],max_step=1e-4)
-    return sol
 
-# sol = solve(cs)
-# for i in range(len(x)):
-#     plt.subplot(len(x),1,i+1)
-#     plt.plot(sol.t,sol.y[i,:])
-# plt.show()
+    if plot:
+        for i in range(len(x)):
+            plt.subplot(len(x),1,i+1)
+            plt.plot(sol.t,sol.y[i,:])
+
+    return sol
