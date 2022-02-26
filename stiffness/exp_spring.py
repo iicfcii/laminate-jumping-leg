@@ -21,8 +21,8 @@ def str_movel(pose):
 
 # Base to foot of leg
 Tbc = m3d.Transform()
-Tbc.pos = m3d.Vector(-4/1000, (-25.4*22-1)/1000, 0.068)
-Tbc.orient = m3d.Orientation.new_euler((0, 0, -np.pi/2-35/180*np.pi), encoding='XYZ')
+Tbc.pos = m3d.Vector(-3/1000, (-25.4*21-1)/1000, 0.068)
+Tbc.orient = m3d.Orientation.new_euler((0, 0, -np.pi/2-37/180*np.pi), encoding='XYZ')
 
 # Tool pose wrt virtual rotation
 Tct = m3d.Transform()

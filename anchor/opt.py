@@ -10,7 +10,7 @@ import stiffness
 import jump
 
 cs = jump.cs
-cs['k'] = 20
+cs['k'] = 50
 cs['a'] = 1.0
 cs['r'] = 0.06
 
@@ -19,8 +19,8 @@ r = cs['r']
 k = cs['k']
 a = cs['a']
 
-sol = jump.solve(cs,plot=True)
-rot = -np.amin(sol.y[1,:])/r*1.2
+sol = jump.solve(cs,plot=False)
+rot = -np.amin(sol.y[1,:])/r
 
 def obj_motion(x,plot=False):
     rots = np.linspace(0,-d/r,50)+x[0]
@@ -78,7 +78,7 @@ bounds_stiffness = [(0.01,0.1)]*4+[(0.01,0.02)]+[(-1,1)]*1
 xm = None
 xs = None
 xm = [2.7304563891629736, 0.018164191509064176, 0.05064236571753332, 0.0100203056411408, 0.05996472346660402, 0.05964275563306244, 0.48964802947541886]
-xs = [0.010000981639302908, 0.04141110349458153, 0.04329610757653969, 0.06840294338757574, 0.010011579253171563, -0.055473045908571605]
+xs = [0.010002499145414241, 0.023667181334153742, 0.02488843258063794, 0.041974644792054, 0.01002793807833171, -0.5988527038522609]
 
 if __name__ == '__main__':
     if xm is None:
@@ -119,7 +119,7 @@ if __name__ == '__main__':
         print('Cost', res.fun)
         xs = res.x
 
-    print('ckrank range', d/r)
+    print('crank range', d/r)
     print('spring Mass', mass_spring)
     print('spring range', rot)
     print('xm',str(list(xm)))

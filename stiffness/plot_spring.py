@@ -45,18 +45,28 @@ def read(*args):
 
     return rz,tz,k
 
+xs = [
+    [0.010000981639302908, 0.04141110349458153, 0.04329610757653969, 0.06840294338757574, 0.010011579253171563, -0.055473045908571605],
+    [0.010002499145414241, 0.023667181334153742, 0.02488843258063794, 0.041974644792054, 0.01002793807833171, -0.5988527038522609],
+]
+rots = [
+    0.86,
+    0.42,
+]
+r = 0.06
 if __name__ == '__main__':
-    for i,k in enumerate([80]):
+    for i,k in enumerate([20,50]):
+        rot = rots[i]
+        x = xs[i]
         c = 'C{:d}'.format(i)
         for n in [1,2,3]:
-            rz,tz,kp = read(80,1,n)
-            print(kp)
+            rz,tz,kp = read(k,1,n)
+            print(kp/r**2)
             plt.plot(rz,tz,'.',color=c,markersize=1)
-        rzp = np.linspace(0,0.4,100)
-        tzp = k*0.05*0.05*rzp
+        rzp = np.linspace(0,rot,100)
+        tzp = k*r**2*rzp
         plt.plot(rzp,tzp,color=c)
 
-    # x = [0.01000070524617546, 0.022578982818760737, 0.025663408327849472, 0.04118928197560169, 0.010298609259904563, -0.006784923455315561]
-    # rzs,tzs = stiffness.sim(x,0.4,plot=False)
-    # plt.plot(rzs,tzs)
+        rzs,tzs = stiffness.sim(x,rot,plot=False)
+        plt.plot(rzs,tzs,'--')
     plt.show()
