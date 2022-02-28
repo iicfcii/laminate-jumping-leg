@@ -5,10 +5,12 @@ import geom
 # PRBM
 gamma = 0.85
 Ktheta = 2.65
-E = 8.14e9
+# E (GPa) vs l(mm) 3 deg poly
+pE = [8.496684430429737e-06, -0.0024717328259184017, 0.25514193947110525, 6.4409536055563406]
 
 def prbm_k(t,l,w):
     I = w*t**3/12
+    E = np.polyval(pE,l*1000)*1e9
     k = gamma*Ktheta*E*I/l
     return k
 

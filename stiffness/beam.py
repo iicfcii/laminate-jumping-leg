@@ -6,6 +6,7 @@ import time
 import matplotlib.pyplot as plt
 import numpy as np
 import data
+from scipy.optimize import root_scalar
 import stiffness
 
 def read(*args):
@@ -21,9 +22,6 @@ def read(*args):
 
     # Avoid jump between -pi and pi
     rz[rz < 0] += 2*np.pi
-
-    # plt.plot(t,rz,'.')
-    # plt.show()
 
     # Force bias
     to = np.nonzero(t > 1)[0][0]
@@ -45,12 +43,20 @@ def read(*args):
     # so a, the length of the shorter one of the PRBM model stay constant
     # and b, the length of the moment arm or the longer one plus rigid link,
     # can be calculated easily
-    a = l*(1-stiffness.gamma)
+    gamma = stiffness.gamma
+    a = l*(1-gamma)
 
     theta = [] # Virtual joint angle
     tau = [] # Virtual joint torque
     for rzi,tzi in zip(rz,tz):
         b = np.sqrt((a+c)**2+d**2-2*(a+c)*d*np.cos(rzi))
+
+        # def eq(a):
+        #     return (a+c)**2+d**2-2*(a+c)*d*np.cos(rzi)-(a/(1-gamma)*gamma)**2
+        # sol = root_scalar(eq,bracket=[0,l*2],method='brentq')
+        # a = sol.root
+        # b = a/(1-gamma)*gamma
+
         thetai = np.arctan2(d*np.sin(rzi),d*np.cos(rzi)-c-a)
         f = tzi/d
         f_ang = np.pi/2-(thetai-rzi)
@@ -68,14 +74,33 @@ def read(*args):
     t = 0.00046
     I = w*t**3/12
     E = k/stiffness.gamma/stiffness.Ktheta/I*l
-    print('E',E/1e9)
 
     thetap = np.linspace(0,theta[-1],100)
     taup = thetap*k
-    plt.figure()
-    plt.plot(theta,tau)
-    plt.plot(thetap,taup)
-    plt.show()
-    # return rz,tz,k
 
-read(40,10,3)
+    # plt.figure()
+    # plt.plot(theta,tau)
+    # plt.plot(thetap,taup)
+    # plt.show()
+
+    return E
+
+if __name__ == '__main__':
+    l = np.array([20,40,60,80,100])
+    E = []
+    for li in l:
+        Ei = []
+        for n in [1,2,3]:
+            Ei.append(read(li,10,3))
+
+        E.append(np.average(Ei)/1e9)
+
+    p = np.polyfit(l,E,3)
+    lp = np.linspace(l[0],l[-1],50)
+    Ep = np.polyval(p,lp)
+
+    print('E (GPa) vs l(mm)',str(list(p)))
+
+    plt.plot(lp,Ep)
+    plt.plot(l,E,'.')
+    plt.show()
