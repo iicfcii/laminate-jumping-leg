@@ -1,13 +1,12 @@
 import sys
 sys.path.append('../utils')
+sys.path.append('../anchor')
 
 import time
 import matplotlib.pyplot as plt
 import numpy as np
-import math3d as m3d
 import data
-import ati
-import urx
+import stiffness
 
 def read(*args):
     if len(args) == 0:
@@ -17,34 +16,57 @@ def read(*args):
         name = '../data/stiffness_{:d}_{:d}_{:d}.csv'.format(k,int(a*10),n)
     d = data.read(name)
     t = np.array(d['t'])
-    z = np.array(d['z'])
-    fz = np.array(d['fz'])
+    rz = np.array(d['rz'])
+    tz = np.array(d['tz'])
+
+    # Avoid jump between -pi and pi
+    rz[rz < 0] += 2*np.pi
+
+    # plt.plot(t,rz,'.')
+    # plt.show()
 
     # Force bias
     to = np.nonzero(t > 1)[0][0]
-    fz_offset = np.average(fz[:to])
+    tz_offset = np.average(tz[:to])
 
     # Select inital point
-    fz = -(fz-fz_offset)
-    i = np.nonzero(fz > 0.005)[0][0]
-    fz = fz[i:]
-    z = z[i:]
-    z = -(z-z[0])
+    tz = tz-tz_offset
+    i = np.nonzero(tz < -0.0005)[0][0]
+    tz = -tz[i:]
+    rz = rz[i:]
+    rz = rz-rz[0]
+
+    # i = np.nonzero(rz > 0.2)[0][0]
+    # tz = tz[:i]
+    # rz = rz[:i]
 
     # Fit
-    k = np.linalg.lstsq(z.reshape((-1,1)),fz,rcond=None)[0][0]
-    zp = np.arange(0,0.04,0.001)
-    fzp = zp*k
+    k = np.linalg.lstsq(rz.reshape((-1,1)),tz,rcond=None)[0][0]
 
-    return z,fz,zp,fzp,k
+    return rz,tz,k
 
+xs = [
+    [0.010000981639302908, 0.04141110349458153, 0.04329610757653969, 0.06840294338757574, 0.010011579253171563, -0.055473045908571605],
+    [0.010002499145414241, 0.023667181334153742, 0.02488843258063794, 0.041974644792054, 0.01002793807833171, -0.5988527038522609],
+]
+rots = [
+    0.86,
+    0.42,
+]
+r = 0.06
 if __name__ == '__main__':
-    plt.figure()
-    for i, k in enumerate([40,60,80]):
-        z,fz,zp,fzp,kp = read(k,1,1)
-
+    for i,k in enumerate([20,50]):
+        rot = rots[i]
+        x = xs[i]
         c = 'C{:d}'.format(i)
-        plt.plot(z,fz,'.',color=c)
-        plt.plot(zp,fzp,color=c,label='{:.1f}'.format(kp))
-    plt.legend()
+        for n in [1,2,3]:
+            rz,tz,kp = read(k,1,n)
+            print(kp/r**2)
+            plt.plot(rz,tz,'.',color=c,markersize=1)
+        rzp = np.linspace(0,rot,100)
+        tzp = k*r**2*rzp
+        plt.plot(rzp,tzp,color=c)
+
+        rzs,tzs = stiffness.sim(x,rot,plot=False)
+        plt.plot(rzs,tzs,'--')
     plt.show()

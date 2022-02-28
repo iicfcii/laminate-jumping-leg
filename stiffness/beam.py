@@ -1,0 +1,81 @@
+import sys
+sys.path.append('../utils')
+sys.path.append('../anchor')
+
+import time
+import matplotlib.pyplot as plt
+import numpy as np
+import data
+import stiffness
+
+def read(*args):
+    if len(args) == 0:
+        name = '../data/test.csv'
+    else:
+        l,w,n = args
+        name = '../data/beam_{:d}_{:d}_{:d}.csv'.format(l,w,n)
+    d = data.read(name)
+    t = np.array(d['t'])
+    rz = np.array(d['rz'])
+    tz = np.array(d['tz'])
+
+    # Avoid jump between -pi and pi
+    rz[rz < 0] += 2*np.pi
+
+    # plt.plot(t,rz,'.')
+    # plt.show()
+
+    # Force bias
+    to = np.nonzero(t > 1)[0][0]
+    tz_offset = np.average(tz[:to])
+
+    # Select inital point
+    tz = tz-tz_offset
+    i = np.nonzero(tz < -0.0005)[0][0]
+    tz = -tz[i:]
+    rz = rz[i:]
+    rz = rz-rz[0]
+
+    l = l/1000
+    c = 0.01 # distance between rotation center and start of flexible beam
+    d = l+c# distance between rotation center and contact point
+
+    # The actual length of the bending beam will increase a little
+    # Assume that there is a rigid part at the end of the flexible beam
+    # so a, the length of the shorter one of the PRBM model stay constant
+    # and b, the length of the moment arm or the longer one plus rigid link,
+    # can be calculated easily
+    a = l*(1-stiffness.gamma)
+
+    theta = [] # Virtual joint angle
+    tau = [] # Virtual joint torque
+    for rzi,tzi in zip(rz,tz):
+        b = np.sqrt((a+c)**2+d**2-2*(a+c)*d*np.cos(rzi))
+        thetai = np.arctan2(d*np.sin(rzi),d*np.cos(rzi)-c-a)
+        f = tzi/d
+        f_ang = np.pi/2-(thetai-rzi)
+        taui = f*np.sin(f_ang)*b
+
+        theta.append(thetai)
+        tau.append(taui)
+    theta = np.array(theta)
+    tau = np.array(tau)
+
+    # Fit
+    k = np.linalg.lstsq(theta.reshape((-1,1)),tau,rcond=None)[0][0]
+
+    w = w/1000 # 9.85mm
+    t = 0.00046
+    I = w*t**3/12
+    E = k/stiffness.gamma/stiffness.Ktheta/I*l
+    print('E',E/1e9)
+
+    thetap = np.linspace(0,theta[-1],100)
+    taup = thetap*k
+    plt.figure()
+    plt.plot(theta,tau)
+    plt.plot(thetap,taup)
+    plt.show()
+    # return rz,tz,k
+
+read(40,10,3)
