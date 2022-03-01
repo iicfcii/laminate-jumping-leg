@@ -9,12 +9,8 @@ import data
 from scipy.optimize import root_scalar
 import stiffness
 
-def read(*args):
-    if len(args) == 0:
-        name = '../data/test.csv'
-    else:
-        l,w,n = args
-        name = '../data/beam_{:d}_{:d}_{:d}.csv'.format(l,w,n)
+def read(i,l,w,n):
+    name = '../data/beam_{:d}_{:d}_{:d}_{:d}.csv'.format(i,l,int(np.rint(w)),n)
     d = data.read(name)
     t = np.array(d['t'])
     rz = np.array(d['rz'])
@@ -78,6 +74,7 @@ def read(*args):
     thetap = np.linspace(0,theta[-1],100)
     taup = thetap*k
 
+    # print(E)
     # plt.figure()
     # plt.plot(theta,tau)
     # plt.plot(thetap,taup)
@@ -87,20 +84,26 @@ def read(*args):
 
 if __name__ == '__main__':
     l = np.array([20,40,60,80,100])
-    E = []
-    for li in l:
-        Ei = []
-        for n in [1,2,3]:
-            Ei.append(read(li,10,3))
+    Es = []
+    for s in [1,2,3]:
+        E = []
+        for li in l:
+            Ei = []
+            for n in [1,2,3]:
+                Ei.append(read(s,li,9.85,3))
 
-        E.append(np.average(Ei)/1e9)
+            E.append(np.average(Ei)/1e9)
 
-    p = np.polyfit(l,E,3)
+        Es.append(E)
+
+    p = np.polyfit(np.tile(l,3),np.array(Es).flatten(),3)
     lp = np.linspace(l[0],l[-1],50)
     Ep = np.polyval(p,lp)
 
     print('E (GPa) vs l(mm)',str(list(p)))
 
+    for i,E in enumerate(Es):
+        c = 'C{:d}'.format(i)
+        plt.plot(l,E,'.',color=c)
     plt.plot(lp,Ep)
-    plt.plot(l,E,'.')
     plt.show()
