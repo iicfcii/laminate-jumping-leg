@@ -12,8 +12,8 @@ def read(*args):
     if len(args) == 0:
         name = '../data/test.csv'
     else:
-        k,a,n = args
-        name = '../data/spring_{:d}_{:d}_{:d}.csv'.format(k,int(a*10),n)
+        s,k,a,n = args
+        name = '../data/spring_{:d}_{:d}_{:d}_{:d}.csv'.format(s,k,int(a*10),n)
     d = data.read(name)
     t = np.array(d['t'])
     rz = np.array(d['rz'])
@@ -52,10 +52,11 @@ r = 0.06
 if __name__ == '__main__':
     for i,k in enumerate([20,50,80]):
         c = 'C{:d}'.format(i)
-        for n in [1,2,3]:
-            rz,tz,kp = read(k,1,n)
-            print(kp/r**2)
-            plt.plot(rz,tz,'.',color=c,markersize=1)
+        for s in [1,2]:
+            for n in [1,2,3]:
+                rz,tz,kp = read(s,k,1,n)
+                print(kp/r**2)
+                plt.plot(rz,tz,'.',color=c,markersize=1)
         rzp = np.linspace(0,rz[-1],100)
         tzp = k*r**2*rzp
         plt.plot(rzp,tzp,color=c)
