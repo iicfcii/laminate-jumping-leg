@@ -19,8 +19,8 @@ def sim(params):
     return v
 
 K = np.arange(10,111,10)
-R = np.arange(0.02,0.121,0.01)
-A = np.arange(0.6,1.41,0.1)
+R = np.arange(0.04,0.081,0.01)
+A = np.arange(0.5,1.51,0.1)
 K, R, A = np.meshgrid(K,R,A)
 
 KRA = np.array([K.ravel(),R.ravel(),A.ravel()]).T
