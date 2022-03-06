@@ -1,6 +1,6 @@
 import matplotlib.pyplot as plt
 import numpy as np
-import geom
+from . import geom
 
 # PRBM
 gamma = 0.85

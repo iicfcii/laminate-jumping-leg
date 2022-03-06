@@ -1,11 +1,8 @@
-import sys
-sys.path.append('../utils')
-
 from scipy.optimize import differential_evolution
 import matplotlib.pyplot as plt
 import numpy as np
-import spin
-import data
+from . import spin
+from utils import data
 
 I_LOAD = 0.04*0.09**2 # Weights
 I_HOLDER = (
@@ -27,7 +24,7 @@ def read(has_load):
         dthetai = []
         for trial in [1,2]:
             # Exp motor data
-            d = data.read('../data/hpcb100_{:d}V_{:d}_{:d}.csv'.format(int(np.ceil(v)),int(has_load),trial))
+            d = data.read('./data/hpcb100_{:d}V_{:d}_{:d}.csv'.format(int(np.ceil(v)),int(has_load),trial))
             t_raw = np.array(d['t'])
             t1_raw = np.array(d['t1'])
 
@@ -94,20 +91,21 @@ def obj(x,ws,plot=False):
         plt.figure('w')
         plt.figure('i')
         for i in range(len(ws)):
+            c = 'C{:d}'.format(int(i%3))
             plt.figure('w')
             if i < 3:
                 plt.subplot(211)
             else:
                 plt.subplot(212)
-            plt.plot(t,ws[i])
-            plt.plot(sols[i].t,sols[i].y[0,:])
+            plt.plot(t,ws[i],color=c)
+            plt.plot(sols[i].t,sols[i].y[0,:],color=c)
 
             plt.figure('i')
             if i < 3:
                 plt.subplot(211)
             else:
                 plt.subplot(212)
-            plt.plot(sols[i].t,sols[i].y[1,:])
+            plt.plot(sols[i].t,sols[i].y[1,:],color=c)
 
     return e
 

@@ -1,6 +1,6 @@
 import matplotlib.pyplot as plt
 import numpy as np
-import stiffness
+from . import stiffness
 
 tf = 0.465/1000
 tr = np.sum([tf,0.015/1000,0.05/1000,0.015/1000,tf])

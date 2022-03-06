@@ -1,22 +1,18 @@
-import sys
-sys.path.append('../utils')
-sys.path.append('../template')
-
 import numpy as np
 import matplotlib.pyplot as plt
 from scipy.signal import butter, sosfiltfilt
-import data
-import jump
+from utils import data
+from template import jump
 
 sos = butter(2,50,'lowpass',fs=1000,output='sos')
 sos_dy = butter(2,50,'lowpass',fs=360,output='sos')
 
 def read(*args):
     if len(args) == 0:
-        name = '../data/test.csv'
+        name = './data/test.csv'
     else:
         k,a,n = args
-        name = '../data/leg_{:d}_{:d}_{:d}.csv'.format(k,int(a*10),n)
+        name = './data/leg_{:d}_{:d}_{:d}.csv'.format(k,int(a*10),n)
     d = data.read(name)
     t = np.array(d['t'])
     y_raw = np.array(d['y'])

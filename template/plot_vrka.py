@@ -1,10 +1,7 @@
-import sys
-sys.path.append('../utils')
-
 import matplotlib.pyplot as plt
-import jump
 import numpy as np
-import data
+from utils import data
+from . import jump
 
 fs = 8
 lw = 0.6
@@ -18,7 +15,7 @@ plt.rcParams['xtick.major.width'] = lw
 plt.rcParams['ytick.major.width'] = lw
 plt.rcParams['patch.linewidth'] = lw
 
-f = data.read('../data/vrka.csv')
+f = data.read('./data/vrka.csv')
 R = np.array(f['r'])
 K = np.array(f['k'])
 A = np.array(f['a'])

@@ -1,12 +1,9 @@
-import sys
-sys.path.append('../utils')
-
 import matplotlib.pyplot as plt
 import serial
 import time
-import ati
-from NatNetClient import NatNetClient
-import data
+from utils import ati
+from utils.NatNetClient import NatNetClient
+from utils import data
 
 CLIENT_ADDR = "192.168.1.188"
 SERVER_ADDR = "192.168.1.166"
@@ -86,7 +83,7 @@ if __name__ == '__main__':
     motor.close()
     streaming_client.shutdown()
 
-    file_name = '../data/test.csv'
+    file_name = './data/test.csv'
     data.write(
         file_name,
         ['t','y','grf'],

@@ -1,11 +1,8 @@
-import sys
-sys.path.append('../utils')
-
 import multiprocessing
 import matplotlib.pyplot as plt
-import jump
 import numpy as np
-import data
+from utils import data
+from . import jump
 
 cs = jump.cs
 

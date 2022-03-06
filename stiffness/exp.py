@@ -1,13 +1,10 @@
-import sys
-sys.path.append('../utils')
-
 import time
 import matplotlib.pyplot as plt
 import numpy as np
 import math3d as m3d
-import data
-import ati
 import urx
+from utils import data
+from utils import ati
 
 def to_movel(pose):
     return np.array(list(pose.pos)+list(pose.orient.rotation_vector))

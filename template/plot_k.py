@@ -1,6 +1,6 @@
 import matplotlib.pyplot as plt
-import jump
 import numpy as np
+from . import jump
 
 cs = jump.cs
 cs['k'] = 30

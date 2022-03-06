@@ -3,9 +3,9 @@ sys.path.append('../utils')
 
 import serial
 import time
-import ati
-from NatNetClient import NatNetClient
-import data
+from utils import ati
+from utils.NatNetClient import NatNetClient
+from utils import data
 import numpy as np
 
 CLIENT_ADDR = "192.168.1.188"

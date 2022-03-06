@@ -1,19 +1,11 @@
-import sys
-sys.path.append('../utils')
-sys.path.append('../anchor')
-
 import time
 import matplotlib.pyplot as plt
 import numpy as np
-import data
-import stiffness
+from utils import data
+from anchor import stiffness
 
-def read(*args):
-    if len(args) == 0:
-        name = '../data/test.csv'
-    else:
-        s,k,a,n = args
-        name = '../data/spring_{:d}_{:d}_{:d}_{:d}.csv'.format(s,k,int(a*10),n)
+def read(s,k,a,n):
+    name = './data/spring_{:d}_{:d}_{:d}_{:d}.csv'.format(s,k,int(a*10),n)
     d = data.read(name)
     t = np.array(d['t'])
     rz = np.array(d['rz'])

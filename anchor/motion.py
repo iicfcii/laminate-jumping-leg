@@ -1,6 +1,6 @@
 import matplotlib.pyplot as plt
 import numpy as np
-import geom
+from . import geom
 
 def sim(rots,x,plot=False):
     ang = x[0]
