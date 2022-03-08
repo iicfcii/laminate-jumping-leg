@@ -32,7 +32,7 @@ if __name__ == '__main__':
     V = np.array(V).reshape((-1,1))
     res = np.concatenate((KRA,V),axis=1)
 
-    file_name = '../data/vrka.csv'
+    file_name = './data/vrka.csv'
     data.write(
         file_name,
         ['k','r','a','v']+list(cs.keys()),

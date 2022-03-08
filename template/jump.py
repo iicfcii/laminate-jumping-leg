@@ -10,14 +10,14 @@ def f_spring(ys,k,a,d):
     else:
         return -np.sign(ys)*k*d*np.power(np.abs(ys/d),a)
 
-g, m, r, k, a, d = symbols('g m r k a d')
+g, m, r, k, a, dl, ds = symbols('g m r k a dl ds')
 b, K, I, R, L, V = symbols('b K I R L V')
 dyb, ys, dtheta, i, yb = symbols('dyb ys dtheta i yb')
 
 # Spring force
-fs = f_spring(ys,k,a,d)
+fs = f_spring(ys,k,a,ds)
 # Wall force
-fw = (Max(0,yb-ys-d)/(yb-ys-d))*((yb-ys-d)*10000+dtheta*r*50)
+fw = (Max(0,yb-ys-dl)/(yb-ys-dl))*((yb-ys-dl)*10000+dtheta*r*50)
 f = fs+fw
 
 ddyb = f/m-fw/m-g
@@ -31,10 +31,11 @@ dx = Matrix([ddyb,dys,ddtheta,di,dyb])
 cs = {
     'g': 9.81,
     'm': 0.02,
-    'r': 0.05,
+    'r': 0.06,
     'k': 40,
     'a': 1,
-    'd': 0.06,
+    'dl': 0.06,
+    'ds': 0.06,
     'b': 0.0006566656814173122,
     'K': 0.14705778874626846,
     'I': 9.345234544905957e-05,

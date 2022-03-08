@@ -118,11 +118,10 @@ def spring(ang,ls,c):
 
     return lk
 
-def bbox(lks):
+def bbox(lks,pad=0.005):
     ps = np.array(lks).reshape((-1,2))
     cx = (np.amax(ps[:,0])+np.amin(ps[:,0]))/2
     cy = (np.amax(ps[:,1])+np.amin(ps[:,1]))/2
-    pad = 0.005
     dx = np.amax(ps[:,0])-np.amin(ps[:,0])
     dy = np.amax(ps[:,1])-np.amin(ps[:,1])
 
