@@ -31,7 +31,7 @@ bbox = geom.bbox(lksp)
 
 fig,axes = plt.subplots(
     1,2,
-    figsize=(3.4,2.5),dpi=150
+    figsize=(3.4-plot.pad*2,2.58),dpi=150
 )
 
 ax = axes[0]
@@ -61,7 +61,8 @@ axp.set_xlabel('Crank Angle (rad)')
 axp.set_ylabel('Percentage Error (%)',labelpad=0)
 
 plt.subplots_adjust(
-    left=0.02,right=0.98,top=0.98,bottom=0.16,
-    wspace=0.35,hspace=0
+    left=0,right=1,top=1,bottom=0.145,
+    wspace=0.32,hspace=0
 )
+plot.savefig('fourbar.pdf',fig)
 plt.show()

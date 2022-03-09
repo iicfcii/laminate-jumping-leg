@@ -11,7 +11,7 @@ plot.set_default()
 cs = jump.cs
 fig,ax = plt.subplots(
     1,1,
-    figsize=(3.4,3),dpi=150
+    figsize=(3.4-plot.pad*2,3),dpi=150
 )
 lw = 0.8
 c = ['C0','C1','C0','C1','C0','C1']
@@ -42,7 +42,8 @@ ax.legend(lines[:3],['Desired','Design','Measured'])
 ax.set_xlabel('Displacement (m)')
 ax.set_ylabel('Force (N)')
 plt.subplots_adjust(
-    left=0.14,right=0.98,top=0.98,bottom=0.12,
+    left=0.14,right=1,top=1,bottom=0.125,
     wspace=0,hspace=0
 )
+plot.savefig('stiffness.pdf',fig)
 plt.show()

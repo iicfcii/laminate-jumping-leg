@@ -1,4 +1,5 @@
 import matplotlib.pyplot as plt
+import matplotlib.gridspec as gridspec
 import numpy as np
 from utils import data
 from utils import plot
@@ -35,24 +36,16 @@ r_plots = [0.04,0.05,0.07,0.08,0.06]
 
 plot.set_default()
 
-dpi = 150
-fig = plt.figure(figsize=(3.4, 3.4),dpi=150)
-subfig1,subfig2 = fig.subfigures(
-    2,1,
-    height_ratios=[0.3,1],hspace=0,wspace=0
-)
+fig = plt.figure(figsize=(3.4-plot.pad*2,3.4),dpi=150)
+gs = gridspec.GridSpec(2,1,figure=fig,height_ratios=[0.3,1])
+gs1 = gs[0].subgridspec(1,4)
+gs2 = gs[1].subgridspec(1,3,width_ratios=[0.13,1,0.28])
 
-axes1 = subfig1.subplots(
-    1,4,
-    gridspec_kw={'width_ratios':[1,1,1,1]},
-)
-axes2 = subfig2.subplots(
-    1,2,
-    gridspec_kw={'width_ratios':[1,0.3]},
-)
-axes = axes1.ravel().tolist()+axes2.ravel().tolist()
+axes1 = [fig.add_subplot(gs1[0,i]) for i in range(4)]
+axes2 = [fig.add_subplot(gs2[0,i]) for i in [1,0,2]]
+axes = axes1+axes2
 
-for j,ax in enumerate(axes[:-1]):
+for j,ax in enumerate(axes[:-2]):
     # Figure out the r coordinate
     i = (np.abs(R[:,0,0].flatten()-r_plots[j])<1e-10).nonzero()[0][0]
     contour = ax.contourf(
@@ -71,27 +64,27 @@ for j,ax in enumerate(axes[:-1]):
     ax.annotate(
         '{:.2f} m'.format(R[i,0,0]),
         xy=(1, 0),xycoords='axes fraction',
-        xytext=(-0.15*dpi,0.15*dpi),textcoords='offset pixels',ha='right',va='bottom',
+        xytext=(-5,5),textcoords='offset points',ha='right',va='bottom',
         bbox={'boxstyle':'round','fc':'w'}
     )
-    # ax.set_title('r = {:.2f} m'.format(R[i,0,0]))
 
-    if j == len(axes)-2:
+    if j == len(axes)-3:
         ax.annotate(
             '{:.2f}'.format(v_max_r),
             xy=(k_max, a_max),
-            xytext=(0.3*dpi,-0.3*dpi),textcoords='offset pixels',ha='center',va='top',
+            xytext=(15,-15),textcoords='offset points',ha='center',va='top',
             arrowprops={'arrowstyle':'->'},
             bbox={'boxstyle':'round','fc':'w'}
-        ) # 'offset points' causes error with subfigure
+        )
         ax.set_ylabel('Nonlinearity',labelpad=2)
         ax.set_xlabel('Stiffness Coefficient (N/m)',labelpad=2)
     else:
         ax.set_xticks([])
         ax.set_yticks([])
 
+axes[-2].axis('off')
 axes[-1].axis('off')
-cb = subfig2.colorbar(
+cb = fig.colorbar(
     contour,
     ax=axes[-1],
     format=lambda x,p: '{:.1f}'.format(x),
@@ -103,6 +96,6 @@ cb = subfig2.colorbar(
 cb.set_label('Liftoff Velocity (m/s)')
 cb.solids.set_edgecolor("face")
 
-subfig1.subplots_adjust(left=0.02,right=0.98,top=0.92,bottom=0.08,wspace=0.1)
-subfig2.subplots_adjust(left=0.12,right=1,top=1,bottom=0.13,wspace=0.1)
+fig.subplots_adjust(left=0,right=1,top=1,bottom=0.1,wspace=0.1,hspace=0.05)
+plot.savefig('sweep.pdf',fig)
 plt.show()

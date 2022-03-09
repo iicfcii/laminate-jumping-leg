@@ -10,7 +10,7 @@ plot.set_default()
 cs = jump.cs
 fig,axes = plt.subplots(
     3,2,
-    figsize=(3.4,4.88),dpi=150
+    figsize=(3.4-plot.pad*2,4.91),dpi=150
 )
 r = 0.04
 scales = [2,1,1,0.6,0.6,0.6]
@@ -78,7 +78,8 @@ ax.set_xlabel('Stiffness Coefficient (N/m)',labelpad=12)
 ax.set_ylabel('Nonlinearity',labelpad=12)
 
 plt.subplots_adjust(
-    left=0.1,right=0.98,top=0.98,bottom=0.06,
+    left=0.09,right=1,top=1,bottom=0.06,
     wspace=0,hspace=0
 )
+plot.savefig('springs.pdf',fig)
 plt.show()
