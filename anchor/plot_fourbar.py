@@ -50,15 +50,15 @@ ax.set_yticks([])
 ax.set_xlabel('Fourbar Design')
 
 axp = axes[1]
-e_xs = (xs-xs_d)*1000
-e_ys = (ys-ys_d)*1000
+e_xs = (xs-xs_d)/cs['dl']*100
+e_ys = (ys-ys_d)/cs['dl']*100
 rots = rots[0]-rots
 lw = 1
 axp.plot(rots,e_xs,linewidth=lw,label='x')
 axp.plot(rots,e_ys,linewidth=lw,label='y')
 axp.legend()
 axp.set_xlabel('Crank Angle (rad)')
-axp.set_ylabel('Error (mm)',labelpad=0)
+axp.set_ylabel('Percentage Error (%)',labelpad=0)
 
 plt.subplots_adjust(
     left=0.02,right=0.98,top=0.98,bottom=0.16,

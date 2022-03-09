@@ -30,22 +30,29 @@ v_min = V.flatten()[idx_min]
 print('Max k={:.0f} r={:.2f} a={:.2f} v={:.2f}'.format(k_max,r_max,a_max,v_max))
 print('Min k={:.0f} r={:.2f} a={:.2f} v={:.2f}'.format(k_min,r_min,a_min,v_min))
 
-r_plots = [0.06]
+r_plots = [0.04,0.05,0.07,0.08,0.06]
 # r_plots = R[:,0,0]
 
 plot.set_default()
-fig,axes = plt.subplots(
-    1,len(r_plots)+1,
-    sharex=True,sharey=True,
-    gridspec_kw={'width_ratios':len(r_plots)*[1]+[0.3]},
-    figsize=(3.4, 2.5),dpi=150
-)
-# fig.patch.set_facecolor('red')
-for j,ax in enumerate(axes.ravel()):
-    if j >= len(r_plots):
-        ax.axis('off')
-        continue
 
+dpi = 150
+fig = plt.figure(figsize=(3.4, 3.4),dpi=150)
+subfig1,subfig2 = fig.subfigures(
+    2,1,
+    height_ratios=[0.3,1],hspace=0,wspace=0
+)
+
+axes1 = subfig1.subplots(
+    1,4,
+    gridspec_kw={'width_ratios':[1,1,1,1]},
+)
+axes2 = subfig2.subplots(
+    1,2,
+    gridspec_kw={'width_ratios':[1,0.3]},
+)
+axes = axes1.ravel().tolist()+axes2.ravel().tolist()
+
+for j,ax in enumerate(axes[:-1]):
     # Figure out the r coordinate
     i = (np.abs(R[:,0,0].flatten()-r_plots[j])<1e-10).nonzero()[0][0]
     contour = ax.contourf(
@@ -62,24 +69,29 @@ for j,ax in enumerate(axes.ravel()):
     v_max_r = V[i,:,:].flatten()[idx_max]
 
     ax.annotate(
-        '{:.2f}'.format(v_max_r),
-        xy=(k_max, a_max),
-        xytext=(15,-15),textcoords='offset points',ha='center',va='top',
-        arrowprops={'arrowstyle':'->'},
-        bbox={'boxstyle':'round','fc':'w'}
-    )
-    ax.annotate(
         '{:.2f} m'.format(R[i,0,0]),
-        xy=(0, 1),xycoords='axes fraction',
-        xytext=(8,-8),textcoords='offset points',ha='left',va='top',
+        xy=(1, 0),xycoords='axes fraction',
+        xytext=(-0.15*dpi,0.15*dpi),textcoords='offset pixels',ha='right',va='bottom',
         bbox={'boxstyle':'round','fc':'w'}
     )
     # ax.set_title('r = {:.2f} m'.format(R[i,0,0]))
 
-    ax.set_ylabel('Nonlinearity')
-    ax.set_xlabel('Stiffness Coefficient (N/m)')
+    if j == len(axes)-2:
+        ax.annotate(
+            '{:.2f}'.format(v_max_r),
+            xy=(k_max, a_max),
+            xytext=(0.3*dpi,-0.3*dpi),textcoords='offset pixels',ha='center',va='top',
+            arrowprops={'arrowstyle':'->'},
+            bbox={'boxstyle':'round','fc':'w'}
+        ) # 'offset points' causes error with subfigure
+        ax.set_ylabel('Nonlinearity',labelpad=2)
+        ax.set_xlabel('Stiffness Coefficient (N/m)',labelpad=2)
+    else:
+        ax.set_xticks([])
+        ax.set_yticks([])
 
-cb = fig.colorbar(
+axes[-1].axis('off')
+cb = subfig2.colorbar(
     contour,
     ax=axes[-1],
     format=lambda x,p: '{:.1f}'.format(x),
@@ -91,5 +103,6 @@ cb = fig.colorbar(
 cb.set_label('Liftoff Velocity (m/s)')
 cb.solids.set_edgecolor("face")
 
-plt.subplots_adjust(left=0.14,right=1,top=0.95,bottom=0.15,wspace=0.1)
+subfig1.subplots_adjust(left=0.02,right=0.98,top=0.92,bottom=0.08,wspace=0.1)
+subfig2.subplots_adjust(left=0.12,right=1,top=1,bottom=0.13,wspace=0.1)
 plt.show()
