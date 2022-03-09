@@ -2,7 +2,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 from . import stiffness
 
-tf = 0.465/1000
+tf = 0.45/1000
 tr = np.sum([tf,0.015/1000,0.05/1000,0.015/1000,tf])
 wr = 0.01
 pad = 0.004 # pad at the end of the flexible beam
@@ -64,7 +64,19 @@ def limit_ang(ang):
 def leg(ang,l,c,tilt=None):
     ps, ts = fourbar_fk(ang,*l[:4],form=c)
     assert ps is not None, 'No fourbar fk solution'
-    pf = np.array([[ps[2,0]+np.cos(ts[2])*l[4],ps[2,1]+np.sin(ts[2])*l[4]]])
+
+
+    lc = np.sqrt(l[4]**2-tr**2)+np.sqrt(l[2]**2-tr**2)
+    cos_beta = (l[4]**2+l[2]**2-lc**2)/2/l[4]/l[2]
+    beta = np.arccos(cos_beta) # Consider the joint offset due to beam thickness
+    beta = np.pi-beta
+    # NOTE: ideally, beta's sign should be determined by testing
+    # whether the long coupler intersects with the rocker.
+    if c < 0: beta = -beta
+    pf = np.array([[
+        ps[2,0]+np.cos(ts[2]+beta)*l[4],
+        ps[2,1]+np.sin(ts[2]+beta)*l[4]
+    ]])
 
     if tilt is None:
         # Make the diagonal line point at -y direction
