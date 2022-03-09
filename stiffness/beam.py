@@ -6,9 +6,10 @@ from anchor import stiffness
 from utils import data
 
 Eref = (2.7+2.2)/2*1e6*6894.76/1e9 # GPa
+T = [0.000450,0.000457,0.000457,0.000433,0.000436]
 
-def read(i,l,w,n):
-    name = './data/beam_{:d}_{:d}_{:d}_{:d}.csv'.format(i,l,int(np.rint(w)),n)
+def read(s,l,w,n):
+    name = './data/beam_{:d}_{:d}_{:d}_{:d}.csv'.format(s,l,int(np.rint(w)),n)
     d = data.read(name)
     t = np.array(d['t'])
     rz = np.array(d['rz'])
@@ -23,7 +24,7 @@ def read(i,l,w,n):
 
     # Select inital point
     tz = tz-tz_offset
-    i = np.nonzero(tz < -0.0005)[0][0]
+    i = np.nonzero(tz < -0.0002)[0][0]
     tz = -tz[i:]
     rz = rz[i:]
     rz = rz-rz[0]
@@ -70,7 +71,8 @@ def read(i,l,w,n):
     k = np.linalg.lstsq(theta.reshape((-1,1)),tau,rcond=None)[0][0]
 
     w = w/1000 # 9.85mm
-    t = 0.00046
+
+    t = T[s-1]
     I = w*t**3/12
     E = k/stiffness.gamma/stiffness.Ktheta/I*l
 
@@ -80,14 +82,15 @@ def read(i,l,w,n):
     # plt.figure()
     # plt.plot(theta,tau)
     # plt.plot(thetap,taup)
-    # plt.plot(rz,n)
     # plt.show()
 
     return theta,tau,E
 
+# read(5,20,9.85,3)
+
 if __name__ == '__main__':
     l = np.array([20,40,60,80,100])
-    samples = [1,2,3]
+    samples = [1,2,3,4,5]
     Es = []
 
     plt.figure()
@@ -111,12 +114,12 @@ if __name__ == '__main__':
     Ep = np.polyval(p,lp)
 
     print('E (GPa) vs l(mm)',str(list(p)))
+    print('Average t', np.mean(T))
 
     plt.figure()
-    for i,E in enumerate(Es):
-        c = 'C{:d}'.format(i)
-        plt.plot(l,E/Eref,'.',color=c)
-    plt.plot(lp,Ep/Eref)
+    for E in Es:
+        plt.plot(l,E/Eref,'.',color='C0')
+    plt.plot(lp,Ep/Eref,color='C0')
     plt.xlabel('Length (mm)')
     plt.ylabel('Virtual Stiffness Correction Factor')
     plt.show()

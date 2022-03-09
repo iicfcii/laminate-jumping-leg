@@ -2,7 +2,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 from . import stiffness
 
-tf = 0.45/1000
+tf = 0.4466/1000
 tr = np.sum([tf,0.015/1000,0.05/1000,0.015/1000,tf])
 wr = 0.01
 pad = 0.004 # pad at the end of the flexible beam
