@@ -13,7 +13,7 @@ fig,axes = plt.subplots(
     figsize=(3.4-plot.pad*2,4.91),dpi=150
 )
 r = 0.04
-scales = [2,1,1,0.6,0.6,0.6]
+scales = [2,1,1,0.7,0.7,0.7]
 # scales = [1,1,1,1,1,1]
 for i,ax in enumerate(axes.ravel()):
     s = design.springs[i]
@@ -23,7 +23,8 @@ for i,ax in enumerate(axes.ravel()):
 
     sol = jump.solve(cs,plot=False)
     rot = -np.amin(sol.y[1,:])/cs['r']
-
+    print(cs['k'],cs['a'],rot)
+    
     x = s['x']
     ls = x[:4]
     w = x[4]

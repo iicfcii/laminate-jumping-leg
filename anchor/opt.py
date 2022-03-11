@@ -56,8 +56,8 @@ def obj_stiffness(x,m,plot=False):
     e = np.sqrt(np.sum((f-f_d)**2)/f_d.shape[0])
 
     mass_spring = (
-        (x[0]+x[2]+x[3])*geom.tr*geom.wr*geom.rho+
-        x[1]*geom.tf*x[4]*geom.rho
+        (x[0]+x[2]+x[3]+geom.pad)*geom.tr*geom.wr*geom.rho+
+        (x[1]-geom.pad)*geom.tf*x[4]*geom.rho
     )
     em = np.abs(m-mass_spring)
 
@@ -70,12 +70,12 @@ def obj_stiffness(x,m,plot=False):
     return e+5*em
 
 bounds_motion = [(-np.pi,np.pi)]+[(0.01,0.06)]*5+[(-1,1)]*1
-bounds_stiffness = [(0.01,0.1)]+[(0.025,0.105)]+[(0.01,0.1)]*2+[(0.01,0.015)]+[(-1,1)]*1
+bounds_stiffness = [(0.01,0.12)]+[(0.02+geom.pad,0.1+geom.pad)]+[(0.01,0.12)]*2+[(0.01,0.015)]+[(-1,1)]*1
 
 xm = None
 xs = None
-xm = [2.781912947006866, 0.018706062290721335, 0.05038077637460431, 0.010005480977177083, 0.05999704074130474, 0.059231905339233296, 0.1200145330960729]
-xs = [0.010000069768143195, 0.025002362800627606, 0.021076480353566136, 0.04112495788981202, 0.010256837489942166, -0.6005357886814637]
+xm = [2.828159538479232, 0.01972015942228434, 0.049514330533803705, 0.010005526060266192, 0.05999369017118644, 0.05585751101015963, 0.08394108211874252]
+xs = [0.010000000609479094, 0.024683896023788017, 0.02517355198647582, 0.04330636939679823, 0.010080368535064844, -0.2926686830625965]
 
 if __name__ == '__main__':
     if xm is None:
@@ -95,7 +95,8 @@ if __name__ == '__main__':
         print('Cost', res.fun)
         xm = res.x
 
-    mass_spring = 0.005-np.sum(xm[1:6])*geom.tr*geom.wr*geom.rho
+    mass_fourbar = np.sum(xm[1:6])*geom.tr*geom.wr*geom.rho
+    mass_spring = 0.007-mass_fourbar
     assert mass_spring > 0.001
 
     if xs is None:

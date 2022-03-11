@@ -30,7 +30,7 @@ dx = Matrix([ddyb,dys,ddtheta,di,dyb])
 
 cs = {
     'g': 9.81,
-    'm': 0.02,
+    'm': 0.022,
     'r': 0.06,
     'k': 40,
     'a': 1,
