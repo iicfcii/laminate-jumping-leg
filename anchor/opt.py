@@ -70,7 +70,7 @@ def obj_stiffness(x,m,plot=False):
     return e+5*em
 
 bounds_motion = [(-np.pi,np.pi)]+[(0.01,0.06)]*5+[(-1,1)]*1
-bounds_stiffness = [(0.01,0.1)]+[(0.025,0.105)]+[(0.01,0.1)]*2+[(0.01,0.02)]+[(-1,1)]*1
+bounds_stiffness = [(0.01,0.1)]+[(0.025,0.105)]+[(0.01,0.1)]*2+[(0.01,0.015)]+[(-1,1)]*1
 
 xm = None
 xs = None

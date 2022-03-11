@@ -97,5 +97,5 @@ cb.set_label('Liftoff Velocity (m/s)')
 cb.solids.set_edgecolor("face")
 
 fig.subplots_adjust(left=0,right=1,top=1,bottom=0.1,wspace=0.1,hspace=0.05)
-plot.savefig('sweep.pdf',fig)
 plt.show()
+plot.savefig('sweep.pdf',fig)

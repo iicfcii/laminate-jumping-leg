@@ -18,15 +18,15 @@ def str_movel(pose):
 # Base to foot of leg
 Tbc = m3d.Transform()
 Tbc.pos = m3d.Vector(-4/1000, (-25.4*21-1)/1000, 0.075)
-Tbc.orient = m3d.Orientation.new_euler((0, 0, -np.pi/2+0/180*np.pi), encoding='XYZ')
+Tbc.orient = m3d.Orientation.new_euler((0, 0, -np.pi/2-80/180*np.pi), encoding='XYZ')
 
 # Tool pose wrt virtual rotation
 Tct = m3d.Transform()
-Tct.pos = m3d.Vector(-(40+10+20)/1000,0,0)
+Tct.pos = m3d.Vector(-(40+15)/1000,0,0)
 Tct.orient = m3d.Orientation.new_euler((np.pi, 0, np.pi/4), encoding='XYZ')
 
 MOVEL_INIT = to_movel(Tbc*Tct)
-ROT_MAX = 0.4
+ROT_MAX = -0.75
 
 # Beam
 # 20,40,60,80,100
@@ -49,7 +49,7 @@ if __name__ == '__main__':
     time.sleep(2)
 
     t0 = time.time()
-    drs = np.arange(0,-ROT_MAX,-0.02)
+    drs = np.arange(0,-ROT_MAX,np.sign(ROT_MAX)*-0.01)
     drs = np.concatenate(([0,0],drs))
 
     t = []
