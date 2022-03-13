@@ -3,7 +3,7 @@ import numpy as np
 from . import stiffness
 
 tf = 0.4466/1000
-tr = np.sum([tf,0.015/1000,0.05/1000,0.015/1000,0.8255/1000])
+tr = np.sum([tf,0.015/1000,0.13/1000,0.015/1000,0.8255/1000])
 wr = 0.01
 pad = 0.004 # pad at the end of the flexible beam
 rho = 1820 # fiber glass density
