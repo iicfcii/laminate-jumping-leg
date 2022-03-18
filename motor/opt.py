@@ -94,17 +94,22 @@ def obj(x,ws,plot=False):
             c = 'C{:d}'.format(int(i%3))
             plt.figure('w')
             if i < 3:
-                plt.subplot(211)
+                plt.subplot(121)
+                plt.title('Without Load')
             else:
-                plt.subplot(212)
-            plt.plot(t,ws[i],color=c)
+                plt.subplot(122)
+                plt.title('With Load')
+            plt.plot(t,ws[i],'--',color=c,label='{:.1f}V'.format(VOLTS[i%3]))
             plt.plot(sols[i].t,sols[i].y[0,:],color=c)
+            plt.xlabel('Time (s)')
+            plt.ylabel('Speed (rad/s)')
+            plt.legend()
 
             plt.figure('i')
             if i < 3:
-                plt.subplot(211)
+                plt.subplot(121)
             else:
-                plt.subplot(212)
+                plt.subplot(122)
             plt.plot(sols[i].t,sols[i].y[1,:],color=c)
 
     return e
