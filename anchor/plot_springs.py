@@ -23,8 +23,8 @@ for i,ax in enumerate(axes.ravel()):
 
     sol = jump.solve(cs,plot=False)
     rot = -np.amin(sol.y[1,:])/cs['r']
-    print(cs['k'],cs['a'],rot)
-    
+    print(cs['k'],cs['a'],rot,rot*cs['r'])
+
     x = s['x']
     ls = x[:4]
     w = x[4]
