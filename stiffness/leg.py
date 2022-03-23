@@ -21,7 +21,7 @@ def read(s,k,a,n):
     z = -z
 
     # Find contact time
-    ti = t[np.nonzero(fz > 0.015)[0][0]]
+    ti = t[np.nonzero(fz > 0.02)[0][0]]
 
     # Select range
     fz = fz[t>ti]
@@ -34,11 +34,11 @@ r = 0.06
 d = 0.06
 if __name__ == '__main__':
     plt.figure()
-    for i,k in enumerate([30]):
+    for i,k in enumerate([70]):
         c = 'C{:d}'.format(i)
-        for j,a in enumerate([0.7,1,1.5]):
+        for j,a in enumerate([0.7,1]):
             for s in [1]:
-                for n in [1,2,3]:
+                for n in [0]:
                     z,fz = read(s,k,a,n)
                     plt.plot(z,fz,'.',color=c,markersize=0.5)
 

@@ -6,19 +6,21 @@ from . import geom
 tf = 0.45/1000
 gamma = 0.85
 Ktheta = 2.65
-E = (2.7+2.2)/2*1e6*6894.76
+# E = (2.7+2.2)/2*1e6*6894.76
+pE = [1.8117485942295127e-05, -0.0044047993719374965, 0.3702293952041017, 5.703030702032034]
 
 def prbm_k(t,l,w):
     I = w*t**3/12
+    E = np.polyval(pE,l*1000)*1e9
     k = gamma*Ktheta*E*I/l
     return k
 
 def sim(x,r,plot=False):
-    ls = x[:3]
-    c = x[3]
+    ls = x[:4]
+    c = x[4]
     w = geom.wr
 
-    k = prbm_k(tf,ls[0],w)
+    k = prbm_k(tf,ls[1],w)
     lk = geom.spring(0,ls,c)
 
     lks = []
@@ -36,9 +38,9 @@ def sim(x,r,plot=False):
         dtheta = geom.limit_ang(theta-np.pi)
         tauk = k*dtheta
         f_ang = geom.limit_ang(alpha-theta)
-        f = tauk/(ls[0]*gamma+geom.pade)/np.sin(f_ang)
+        f = tauk/(ls[1]*gamma+geom.pade)/np.sin(f_ang)
         fp_ang = geom.limit_ang(np.pi+alpha-beta)
-        tau = f*np.sin(fp_ang)*ls[2]
+        tau = f*np.sin(fp_ang)*ls[3]
 
         # print(theta,alpha,beta,dtheta,f_ang,fp_ang)
         taus.append(tau)
