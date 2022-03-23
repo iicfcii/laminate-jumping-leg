@@ -4,8 +4,6 @@ from . import jump
 
 cs = jump.cs
 cs['k'] = 70
-cs['r'] = 0.06
-cs['ds'] = 0.06
 
 for i,a in enumerate([0.7,1,1.5]):
     cs['a'] = a

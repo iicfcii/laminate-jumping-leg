@@ -2,10 +2,10 @@ import matplotlib.pyplot as plt
 import numpy as np
 from . import stiffness
 
-tf = 0.4466/1000
-tr = np.sum([tf,0.015/1000,0.13/1000,0.015/1000,0.8255/1000])
+tr = np.sum([0.45,0.015,0.05,0.015,0.82])/1000
 wr = 0.01
-pad = 0.004 # pad at the end of the flexible beam
+padf = 0.006 # pad at the front of the flexible beam
+pade = 0.004 # pad at the end of the flexible beam
 rho = 1820 # fiber glass density
 
 # Fourbar
@@ -100,14 +100,12 @@ def leg(ang,l,c,tilt=None):
 def spring(ang,ls,c):
     #        b
     #      /  \
-    #    d     \
+    #    j     \
     #   /       \
     # a----------c
-    ad = ls[0]
-    db = ls[1] # flexible
-    bc = ls[2]
-    ac = ls[3] # crank
-    ab = ad+db
+    ab = padf+ls[0]+pade # flexible
+    bc = ls[1]
+    ac = ls[2] # crank
 
     cos_bac = (ab**2+ac**2-bc**2)/2/ab/ac
     assert np.abs(cos_bac) <= 1, 'Cannot form a triangle'
@@ -116,8 +114,8 @@ def spring(ang,ls,c):
     bac = np.arccos(cos_bac)
     if c < 0: bac = -bac
 
-    aj = ad+(db-pad)*(1-stiffness.gamma)
-    jb = ad+db-aj
+    aj = padf+ls[0]*(1-stiffness.gamma)
+    jb = ab-aj
     ps, ts = fourbar_fk(-bac+ang,aj,ac,bc,jb,form=-c)
     assert ps is not None, 'No fourbar fk solution'
 

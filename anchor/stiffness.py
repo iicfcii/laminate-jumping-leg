@@ -3,23 +3,22 @@ import numpy as np
 from . import geom
 
 # PRBM
+tf = 0.45/1000
 gamma = 0.85
 Ktheta = 2.65
-# E (GPa) vs l(mm) 3 deg poly
-pE = [1.8117485942295127e-05, -0.0044047993719374965, 0.3702293952041017, 5.703030702032034]
+E = (2.7+2.2)/2*1e6*6894.76
 
 def prbm_k(t,l,w):
     I = w*t**3/12
-    E = np.polyval(pE,l*1000)*1e9
     k = gamma*Ktheta*E*I/l
     return k
 
 def sim(x,r,plot=False):
-    ls = x[:4]
-    w = x[4]
-    c = x[5]
+    ls = x[:3]
+    c = x[3]
+    w = geom.wr
 
-    k = prbm_k(geom.tf,ls[1]-geom.pad,w)
+    k = prbm_k(tf,ls[0],w)
     lk = geom.spring(0,ls,c)
 
     lks = []
@@ -37,9 +36,9 @@ def sim(x,r,plot=False):
         dtheta = geom.limit_ang(theta-np.pi)
         tauk = k*dtheta
         f_ang = geom.limit_ang(alpha-theta)
-        f = tauk/(ls[1]*gamma)/np.sin(f_ang)
+        f = tauk/(ls[0]*gamma+geom.pade)/np.sin(f_ang)
         fp_ang = geom.limit_ang(np.pi+alpha-beta)
-        tau = f*np.sin(fp_ang)*ls[3]
+        tau = f*np.sin(fp_ang)*ls[2]
 
         # print(theta,alpha,beta,dtheta,f_ang,fp_ang)
         taus.append(tau)

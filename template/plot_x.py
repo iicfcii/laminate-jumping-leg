@@ -3,11 +3,10 @@ import numpy as np
 from . import jump
 
 cs = jump.cs
-cs['k'] = 50
-cs['r'] = 0.07
+cs['k'] = 70
 
 plt.figure()
-for a in [0.5,1,1.5]:
+for a in [0.7,1,1.5]:
     cs['a'] = a
     sol = jump.solve(cs)
 

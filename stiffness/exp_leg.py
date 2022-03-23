@@ -17,7 +17,7 @@ def str_movel(pose):
 
 # Base to foot of leg
 Tbc = m3d.Transform()
-Tbc.pos = m3d.Vector(-4/1000, (-25.4*21-1-30)/1000, 0.165)
+Tbc.pos = m3d.Vector(-4/1000, (-25.4*21-1-30)/1000, 0.168)
 Tbc.orient = m3d.Orientation.new_euler((0, 0, -np.pi/2), encoding='XYZ')
 
 # Tool pose wrt virtual rotation
@@ -26,7 +26,7 @@ Tct.pos = m3d.Vector(-75/1000,0,0)
 Tct.orient = m3d.Orientation.new_euler((np.pi, 0, np.pi/4), encoding='XYZ')
 
 MOVEL_INIT = to_movel(Tbc*Tct)
-Z_MAX = 0.045
+Z_MAX = 0.06
 
 if __name__ == '__main__':
     ur5 = urx.Robot("192.168.1.103")

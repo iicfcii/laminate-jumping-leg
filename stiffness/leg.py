@@ -34,9 +34,9 @@ r = 0.06
 d = 0.06
 if __name__ == '__main__':
     plt.figure()
-    for i,k in enumerate([30,70]):
+    for i,k in enumerate([30]):
         c = 'C{:d}'.format(i)
-        for j,a in enumerate([0.7,1]):
+        for j,a in enumerate([0.7,1,1.5]):
             for s in [1]:
                 for n in [1,2,3]:
                     z,fz = read(s,k,a,n)
