@@ -33,3 +33,37 @@ def sim(rots,x,plot=False):
         plt.plot(pfs[:,0],pfs[:,1])
 
     return xs, ys
+
+def simf(rots,x,plot=False):
+    ang = x[0]
+    l = x[1:6]
+    c = x[6]
+
+    lk, tilt = geom.leg(ang,l,c)
+
+    rs = []
+    for rot in rots:
+        lk, rot = geom.leg(rot,l,c,tilt=tilt)
+
+        f = 1
+        ang_fr = geom.pose(lk[2])[1]
+        dx_fr = lk[2][0,0]-lk[1][0,0]
+        dy_fr = lk[2][0,1]-lk[1][0,1]
+        dx_f = lk[4][1,0]-lk[1][0,0]
+        fr = f*dx_f/(np.sin(ang_fr)*dx_fr-np.cos(ang_fr)*dy_fr)
+
+        fiy = f-fr*np.sin(ang_fr)
+        fix = fr*np.cos(ang_fr)
+
+        ang_crank = geom.pose(lk[0])[1]
+        l_crank = l[1]
+        tau = -(l_crank*np.cos(ang_crank)*fiy+l_crank*np.sin(ang_crank)*fix)
+
+        rs.append(abs(tau/f))
+    rs = np.array(rs)
+
+    if plot:
+        plt.figure()
+        plt.plot(rots,rs)
+
+    return rs

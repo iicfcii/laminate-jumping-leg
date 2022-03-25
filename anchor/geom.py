@@ -64,7 +64,7 @@ def leg(ang,l,c,tilt=None):
     ps, ts = fourbar_fk(ang,*l[:4],form=c)
     assert ps is not None, 'No fourbar fk solution'
 
-
+    # beta = 0
     lc = np.sqrt(l[4]**2-tr**2)+np.sqrt(l[2]**2-tr**2)
     cos_beta = (l[4]**2+l[2]**2-lc**2)/2/l[4]/l[2]
     beta = np.arccos(cos_beta) # Consider the joint offset due to beam thickness

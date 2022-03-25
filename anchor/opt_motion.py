@@ -46,7 +46,7 @@ if __name__ == '__main__':
         res = differential_evolution(
             obj_motion,
             bounds=bounds_motion,
-            popsize=50,
+            popsize=20,
             maxiter=500,
             tol=0.01,
             callback=cb,
@@ -59,7 +59,7 @@ if __name__ == '__main__':
         print('Cost', res.fun)
         xm = res.x
 
-    m = (np.sum(xm[1:6])+geom.padf)*geom.tr*geom.wr*geom.rho
+    m = (np.sum(xm[1:6])+0.006)*geom.tr*geom.wr*geom.rho
 
     print('crank range', d/r)
     print('mass',m)
