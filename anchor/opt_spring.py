@@ -31,14 +31,11 @@ def obj_stiffness(x,plot=False):
     except AssertionError:
         return 10
 
-    y_d = np.linspace(0,d,50)
-    f_d = -jump.f_spring(y_d,k,a,d)
-
     rots = -rz+design.xm[0]
     y = motion.sim(rots,design.xm,plot=False)[1]
     y = y[0]-y
     f = tz/motion.simf(rots,design.xm,plot=False)
-    f_d = np.interp(y,y_d,f_d)
+    f_d = -jump.f_spring(y,k,a,d)
     e = np.sqrt(np.sum((f-f_d)**2)/f.shape[0])
 
     if plot:
