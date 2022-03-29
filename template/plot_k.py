@@ -22,7 +22,7 @@ for i,a in enumerate([0.7,1,1.5]):
     f2 = -jump.f_spring(ys2,cs['k'],cs['a'],cs['ds'])
 
     c = 'C{:d}'.format(i)
-    plt.plot(ys1,f1,color=c,label='a={:.1f} v_max={:.1f}'.format(a,v_max))
+    plt.plot(ys1,f1,color=c,label='a={:.1f} v_max={:.2f}'.format(a,v_max))
     plt.plot(ys2,f2,'--',color=c)
 plt.legend()
 plt.show()

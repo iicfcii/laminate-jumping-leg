@@ -52,7 +52,7 @@ lift_off.direction = 1
 
 def solve(cs,plot=False):
     # Initial condition after settle
-    ys_i = -cs['m']*cs['g']/cs['k']
+    ys_i = -np.power(cs['m']*cs['g']/cs['k']/cs['ds'],1/cs['a'])*cs['ds']
     yb_i = ys_i
 
     x0 = [0,ys_i,0,0,yb_i]
