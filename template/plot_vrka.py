@@ -50,7 +50,8 @@ for j,ax in enumerate(axes[:-2]):
     i = (np.abs(R[:,0,0].flatten()-r_plots[j])<1e-10).nonzero()[0][0]
     contour = ax.contourf(
         K[i,:,:],A[i,:,:],V[i,:,:],
-        np.linspace(np.maximum(v_min,0),v_max,8),
+        # np.linspace(np.maximum(v_min,0),v_max,8),
+        np.arange(0.8,2.01,0.1),
         extend='neither' if v_min > 0 else 'min'
     )
     for c in contour.collections: c.set_edgecolor("face")
@@ -63,8 +64,8 @@ for j,ax in enumerate(axes[:-2]):
 
     ax.annotate(
         '{:.2f} m'.format(R[i,0,0]),
-        xy=(1, 0),xycoords='axes fraction',
-        xytext=(-5,5),textcoords='offset points',ha='right',va='bottom',
+        xy=(1, 1),xycoords='axes fraction',
+        xytext=(-5,-5),textcoords='offset points',ha='right',va='top',
         bbox={'boxstyle':'round','fc':'w'}
     )
 
