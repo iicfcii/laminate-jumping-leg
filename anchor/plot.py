@@ -3,6 +3,7 @@ import matplotlib.pyplot as plt
 from scipy.signal import butter, sosfiltfilt
 from utils import data
 from template import jump
+from stiffness import leg
 
 sos = butter(2,50,'lowpass',fs=1000,output='sos')
 sos_dy = butter(2,50,'lowpass',fs=360,output='sos')
@@ -33,6 +34,8 @@ def read(s,k,a,n):
             break
         ti += 0.005
     assert grf_bias is not None, 'Cant find no load bias'
+
+    m = -(np.mean(grf_raw[t<0.4])-grf_bias)/jump.cs['g']
 
     ti = t[np.nonzero(t > 0.505)[0][0]]
     tf = t[np.nonzero(grf > grf_bias)[0][0]]
@@ -71,7 +74,29 @@ def read(s,k,a,n):
     # plt.plot(t,dy)
     # plt.show()
 
-    return t,grf,dy
+    return t,grf,dy,m
+
+def readn(s,k,a):
+    ts = []
+    grfs = []
+    dys = []
+    ms = []
+    for n in [1,2,3]:
+        t,grf,dy,m = read(s,k,a,n)
+        ts.append(t)
+        grfs.append(grf)
+        dys.append(dy)
+        ms.append(m)
+    tf = np.amin([np.amax(ts[i]) for i in range(len(ts))])
+    t = np.linspace(0,tf,100)
+    grfs = [np.interp(t,ts[i],grfs[i]) for i in range(len(grfs))]
+    dys = [np.interp(t,ts[i],dys[i]) for i in range(len(dys))]
+
+    grf = np.mean(grfs,axis=0)
+    dy = np.mean(dys,axis=0)
+    m = np.mean(ms)
+
+    return t,grf,dy,m
 
 if __name__ == '__main__':
     plt.figure()
@@ -80,27 +105,9 @@ if __name__ == '__main__':
             for s in [1]:
                 c = 'C{:d}'.format(i)
 
-                ts = []
-                grfs = []
-                dys = []
-                for n in [1,2,3]:
-                    t,grf,dy = read(s,k,a,n)
-                    ts.append(t)
-                    grfs.append(grf)
-                    dys.append(dy)
-
-                    plt.subplot(211)
-                    plt.plot(t,dy,'.',color=c,markersize=1)
-                    plt.subplot(212)
-                    plt.plot(t,grf,'.',color=c,markersize=1)
-
-                tf = np.amin([np.amax(ts[i]) for i in range(len(ts))])
-                t = np.linspace(0,tf,100)
-                grfs = [np.interp(t,ts[i],grfs[i]) for i in range(len(grfs))]
-                dys = [np.interp(t,ts[i],dys[i]) for i in range(len(dys))]
-
-                grf = np.mean(grfs,axis=0)
-                dy = np.mean(dys,axis=0)
+                t,grf,dy,m = readn(1,k,a)
+                z,fz = leg.readn(1,k,a)
+                kp,ap = leg.fit(z,fz,k,a)
 
                 plt.subplot(211)
                 plt.plot(t,dy,color=c)
@@ -108,13 +115,13 @@ if __name__ == '__main__':
                 plt.plot(t,grf,color=c)
 
                 cs = jump.cs
-                # cs['m'] = 0.028
-                cs['k'] = k
-                cs['a'] = a
+                cs['m'] = m
+                cs['k'] = kp
+                cs['a'] = ap
                 sol = jump.solve(cs)
                 t_d = sol.t
                 dy_d = sol.y[0,:]
-                grf_d = jump.f_spring(sol.y[1,:],k,a,cs['ds'])
+                grf_d = jump.f_spring(sol.y[1,:],cs['k'],cs['a'],cs['ds'])
                 plt.subplot(211)
                 plt.plot(t_d,dy_d,'--',color=c)
                 plt.subplot(212)

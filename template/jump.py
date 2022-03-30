@@ -12,10 +12,10 @@ def f_spring(ys,k,a,d):
 
 g, m, r, k, a, dl, ds = symbols('g m r k a dl ds')
 b, K, I, R, L, V = symbols('b K I R L V')
-dyb, ys, dtheta, i, yb = symbols('dyb ys dtheta i yb')
+dyb, ys, dtheta, i, yb, theta = symbols('dyb ys dtheta i yb theta')
 
 # Spring force
-fs = f_spring(ys,k,a,ds)
+fs = f_spring(ys,k,a,ds)-0*(dyb-r*dtheta)
 # Wall force
 fw = (Max(0,yb-ys-dl)/(yb-ys-dl))*((yb-ys-dl)*10000+dtheta*r*50)
 f = fs+fw
@@ -25,8 +25,8 @@ ddtheta = -b*dtheta/I+K*i/I-f*r/I
 di = V/L-K*dtheta/L-R*i/L
 dys = dyb-r*dtheta
 
-x = Matrix([dyb,ys,dtheta,i,yb])
-dx = Matrix([ddyb,dys,ddtheta,di,dyb])
+x = Matrix([dyb,ys,dtheta,i,yb,theta])
+dx = Matrix([ddyb,dys,ddtheta,di,dyb,dtheta])
 
 cs = {
     'g': 9.81,
@@ -41,7 +41,7 @@ cs = {
     'I': 9.345234544905957e-05,
     'R': 10,
     'L': 580e-6,
-    'V': 8.7,
+    'V': 8.7
 }
 
 # spring decompress
@@ -54,8 +54,9 @@ def solve(cs,plot=False):
     # Initial condition after settle
     ys_i = -np.power(cs['m']*cs['g']/cs['k']/cs['ds'],1/cs['a'])*cs['ds']
     yb_i = ys_i
+    theta_i = 0
 
-    x0 = [0,ys_i,0,0,yb_i]
+    x0 = [0,ys_i,0,0,yb_i,theta_i]
     dx_f = lambdify(x,dx.subs(cs))
 
     def f(t, x):
