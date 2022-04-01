@@ -21,30 +21,23 @@ lines = []
 for i,s in enumerate(design.springs):
     cs['k'] = s['k']
     cs['a'] = s['a']
+    x = s['x']
 
-    # sol = jump.solve(cs,plot=False)
-    # ys_max = -np.amin(sol.y[1,:])
-    # yd = np.linspace(0,ys_max,100)
+    thetad = np.linspace(0,cs['t']/cs['k'],100)
+    taud = jump.t_spring(thetad,cs['k'],cs['a'],cs['t'])
 
-    yd = np.linspace(0,cs['ds'],100)
-    fd = -jump.f_spring(yd,cs['k'],cs['a'],cs['ds'])
+    theta,tau = stiffness.sim(x,cs['t']/cs['k'],plot=False)
 
-    rz,tz = stiffness.sim(s['x'],cs['dl']/cs['r'],plot=False)
-    rots = -rz+design.xm[0]
-    y = motion.sim(rots,design.xm,plot=False)[1]
-    y = y[0]-y
-    f = tz/motion.simf(rots,design.xm,plot=False)
+    # ye,fe = leg.readn(1,cs['k'],cs['a'])
+    # kp,ap = leg.fit(ye,fe,cs['k'],cs['a'])
+    # yf = ye
+    # ff = -jump.f_spring(yf,kp,ap,cs['ds'])
+    # print(cs['k'],cs['a'],kp,ap)
 
-    ye,fe = leg.readn(1,cs['k'],cs['a'])
-    kp,ap = leg.fit(ye,fe,cs['k'],cs['a'])
-    yf = ye
-    ff = -jump.f_spring(yf,kp,ap,cs['ds'])
-    print(cs['k'],cs['a'],kp,ap)
-
-    ax.plot(yd,fd,'--',color=c[i],linewidth=lw)
-    ax.plot(y,f,'-',color=c[i],linewidth=lw)
-    ax.plot(ye,fe,'.',color=c[i],markersize=2)
-    ax.plot(yf,ff,'-.',color=c[i],linewidth=lw)
+    ax.plot(thetad,taud,'--',color=c[i],linewidth=lw)
+    ax.plot(theta,tau,'-',color=c[i],linewidth=lw)
+    # ax.plot(ye,fe,'.',color=c[i],markersize=2)
+    # ax.plot(yf,ff,'-.',color=c[i],linewidth=lw)
     # lines.append(ax.plot(yd,fd,'--',color=c[i],linewidth=lw)[0])
     # lines.append(ax.plot(y,f,'-',color=c[i],linewidth=lw)[0])
     # lines.append(ax.plot(y,f,'.',color=c[i],linewidth=lw,markersize=1.5)[0])

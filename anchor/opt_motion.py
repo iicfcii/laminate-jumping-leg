@@ -7,18 +7,16 @@ from . import stiffness
 from template import jump
 
 cs = jump.cs
-d = cs['dl']
-r = cs['r']
 
 def obj_motion(x,plot=False):
-    rots = np.linspace(0,-d/r,50)+x[0]
+    rots = np.linspace(0,-cs['d']/cs['r'],50)+x[0]
     try:
         xs,ys = motion.sim(rots,x,plot=plot)
     except AssertionError:
         return 1
 
     xs_d = np.zeros(xs.shape)
-    ys_d = (rots-x[0])*r+ys[0]
+    ys_d = (rots-x[0])*cs['r']+ys[0]
 
     if plot:
         plt.figure()
@@ -39,7 +37,7 @@ bounds_motion = [(-np.pi,np.pi)]+[(0.01,0.06)]*5+[(-1,1)]*1
 
 xm = None
 xs = None
-xm = [2.825178219357225, 0.019652230845575398, 0.049581597690582, 0.010001644395921317, 0.059999785028978105, 0.05607371091295432, 0.10830546065402658]
+xm = [2.8087010177640224, 0.01947634385445778, 0.049665419129793546, 0.010000143842022406, 0.05999292244448598, 0.05610310172830579, 0.05328426157169952]
 
 if __name__ == '__main__':
     if xm is None:
@@ -61,7 +59,7 @@ if __name__ == '__main__':
 
     m = (np.sum(xm[1:6])+0.006)*geom.tr*geom.wr*geom.rho
 
-    print('crank range', d/r)
+    print('crank range', cs['d']/cs['r'])
     print('mass',m)
     print('xm',str(list(xm)))
     print('xm error',obj_motion(xm,plot=True))

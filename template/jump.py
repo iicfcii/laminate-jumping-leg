@@ -10,22 +10,12 @@ def t_spring(theta,k,a,t):
     else:
         return np.sign(theta)*t*np.power(np.abs(theta*k/t),a)
 
-# r = 0.06
-# t = 2*r
-# for k in [30*r**2,70*r**2]:
-#     for a in [0.5,1,2]:
-#         theta = np.linspace(0,t/k,100)
-#         ts = -t_spring(theta,k,a,t)
-#
-#         plt.plot(theta,ts)
-# plt.show()
-
 g, m, r, k, a, t, d = symbols('g m r k a t d')
 b, K, I, R, L, V = symbols('b K I R L V')
 y, dy, theta, dtheta, thetas, i = symbols('y dy theta dtheta thetas i')
 
 ts = t_spring(thetas,k,a,t)
-tb = (Max(0,theta-d)/(theta-d))*((theta-d)*10+dtheta*0.1)
+tb = (Max(0,theta-d/r)/(theta-d/r))*((theta-d/r)*10+dtheta*0.1)
 
 ddy = (ts/r-m*g)/m
 ddtheta = (K*i-ts-tb-b*dtheta)/I
@@ -39,10 +29,10 @@ cs = {
     'g': 9.81,
     'm': 0.02,
     'r': 0.06,
-    'k': 30*0.06**2,
+    'k': 0.2,
     'a': 1,
-    't': 1.5*0.06,
-    'd': 1,
+    't': 0.1,
+    'd': 0.06,
     'b': 0.0006566656814173122,
     'K': 0.14705778874626846,
     'I': 9.345234544905957e-05,

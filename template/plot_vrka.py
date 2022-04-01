@@ -51,8 +51,8 @@ for j,ax in enumerate(axes[:-2]):
     contour = ax.contourf(
         K[i,:,:],A[i,:,:],V[i,:,:],
         # np.linspace(np.maximum(v_min,0),v_max,8),
-        np.arange(0.8,2.21,0.1),
-        extend='neither' if v_min > 0 else 'min'
+        # extend='neither' if v_min > 0 else 'min',
+        np.arange(1.0,2.21,0.1),extend='min'
     )
     for c in contour.collections: c.set_edgecolor("face")
     ax.tick_params(axis='both',which='both')
@@ -79,6 +79,7 @@ for j,ax in enumerate(axes[:-2]):
         )
         ax.set_ylabel('Nonlinearity',labelpad=2)
         ax.set_xlabel('Stiffness Coefficient (N/m)',labelpad=2)
+        ax.set_yticks([0.5,1.0,1.5,2.0])
     else:
         ax.set_xticks([])
         ax.set_yticks([])

@@ -5,7 +5,6 @@ from utils import data
 from . import jump
 
 cs = jump.cs
-
 def sim(params):
     cs['k'] = params[0]
     cs['r'] = params[1]
@@ -15,7 +14,7 @@ def sim(params):
     v = sol.y[1,-1]
     return v
 
-K = np.arange(10,111,10)*cs['r']**2
+K = np.arange(0.05,0.36,0.02)
 R = np.arange(0.04,0.081,0.01)
 A = np.arange(0.5,2.01,0.1)
 K, R, A = np.meshgrid(K,R,A)
