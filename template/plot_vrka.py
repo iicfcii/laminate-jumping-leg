@@ -51,7 +51,7 @@ for j,ax in enumerate(axes[:-2]):
     contour = ax.contourf(
         K[i,:,:],A[i,:,:],V[i,:,:],
         # np.linspace(np.maximum(v_min,0),v_max,8),
-        np.arange(0.8,2.01,0.1),
+        np.arange(0.8,2.21,0.1),
         extend='neither' if v_min > 0 else 'min'
     )
     for c in contour.collections: c.set_edgecolor("face")

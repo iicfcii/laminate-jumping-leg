@@ -3,39 +3,46 @@ from scipy.integrate import solve_ivp
 import matplotlib.pyplot as plt
 import numpy as np
 
-def f_spring(ys,k,a,d):
+def t_spring(theta,k,a,t):
     import sympy.core
-    if isinstance(ys,sympy.core.symbol.Symbol):
-        return -sign(ys)*k*d*Pow(abs(ys/d),a)
+    if isinstance(theta,sympy.core.symbol.Symbol):
+        return sign(theta)*t*Pow(abs(theta*k/t),a)
     else:
-        return -np.sign(ys)*k*d*np.power(np.abs(ys/d),a)
+        return np.sign(theta)*t*np.power(np.abs(theta*k/t),a)
 
-g, m, r, k, a, dl, ds = symbols('g m r k a dl ds')
+# r = 0.06
+# t = 2*r
+# for k in [30*r**2,70*r**2]:
+#     for a in [0.5,1,2]:
+#         theta = np.linspace(0,t/k,100)
+#         ts = -t_spring(theta,k,a,t)
+#
+#         plt.plot(theta,ts)
+# plt.show()
+
+g, m, r, k, a, t, d = symbols('g m r k a t d')
 b, K, I, R, L, V = symbols('b K I R L V')
-dyb, ys, dtheta, i, yb, theta = symbols('dyb ys dtheta i yb theta')
+y, dy, theta, dtheta, thetas, i = symbols('y dy theta dtheta thetas i')
 
-# Spring force
-fs = f_spring(ys,k,a,ds)-0*(dyb-r*dtheta)
-# Wall force
-fw = (Max(0,yb-ys-dl)/(yb-ys-dl))*((yb-ys-dl)*10000+dtheta*r*50)
-f = fs+fw
+ts = t_spring(thetas,k,a,t)
+tb = (Max(0,theta-d)/(theta-d))*((theta-d)*10+dtheta*0.1)
 
-ddyb = f/m-fw/m-g
-ddtheta = -b*dtheta/I+K*i/I-f*r/I
+ddy = (ts/r-m*g)/m
+ddtheta = (K*i-ts-tb-b*dtheta)/I
+dthetas = dtheta-dy/r
 di = V/L-K*dtheta/L-R*i/L
-dys = dyb-r*dtheta
 
-x = Matrix([dyb,ys,dtheta,i,yb,theta])
-dx = Matrix([ddyb,dys,ddtheta,di,dyb,dtheta])
+x = Matrix([y,dy,theta,dtheta,thetas,i])
+dx = Matrix([dy,ddy,dtheta,ddtheta,dthetas,di])
 
 cs = {
     'g': 9.81,
-    'm': 0.025,
+    'm': 0.02,
     'r': 0.06,
-    'k': 40,
+    'k': 30*0.06**2,
     'a': 1,
-    'dl': 0.06,
-    'ds': 0.06,
+    't': 1.5*0.06,
+    'd': 1,
     'b': 0.0006566656814173122,
     'K': 0.14705778874626846,
     'I': 9.345234544905957e-05,
@@ -46,17 +53,16 @@ cs = {
 
 # spring decompress
 def lift_off(t,x):
-    return x[1]
+    return x[4]
 lift_off.terminal = True
-lift_off.direction = 1
+lift_off.direction = -1
 
 def solve(cs,plot=False):
     # Initial condition after settle
-    ys_i = -np.power(cs['m']*cs['g']/cs['k']/cs['ds'],1/cs['a'])*cs['ds']
-    yb_i = ys_i
-    theta_i = 0
+    thetas_i = np.power(cs['m']*cs['g']*cs['r']/cs['t'],1/cs['a'])*cs['t']/cs['k']
+    # print(t_spring(thetas_i,cs['k'],cs['a'],cs['t'])/cs['r'],cs['m']*cs['g'])
 
-    x0 = [0,ys_i,0,0,yb_i,theta_i]
+    x0 = [0,0,0,0,thetas_i,0]
     dx_f = lambdify(x,dx.subs(cs))
 
     def f(t, x):
@@ -70,3 +76,6 @@ def solve(cs,plot=False):
             plt.plot(sol.t,sol.y[i,:])
 
     return sol
+
+# solve(cs,plot=True)
+# plt.show()

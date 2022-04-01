@@ -12,12 +12,12 @@ def sim(params):
     cs['a'] = params[2]
 
     sol = jump.solve(cs)
-    v = sol.y[0,-1]
+    v = sol.y[1,-1]
     return v
 
-K = np.arange(10,111,10)
+K = np.arange(10,111,10)*cs['r']**2
 R = np.arange(0.04,0.081,0.01)
-A = np.arange(0.5,1.51,0.1)
+A = np.arange(0.5,2.01,0.1)
 K, R, A = np.meshgrid(K,R,A)
 
 KRA = np.array([K.ravel(),R.ravel(),A.ravel()]).T
