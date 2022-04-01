@@ -2,7 +2,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from scipy.signal import butter, sosfiltfilt
 from utils import data
-from template import jump
+from template import jump,jump2
 from stiffness import leg
 
 sos = butter(2,50,'lowpass',fs=1000,output='sos')
@@ -23,13 +23,17 @@ def read(s,k,a,n):
     grf = sosfiltfilt(sos,grf_raw)
     dy = sosfiltfilt(sos_dy,dy_raw)
 
+    # plt.plot(t,grf)
+    # plt.plot(t,grf_raw)
+    # plt.show()
+
     # Find start and lift off time
     grf_bias = None
     ti = 0.5
     while ti < 1:
-        idx = np.logical_and(t > ti,t < ti+0.1)
+        idx = np.logical_and(t > ti,t < ti+0.06)
         std = np.std(grf[idx])
-        if std < 0.001:
+        if std < 0.0015:
             grf_bias = np.average(grf[idx])
             break
         ti += 0.005
@@ -42,10 +46,6 @@ def read(s,k,a,n):
     # ti = 0.5
     # tf = 0.8
 
-    # plt.plot(t,grf)
-    # plt.plot(t,grf_raw)
-    # plt.show()
-
     # Select
     idx_ti_grf = np.nonzero(t > ti)[0][0]
     idx_tf_grf = np.nonzero(t > tf)[0][0]
@@ -53,9 +53,10 @@ def read(s,k,a,n):
     grf_raw = -(grf_raw[idx_ti_grf:idx_tf_grf]-grf_bias)
     grf = -(grf[idx_ti_grf:idx_tf_grf]-grf_bias)
 
-    idx_ti_y = np.nonzero(t_y > ti)[0][0]
-    idx_tf_y = np.nonzero(t_y > tf)[0][0]
-    t_y = t_y[idx_ti_y:idx_tf_y]
+    dt = 0.012 if k == 70 else 0.018
+    idx_ti_y = np.nonzero(t_y > ti+dt)[0][0]
+    idx_tf_y = np.nonzero(t_y > tf+dt)[0][0]
+    t_y = t_y[idx_ti_y:idx_tf_y]-dt
     dy_raw = dy_raw[idx_ti_y:idx_tf_y]
     dy = dy[idx_ti_y:idx_tf_y]
 
@@ -96,11 +97,19 @@ def readn(s,k,a):
     dy = np.mean(dys,axis=0)
     m = np.mean(ms)
 
+    # plt.figure('compare')
+    # for dy,grf in zip(dys,grfs):
+    #     plt.subplot(211)
+    #     plt.plot(t,dy)
+    #     plt.subplot(212)
+    #     plt.plot(t,grf)
+    # plt.show()
+
     return t,grf,dy,m
 
 if __name__ == '__main__':
-    plt.figure()
-    for k in [70]:
+    for k in [30,70]:
+        plt.figure('k={:d}'.format(k))
         for i,a in enumerate([0.7,1,1.5]):
             for s in [1]:
                 c = 'C{:d}'.format(i)
@@ -114,16 +123,21 @@ if __name__ == '__main__':
                 plt.subplot(212)
                 plt.plot(t,grf,color=c)
 
+
+                mm = 0.015
                 cs = jump.cs
-                cs['m'] = m
+                cs['mb'] = mm+(m-mm)*0.5
+                cs['ms'] = m-cs['mb']
                 cs['k'] = kp
                 cs['a'] = ap
-                sol = jump.solve(cs)
+                sol = jump2.solve(cs)
                 t_d = sol.t
-                dy_d = sol.y[0,:]
-                grf_d = jump.f_spring(sol.y[1,:],cs['k'],cs['a'],cs['ds'])
+                dy_d = sol.y[1,:]
+                grf_d = jump2.f_spring(sol.y[2,:],cs['k'],cs['a'],cs['ds'])
                 plt.subplot(211)
                 plt.plot(t_d,dy_d,'--',color=c)
                 plt.subplot(212)
                 plt.plot(t_d,grf_d,'--',color=c)
+
+                print(k,a,kp,ap,m)
 plt.show()
