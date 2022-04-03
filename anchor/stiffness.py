@@ -4,6 +4,7 @@ from . import geom
 
 # PRBM
 tf = 0.45/1000
+wf = 10/1000
 gamma = 0.85
 Ktheta = 2.65
 # E = (2.7+2.2)/2*1e6*6894.76
@@ -18,7 +19,7 @@ def prbm_k(t,l,w):
 def sim(x,r,plot=False):
     ls = x[:4]
     c = x[4]
-    w = geom.wr
+    w = wf
 
     k = prbm_k(tf,ls[1],w)
     lk = geom.spring(0,ls,c)

@@ -6,7 +6,7 @@ from anchor import stiffness
 from template import jump
 
 def read(s,k,a,n):
-    name = './data/spring_{:d}_{:d}_{:d}_{:d}.csv'.format(s,k,int(a*10),n)
+    name = './data/spring_{:d}_{:d}_{:d}_{:d}.csv'.format(s,int(k*100),int(a*10),n)
     d = data.read(name)
     t = np.array(d['t'])
     rz = np.array(d['rz'])
@@ -25,7 +25,7 @@ def read(s,k,a,n):
     rz = -dir*rz
 
     # Find contact time
-    ti = t[np.nonzero(tz > 0.0002)[0][0]]
+    ti = t[np.nonzero(tz > 0.001)[0][0]]
 
     # Select range
     tz = tz[t>ti]
@@ -34,19 +34,17 @@ def read(s,k,a,n):
 
     return rz,tz
 
-r = 0.06
-d = 0.06
 if __name__ == '__main__':
     plt.figure()
-    for i,k in enumerate([30,70]):
+    for i,k in enumerate([0.15,0.3]):
         c = 'C{:d}'.format(i)
-        for j,a in enumerate([0.7,1.0,1.5]):
+        for j,a in enumerate([0.5,1,2]):
             for s in [1]:
                 for n in [1,2,3]:
                     rz,tz = read(s,k,a,n)
-                    plt.plot(rz*r,tz/r,'.',color=c,markersize=0.1)
+                    plt.plot(rz,tz,'.',color=c,markersize=0.5)
 
-            rzp = np.linspace(0,rz[-1],100)
-            tzp = -jump.f_spring(rzp*r,k,a,d)*r
-            plt.plot(rzp*r,tzp/r,color=c)
+            rzp = np.linspace(0,jump.cs['t']/k,100)
+            tzp = jump.t_spring(rzp,k,a,jump.cs['t'])
+            plt.plot(rzp,tzp,color=c)
     plt.show()
