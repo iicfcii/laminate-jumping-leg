@@ -2,6 +2,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from . import design
 from . import geom
+from .opt_spring import mass
 from template import jump
 from utils import plot
 
@@ -13,27 +14,24 @@ fig,axes = plt.subplots(
     figsize=(3.4-plot.pad*2,4.91),dpi=150
 )
 r = 0.04
-scales = [2,1,1,0.7,0.7,0.7]
+scales = [1.6,1,1,1,1.6,1.6]
 # scales = [1,1,1,1,1,1]
 for i,ax in enumerate(axes.ravel()):
     s = design.springs[i]
     cs['k'] = s['k']
     cs['a'] = s['a']
-    cs['r'] = 0.06
-
-    sol = jump.solve(cs,plot=False)
-    rot = -np.amin(sol.y[1,:])/cs['r']
-    print(cs['k'],cs['a'],rot,rot*cs['r'])
-
     x = s['x']
+
+    print(cs['k'],cs['a'],cs['t']/cs['k'],mass(x))
+
     ls = x[:4]
-    w = x[4]
-    c = x[5]
+    c = x[4]
+    w = x[5]
 
     scale = scales[i]
 
     lks = []
-    for ang in np.linspace(0,rot,2):
+    for ang in np.linspace(0,cs['t']/cs['k'],2):
         lk = geom.spring(ang,ls,c)
         lks.append(lk)
     lks = np.array(lks)/scale
@@ -48,14 +46,15 @@ for i,ax in enumerate(axes.ravel()):
     ax.set_xticks([])
     ax.set_yticks([])
     if i%2 == 0: ax.set_ylabel('{:.1f}'.format(cs['a']))
-    if i>3: ax.set_xlabel('{:d}'.format(cs['k']))
+    if i>3: ax.set_xlabel('{:.2f}'.format(cs['k']))
 
     for j,lk in enumerate(lks):
         ls = '.-k' if j == 0 else '.--k'
         for k,link in enumerate(lk):
             ax.plot(
                 link[:,0],link[:,1],ls,
-                linewidth=w/0.01*0.8 if k == 2 else 0.8,
+                # linewidth=w/0.01*0.8 if k == 2 else 0.8,
+                linewidth=0.8,
                 markersize=2
             )
 
