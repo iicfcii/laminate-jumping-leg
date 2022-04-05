@@ -27,7 +27,7 @@ dx = Matrix([dy,ddy,dtheta,ddtheta,dthetas,di])
 
 cs = {
     'g': 9.81,
-    'm': 0.02,
+    'm': 0.025,
     'r': 0.06,
     'k': 0.2,
     'a': 1,

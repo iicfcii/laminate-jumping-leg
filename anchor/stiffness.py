@@ -3,7 +3,9 @@ import numpy as np
 from . import geom
 
 # PRBM
-tf = 0.45/1000
+ang_min = 15/180*np.pi
+tr = np.sum([0.82,0.015,0.05,0.015])/1000
+wr = 0.01
 gamma = 0.85
 Ktheta = 2.65
 E = 2.2*1e6*6894.76
@@ -13,29 +15,32 @@ def prbm_k(t,l,w):
     k = gamma*Ktheta*E*I/l
     return k
 
+def tf(ct):
+    return 0.45/1000 if ct > 0 else 0.82/1000
+
 def sim(x,r,plot=False):
     ls = x[:4]
-    c = x[4]
-    w = x[5]
+    cm = x[4]
+    ct = x[5]
 
-    k = prbm_k(tf,ls[1],w)
-    lk = geom.spring(0,ls,c)
+    k = prbm_k(tf(ct),ls[1],wr)
+    lk = geom.spring(0,ls,cm)
 
     lks = []
     angs = np.linspace(0,r,50)
     taus = []
     for ang in angs:
-        lk = geom.spring(ang,ls,c)
+        lk = geom.spring(ang,ls,cm)
         theta = geom.pose(lk[2])[1]
         alpha = geom.pose(lk[1])[1]
         beta = geom.pose(lk[0])[1]
-
-        assert np.abs(beta) > 20/180*np.pi, 'angle between motor arm and crank too small'
+        assert np.abs(beta) > ang_min, 'angle between motor arm and crank too small'
 
         # Static analysis
         dtheta = geom.limit_ang(theta-np.pi)
         tauk = k*dtheta
         f_ang = geom.limit_ang(alpha-theta)
+        assert np.abs(geom.limit_ang(np.pi-f_ang)) > ang_min, 'angle between flexible beam and coupler too small'
         f = tauk/(ls[1]*gamma+geom.pade)/np.sin(f_ang)
         fp_ang = geom.limit_ang(np.pi+alpha-beta)
         tau = f*np.sin(fp_ang)*ls[3]

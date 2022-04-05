@@ -2,8 +2,6 @@ import matplotlib.pyplot as plt
 import numpy as np
 from . import stiffness
 
-tr = np.sum([0.45,0.015,0.05,0.015,0.45])/1000
-wr = 0.01
 pade = 0.004 # pad at the end of the flexible beam
 rho = 1820 # fiber glass density
 
@@ -60,7 +58,7 @@ def limit_ang(ang):
 
     return ang
 
-def leg(ang,l,c,tilt=None):
+def leg(ang,l,c,tr,tilt=None):
     ps, ts = fourbar_fk(ang,*l[:4],form=c)
     assert ps is not None, 'No fourbar fk solution'
 

@@ -13,9 +13,8 @@ fig,axes = plt.subplots(
     3,2,
     figsize=(3.4-plot.pad*2,4.91),dpi=150
 )
-r = 0.04
-scales = [1.6,1,1,1,1.6,1.6]
-# scales = [1,1,1,1,1,1]
+r = 0.06
+scales = [1,1,1,1,1,1]
 for i,ax in enumerate(axes.ravel()):
     s = design.springs[i]
     cs['k'] = s['k']
@@ -60,7 +59,7 @@ for i,ax in enumerate(axes.ravel()):
 
     # Scale
     l = 0.01/scale
-    x1 = xc+r-0.012-l/2
+    x1 = xc+r-0.015-l/2
     x2 = x1+l
     y1 = yc+r-0.005
     y2 = y1

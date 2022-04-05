@@ -2,16 +2,19 @@ import matplotlib.pyplot as plt
 import numpy as np
 from . import geom
 
+tr = np.sum([0.82,0.015,0.05,0.015,0.45])/1000
+wr = 0.01
+
 def sim(rots,x,plot=False):
     ang = x[0]
     l = x[1:6]
     c = x[6]
 
-    lk, tilt = geom.leg(ang,l,c)
+    lk, tilt = geom.leg(ang,l,c,tr)
 
     lks = []
     for rot in rots:
-        lk, rot = geom.leg(rot,l,c,tilt=tilt)
+        lk, rot = geom.leg(rot,l,c,tr,tilt=tilt)
         lks.append(lk)
 
     lks = np.array(lks)
@@ -39,11 +42,11 @@ def simf(rots,x,plot=False):
     l = x[1:6]
     c = x[6]
 
-    lk, tilt = geom.leg(ang,l,c)
+    lk, tilt = geom.leg(ang,l,c,tr)
 
     rs = []
     for rot in rots:
-        lk, rot = geom.leg(rot,l,c,tilt=tilt)
+        lk, rot = geom.leg(rot,l,c,tr,tilt=tilt)
 
         f = 1
         ang_fr = geom.pose(lk[2])[1]
