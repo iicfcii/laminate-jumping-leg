@@ -2,7 +2,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 from . import geom
 
-tr = np.sum([0.82,0.015,0.05,0.015,0.45])/1000
+tr = np.sum([0.83,0.015,0.05,0.015,0.45])/1000
 wr = 0.01
 
 def sim(rots,x,plot=False):

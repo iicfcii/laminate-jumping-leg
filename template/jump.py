@@ -10,14 +10,14 @@ def t_spring(theta,k,a,t):
     else:
         return np.sign(theta)*t*np.power(np.abs(theta*k/t),a)
 
-g, m, r, k, a, t, d = symbols('g m r k a t d')
+g, m, Il, r, k, a, t, d = symbols('g m Il r k a t d')
 b, K, I, R, L, V = symbols('b K I R L V')
 y, dy, theta, dtheta, thetas, i = symbols('y dy theta dtheta thetas i')
 
 ts = t_spring(thetas,k,a,t)
 tb = (Max(0,theta-d/r)/(theta-d/r))*((theta-d/r)*10+dtheta*0.1)
 
-ddy = (ts/r-m*g)/m
+ddy = (ts/r-m*g)/(Il/r**2+m)
 ddtheta = (K*i-ts-tb-b*dtheta)/I
 dthetas = dtheta-dy/r
 di = V/L-K*dtheta/L-R*i/L
@@ -28,10 +28,11 @@ dx = Matrix([dy,ddy,dtheta,ddtheta,dthetas,di])
 cs = {
     'g': 9.81,
     'm': 0.025,
+    'Il': 0.005*0.1**2*0, # inertial of leg (pinion)
     'r': 0.06,
     'k': 0.2,
     'a': 1,
-    't': 0.1,
+    't': 0.12,
     'd': 0.06,
     'b': 0.0006566656814173122,
     'K': 0.14705778874626846,
@@ -50,9 +51,9 @@ lift_off.direction = -1
 def solve(cs,plot=False):
     # Initial condition after settle
     thetas_i = np.power(cs['m']*cs['g']*cs['r']/cs['t'],1/cs['a'])*cs['t']/cs['k']
-    # print(t_spring(thetas_i,cs['k'],cs['a'],cs['t'])/cs['r'],cs['m']*cs['g'])
+    y_i = (0-thetas_i)*cs['r']
 
-    x0 = [0,0,0,0,thetas_i,0]
+    x0 = [y_i,0,0,0,thetas_i,0]
     dx_f = lambdify(x,dx.subs(cs))
 
     def f(t, x):

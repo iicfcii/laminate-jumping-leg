@@ -3,12 +3,14 @@ import numpy as np
 from . import geom
 
 # PRBM
+t_30 = 0.83
+t_15 = 0.45
 ang_min = 15/180*np.pi
-tr = np.sum([0.82,0.015,0.05,0.015])/1000
+tr = np.sum([t_30,0.015,0.05,0.015])/1000
 wr = 0.01
 gamma = 0.85
 Ktheta = 2.65
-E = 2.2*1e6*6894.76
+E = 2.7*1e6*6894.76
 
 def prbm_k(t,l,w):
     I = w*t**3/12
@@ -16,7 +18,7 @@ def prbm_k(t,l,w):
     return k
 
 def tf(ct):
-    return 0.45/1000 if ct > 0 else 0.82/1000
+    return t_15/1000 if ct > 0 else t_30/1000
 
 def sim(x,r,plot=False):
     ls = x[:4]
