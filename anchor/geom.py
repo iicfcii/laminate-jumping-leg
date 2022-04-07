@@ -138,12 +138,14 @@ def bbox(lks,pad=0.005):
         cy-dy/2-pad,cy+dy/2+pad
     )
 
-def leg_spring(ang,l,c,ls,cs):
-    lk, tilt = leg(ang,l,c)
-    lks = spring(ls,cs)
+def leg_spring(ang,l,c,ls,cs,tr):
+    lk, tilt = leg(ang,l,c,tr)
+    lks = spring(0,ls,cs)
 
     ang_crank = pose(lk[0])[1]
-    rot = np.array([[np.cos(ang_crank),-np.sin(ang_crank)],[np.sin(ang_crank),np.cos(ang_crank)]])
+    ang_crankp = pose(lks[0])[1]
+    dang = ang_crank-ang_crankp
+    rot = np.array([[np.cos(dang),-np.sin(dang)],[np.sin(dang),np.cos(dang)]])
 
     lks = [(rot @ ps.T).T for ps in lks]
 

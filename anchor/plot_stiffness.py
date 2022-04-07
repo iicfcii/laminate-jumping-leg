@@ -44,11 +44,11 @@ for i,s in enumerate(design.springs):
     # ax.set_ylim([-0.1,1.9])
 
 # ax.legend(lines[:3],['Desired','Design','Measured'])
-# ax.set_xlabel('Displacement (m)')
-# ax.set_ylabel('Force (N)')
-# plt.subplots_adjust(
-#     left=0.14,right=1,top=1,bottom=0.125,
-#     wspace=0,hspace=0
-# )
-# plot.savefig('stiffness.pdf',fig)
+ax.set_xlabel('Rotation (rad)')
+ax.set_ylabel('Torque (Nm)')
+plt.subplots_adjust(
+    left=0.14,right=1,top=1,bottom=0.125,
+    wspace=0,hspace=0
+)
+plot.savefig('stiffness.pdf',fig)
 plt.show()

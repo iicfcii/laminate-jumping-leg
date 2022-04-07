@@ -10,7 +10,7 @@ tr = np.sum([t_30,0.015,0.05,0.015])/1000
 wr = 0.01
 gamma = 0.85
 Ktheta = 2.65
-E = 2.7*1e6*6894.76
+E = 2.5*1e6*6894.76
 
 def prbm_k(t,l,w):
     I = w*t**3/12
@@ -24,8 +24,9 @@ def sim(x,r,plot=False):
     ls = x[:4]
     cm = x[4]
     ct = x[5]
+    wf = x[6]
 
-    k = prbm_k(tf(ct),ls[1],wr)
+    k = prbm_k(tf(ct),ls[1],wf)
     lk = geom.spring(0,ls,cm)
 
     lks = []
