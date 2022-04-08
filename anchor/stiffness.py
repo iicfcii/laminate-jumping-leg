@@ -6,7 +6,7 @@ from . import geom
 t_30 = 0.83
 t_15 = 0.45
 ang_min = 15/180*np.pi
-tr = np.sum([t_30,0.015,0.05,0.015])/1000
+tr = np.sum([t_30,0.015,0.05,0.015,t_30,0.015])/1000
 wr = 0.01
 gamma = 0.85
 Ktheta = 2.65
