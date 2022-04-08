@@ -36,10 +36,10 @@ def read(s,k,a,n):
 
 if __name__ == '__main__':
     plt.figure()
-    for i,k in enumerate([0.15,0.3]):
+    for i,k in enumerate([0.15]):
         c = 'C{:d}'.format(i)
         for j,a in enumerate([0.5,1,2]):
-            for s in [1]:
+            for s in [3]:
                 for n in [1,2,3]:
                     rz,tz = read(s,k,a,n)
                     plt.plot(rz,tz,'.',color=c,markersize=0.5)

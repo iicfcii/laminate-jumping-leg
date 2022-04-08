@@ -17,16 +17,16 @@ def str_movel(pose):
 
 # Base to foot of leg
 Tbc = m3d.Transform()
-Tbc.pos = m3d.Vector(-4/1000, (-25.4*21-1)/1000, 0.075)
-Tbc.orient = m3d.Orientation.new_euler((0, 0, -np.pi/2-38/180*np.pi), encoding='XYZ')
+Tbc.pos = m3d.Vector(-4/1000, (-25.4*21-1)/1000, 0.077)
+Tbc.orient = m3d.Orientation.new_euler((0, 0, -np.pi/2+75/180*np.pi), encoding='XYZ')
 
 # Tool pose wrt virtual rotation
 Tct = m3d.Transform()
-Tct.pos = m3d.Vector(-(40+60)/1000,0,0)
+Tct.pos = m3d.Vector(-(40+40)/1000,0,0)
 Tct.orient = m3d.Orientation.new_euler((np.pi, 0, np.pi/4), encoding='XYZ')
 
 MOVEL_INIT = to_movel(Tbc*Tct)
-ROT_MAX = 0.8
+ROT_MAX = 0.9
 
 # Beam
 # 20,40,60,80,100

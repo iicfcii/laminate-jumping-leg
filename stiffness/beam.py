@@ -9,7 +9,7 @@ Eref = (2.7+2.2)/2*1e6*6894.76/1e9 # GPa
 T = [0.000450,0.000457,0.000457,0.000433,0.000436]
 
 def read(s,l,w,n):
-    name = './data/beam_{:d}_{:d}_{:d}_{:d}.csv'.format(s,l,int(np.rint(w)),n)
+    name = './data/beam/beam_{:d}_{:d}_{:d}_{:d}.csv'.format(s,l,int(np.rint(w)),n)
     d = data.read(name)
     t = np.array(d['t'])
     rz = np.array(d['rz'])
