@@ -2,7 +2,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 from . import stiffness
 
-pade = 0.004 # pad at the end of the flexible beam
+pade = 0.01 # pad at the end of the flexible beam
 rho = 1820 # fiber glass density
 
 # Fourbar

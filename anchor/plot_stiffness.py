@@ -4,7 +4,7 @@ from . import design
 from . import geom
 from . import stiffness
 from . import motion
-from stiffness import leg
+from stiffness import spring
 from template import jump
 from utils import plot
 
@@ -28,7 +28,11 @@ for i,s in enumerate(design.springs):
 
     theta,tau = stiffness.sim(x,cs['t']/cs['k'],plot=False)
 
-    # ye,fe = leg.readn(1,cs['k'],cs['a'])
+    thetae,taue = spring.readn(0,cs['k'],cs['a'])
+    idx = thetae < cs['t']/cs['k']+0.01
+    thetae = thetae[idx]
+    taue = taue[idx]
+
     # kp,ap = leg.fit(ye,fe,cs['k'],cs['a'])
     # yf = ye
     # ff = -jump.f_spring(yf,kp,ap,cs['ds'])
@@ -36,7 +40,7 @@ for i,s in enumerate(design.springs):
 
     ax.plot(thetad,taud,'--',color=c[i],linewidth=lw)
     ax.plot(theta,tau,'-',color=c[i],linewidth=lw)
-    # ax.plot(ye,fe,'.',color=c[i],markersize=2)
+    ax.plot(thetae,taue,'.-',color=c[i],linewidth=lw,markersize=2)
     # ax.plot(yf,ff,'-.',color=c[i],linewidth=lw)
     # lines.append(ax.plot(yd,fd,'--',color=c[i],linewidth=lw)[0])
     # lines.append(ax.plot(y,f,'-',color=c[i],linewidth=lw)[0])

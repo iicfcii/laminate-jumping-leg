@@ -23,26 +23,69 @@ def read(s,k,a,n):
     dir = np.sign(tz[-1])
     tz = dir*tz
     rz = -dir*rz
-
-    # Find contact time
-    ti = t[np.nonzero(tz > 0.001)[0][0]]
-
-    # Select range
-    tz = tz[t>ti]
-    rz = rz[t>ti]
     rz = rz-rz[0]
 
-    return rz,tz
+    rzm = []
+    tzm = []
+    d = 0.01
+    rzc = 0
+    while rzc < rz[-1]+d/2:
+        idx = np.logical_and(rz>rzc-d/2,rz<rzc+d/2)
+        rzm.append(np.mean(rz[idx]))
+        tzm.append(np.mean(tz[idx]))
+        rzc += d
+
+    rzm = np.array(rzm)
+    tzm = np.array(tzm)
+
+    # Select range
+    i = np.nonzero(tzm > 1e-3)[0][0]-1
+    rzm = rzm[i:]
+    tzm = tzm[i:]
+    rzm = rzm-rzm[0]
+
+    # plt.plot(rzm,tzm,'.')
+    # plt.show()
+
+    return rzm,tzm
+
+def readn(s,k,a):
+    d = 0.01
+
+    rzs = []
+    tzs = []
+    rzmaxs = []
+    for n in [1,2,3]:
+        rz,tz = read(s,k,a,n)
+        rzs.append(rz)
+        tzs.append(tz)
+        rzmaxs.append(np.amax(rz))
+
+    rzmax = np.amin(rzmaxs)
+    rzi = np.arange(0,rzmax+d/2,d)
+
+    tzis = []
+    for rz,tz in zip(rzs,tzs):
+        tzi = np.interp(rzi,rz,tz)
+        tzis.append(tzi)
+    tzi = np.mean(tzis,axis=0)
+
+    # for rz,tz in zip(rzs,tzs):
+    #     plt.plot(rz,tz,'.')
+    # plt.plot(rzi,tzi)
+    # plt.show()
+
+    return rzi,tzi
 
 if __name__ == '__main__':
     plt.figure()
     for i,k in enumerate([0.15]):
         c = 'C{:d}'.format(i)
-        for j,a in enumerate([0.5,1,2]):
-            for s in [3]:
+        for j,a in enumerate([2]):
+            for s in [1]:
                 for n in [1,2,3]:
                     rz,tz = read(s,k,a,n)
-                    plt.plot(rz,tz,'.',color=c,markersize=0.5)
+                    plt.plot(rz,tz,'.-',color=c,markersize=4)
 
             rzp = np.linspace(0,jump.cs['t']/k,100)
             tzp = jump.t_spring(rzp,k,a,jump.cs['t'])
