@@ -1,6 +1,7 @@
 import time
 import matplotlib.pyplot as plt
 import numpy as np
+from scipy.optimize import curve_fit
 from utils import data
 from anchor import stiffness
 from template import jump
@@ -76,6 +77,15 @@ def readn(s,k,a):
     # plt.show()
 
     return rzi,tzi
+
+def fit(rz,tz,kp,ap):
+    def obj(rz,k,a):
+        return jump.t_spring(rz,k,a,jump.cs['t'])
+
+    popt, pcov = curve_fit(obj,rz,tz,p0=[kp,ap])
+    k,a = popt
+
+    return k,a
 
 if __name__ == '__main__':
     plt.figure()

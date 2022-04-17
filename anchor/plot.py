@@ -2,14 +2,14 @@ import numpy as np
 import matplotlib.pyplot as plt
 from scipy.signal import butter, sosfiltfilt
 from utils import data
-from template import jump,jump2
-from stiffness import leg
+from template import jump
+from stiffness import spring
 
 sos = butter(2,50,'lowpass',fs=1000,output='sos')
 sos_dy = butter(2,50,'lowpass',fs=360,output='sos')
 
-def read(s,k,a,n):
-    name = './data/jump_{:d}_{:d}_{:d}_{:d}.csv'.format(s,k,int(a*10),n)
+def read(s,k,a,n,plot=False):
+    name = './data/jump_{:d}_{:d}_{:d}_{:d}.csv'.format(s,int(k*100),int(a*10),n)
     d = data.read(name)
     t = np.array(d['t'])
     y_raw = np.array(d['y'])
@@ -23,9 +23,14 @@ def read(s,k,a,n):
     grf = sosfiltfilt(sos,grf_raw)
     dy = sosfiltfilt(sos_dy,dy_raw)
 
-    # plt.plot(t,grf)
-    # plt.plot(t,grf_raw)
-    # plt.show()
+    if plot:
+        plt.figure('filter')
+        plt.subplot(211)
+        plt.plot(t,grf_raw)
+        plt.plot(t,grf)
+        plt.subplot(212)
+        plt.plot(t_y,dy_raw)
+        plt.plot(t_y,dy)
 
     # Find start and lift off time
     grf_bias = None
@@ -41,7 +46,7 @@ def read(s,k,a,n):
 
     m = -(np.mean(grf_raw[t<0.4])-grf_bias)/jump.cs['g']
 
-    ti = t[np.nonzero(t > 0.505)[0][0]]
+    ti = t[np.nonzero(t > 0.5)[0][0]]
     tf = t[np.nonzero(grf > grf_bias)[0][0]]
     # ti = 0.5
     # tf = 0.8
@@ -53,10 +58,9 @@ def read(s,k,a,n):
     grf_raw = -(grf_raw[idx_ti_grf:idx_tf_grf]-grf_bias)
     grf = -(grf[idx_ti_grf:idx_tf_grf]-grf_bias)
 
-    dt = 0.012 if k == 70 else 0.018
-    idx_ti_y = np.nonzero(t_y > ti+dt)[0][0]
-    idx_tf_y = np.nonzero(t_y > tf+dt)[0][0]
-    t_y = t_y[idx_ti_y:idx_tf_y]-dt
+    idx_ti_y = np.nonzero(t_y > ti)[0][0]
+    idx_tf_y = np.nonzero(t_y > tf)[0][0]
+    t_y = t_y[idx_ti_y:idx_tf_y]
     dy_raw = dy_raw[idx_ti_y:idx_tf_y]
     dy = dy[idx_ti_y:idx_tf_y]
 
@@ -66,24 +70,26 @@ def read(s,k,a,n):
 
     t -= t[0]
 
-    # plt.figure()
-    # plt.plot(t,grf_raw)
-    # plt.plot(t,grf)
-
-    # plt.figure()
-    # plt.plot(t,dy_raw)
-    # plt.plot(t,dy)
-    # plt.show()
+    if plot:
+        print(tf,grf_bias,m)
+        plt.figure('jump')
+        plt.subplot(211)
+        plt.plot(t,grf_raw)
+        plt.plot(t,grf)
+        plt.subplot(212)
+        plt.plot(t,dy_raw)
+        plt.plot(t,dy)
+        plt.show()
 
     return t,grf,dy,m
 
-def readn(s,k,a):
+def readn(s,k,a,plot=False):
     ts = []
     grfs = []
     dys = []
     ms = []
     for n in [1,2,3]:
-        t,grf,dy,m = read(s,k,a,n)
+        t,grf,dy,m = read(s,k,a,n,plot=plot)
         ts.append(t)
         grfs.append(grf)
         dys.append(dy)
@@ -97,47 +103,58 @@ def readn(s,k,a):
     dy = np.mean(dys,axis=0)
     m = np.mean(ms)
 
-    # plt.figure('compare')
-    # for dy,grf in zip(dys,grfs):
-    #     plt.subplot(211)
-    #     plt.plot(t,dy)
-    #     plt.subplot(212)
-    #     plt.plot(t,grf)
-    # plt.show()
+    if plot:
+        plt.figure('trials')
+        for dy,grf in zip(dys,grfs):
+            plt.subplot(211)
+            plt.plot(t,dy)
+            plt.subplot(212)
+            plt.plot(t,grf)
+        plt.show()
 
     return t,grf,dy,m
 
+# read(1,0.15,2,1,plot=True)
+# readn(1,0.3,2,plot=True)
+# exit()
+
 if __name__ == '__main__':
-    for k in [30,70]:
-        plt.figure('k={:d}'.format(k))
-        for i,a in enumerate([0.7,1,1.5]):
-            for s in [1]:
-                c = 'C{:d}'.format(i)
+    for k in [0.15,0.3]:
+        plt.figure('k={:.2f}'.format(k))
+        for i,a in enumerate([0.5,1,2]):
+            c = 'C{:d}'.format(i)
 
-                t,grf,dy,m = readn(1,k,a)
-                z,fz = leg.readn(1,k,a)
-                kp,ap = leg.fit(z,fz,k,a)
+            # exp
+            t,grf,dy,m = readn(1,k,a)
 
-                plt.subplot(211)
-                plt.plot(t,dy,color=c)
-                plt.subplot(212)
-                plt.plot(t,grf,color=c)
+            # sim
+            cs = jump.cs
+            thetae,taue = spring.readn(0,k,a)
+            idx = thetae < cs['t']/k+0.01
+            thetae = thetae[idx]
+            taue = taue[idx]
+            kp,ap = spring.fit(thetae,taue,k,a)
 
+            cs['m'] = m
+            cs['k'] = kp
+            cs['a'] = ap
+            print(m,k,kp,a,ap)
 
-                mm = 0.015
-                cs = jump.cs
-                cs['mb'] = mm+(m-mm)*0.5
-                cs['ms'] = m-cs['mb']
-                cs['k'] = kp
-                cs['a'] = ap
-                sol = jump2.solve(cs)
-                t_d = sol.t
-                dy_d = sol.y[1,:]
-                grf_d = jump2.f_spring(sol.y[2,:],cs['k'],cs['a'],cs['ds'])
-                plt.subplot(211)
-                plt.plot(t_d,dy_d,'--',color=c)
-                plt.subplot(212)
-                plt.plot(t_d,grf_d,'--',color=c)
+            sol = jump.solve(cs)
+            t_s = sol.t
+            dy_s = sol.y[1,:]
+            grf_s = jump.t_spring(sol.y[4,:],cs['k'],cs['a'],cs['t'])/cs['r']
 
-                print(k,a,kp,ap,m)
+            plt.subplot(211)
+            plt.plot(t,dy,color=c,label='k={:.2f} a={:.1f}'.format(kp,ap))
+            plt.plot(t_s,dy_s,'--',color=c)
+            plt.ylabel('Body Speed (m/s)')
+            plt.xlabel('Time (s)')
+            plt.subplot(212)
+            plt.plot(t,grf,color=c)
+            plt.plot(t_s,grf_s,'--',color=c)
+            plt.ylabel('GRF (N)')
+            plt.xlabel('Time (s)')
+    plt.subplot(211)
+    plt.legend()
 plt.show()
