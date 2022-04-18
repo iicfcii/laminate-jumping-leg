@@ -1,7 +1,8 @@
 import numpy as np
 import matplotlib.pyplot as plt
-from . import design
-from . import geom
+from anchor import design
+from anchor import geom
+from anchor import motion
 from template import jump
 from utils import plot
 
@@ -12,12 +13,12 @@ x = design.xm
 ang = x[0]
 l = x[1:6]
 c = x[6]
-rots = np.linspace(0,-cs['dl']/cs['r'],50)+x[0]
-tilt = geom.leg(ang,l,c)[1]
+rots = np.linspace(0,-cs['d']/cs['r'],50)+x[0]
+tilt = geom.leg(ang,l,c,motion.tr)[1]
 
 lks = []
 for rot in rots:
-    lk, rot = geom.leg(rot,l,c,tilt=tilt)
+    lk, rot = geom.leg(rot,l,c,motion.tr,tilt=tilt)
     lks.append(lk)
 lks = np.array(lks)
 xs = lks[:,4,1,0]
@@ -50,8 +51,8 @@ ax.set_yticks([])
 ax.set_xlabel('Fourbar Design')
 
 axp = axes[1]
-e_xs = (xs-xs_d)/cs['dl']*100
-e_ys = (ys-ys_d)/cs['dl']*100
+e_xs = (xs-xs_d)/cs['d']*100
+e_ys = (ys-ys_d)/cs['d']*100
 rots = rots[0]-rots
 lw = 1
 axp.plot(rots,e_xs,linewidth=lw,label='x')

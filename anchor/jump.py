@@ -9,7 +9,7 @@ sos = butter(2,50,'lowpass',fs=1000,output='sos')
 sos_dy = butter(2,50,'lowpass',fs=360,output='sos')
 
 def read(s,k,a,n,plot=False):
-    name = './data/jump_{:d}_{:d}_{:d}_{:d}.csv'.format(s,int(k*100),int(a*10),n)
+    name = './data/jump/jump_{:d}_{:d}_{:d}_{:d}.csv'.format(s,int(k*100),int(a*10),n)
     d = data.read(name)
     t = np.array(d['t'])
     y_raw = np.array(d['y'])
@@ -46,7 +46,7 @@ def read(s,k,a,n,plot=False):
 
     m = -(np.mean(grf_raw[t<0.4])-grf_bias)/jump.cs['g']
 
-    ti = t[np.nonzero(t > 0.5)[0][0]]
+    ti = t[np.nonzero(t > 0.508)[0][0]]
     tf = t[np.nonzero(grf > grf_bias)[0][0]]
     # ti = 0.5
     # tf = 0.8
@@ -114,47 +114,5 @@ def readn(s,k,a,plot=False):
 
     return t,grf,dy,m
 
-# read(1,0.15,2,1,plot=True)
-# readn(1,0.3,2,plot=True)
-# exit()
-
 if __name__ == '__main__':
-    for k in [0.15,0.3]:
-        plt.figure('k={:.2f}'.format(k))
-        for i,a in enumerate([0.5,1,2]):
-            c = 'C{:d}'.format(i)
-
-            # exp
-            t,grf,dy,m = readn(1,k,a)
-
-            # sim
-            cs = jump.cs
-            thetae,taue = spring.readn(0,k,a)
-            idx = thetae < cs['t']/k+0.01
-            thetae = thetae[idx]
-            taue = taue[idx]
-            kp,ap = spring.fit(thetae,taue,k,a)
-
-            cs['m'] = m
-            cs['k'] = kp
-            cs['a'] = ap
-            print(m,k,kp,a,ap)
-
-            sol = jump.solve(cs)
-            t_s = sol.t
-            dy_s = sol.y[1,:]
-            grf_s = jump.t_spring(sol.y[4,:],cs['k'],cs['a'],cs['t'])/cs['r']
-
-            plt.subplot(211)
-            plt.plot(t,dy,color=c,label='k={:.2f} a={:.1f}'.format(kp,ap))
-            plt.plot(t_s,dy_s,'--',color=c)
-            plt.ylabel('Body Speed (m/s)')
-            plt.xlabel('Time (s)')
-            plt.subplot(212)
-            plt.plot(t,grf,color=c)
-            plt.plot(t_s,grf_s,'--',color=c)
-            plt.ylabel('GRF (N)')
-            plt.xlabel('Time (s)')
-    plt.subplot(211)
-    plt.legend()
-plt.show()
+    readn(1,0.3,2,plot=True)

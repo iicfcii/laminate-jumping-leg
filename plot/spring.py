@@ -1,8 +1,8 @@
 import numpy as np
 import matplotlib.pyplot as plt
-from . import design
-from . import geom
-from .opt_spring import mass
+from anchor import design
+from anchor import geom
+from anchor.opt_spring import mass
 from template import jump
 from utils import plot
 
@@ -80,5 +80,5 @@ plt.subplots_adjust(
     left=0.09,right=1,top=1,bottom=0.06,
     wspace=0,hspace=0
 )
-plot.savefig('springs.pdf',fig)
+plot.savefig('spring.pdf',fig)
 plt.show()

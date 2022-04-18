@@ -7,7 +7,7 @@ from anchor import stiffness
 from template import jump
 
 def read(s,k,a,n):
-    name = './data/spring_{:d}_{:d}_{:d}_{:d}.csv'.format(s,int(k*100),int(a*10),n)
+    name = './data/spring/spring_{:d}_{:d}_{:d}_{:d}.csv'.format(s,int(k*100),int(a*10),n)
     d = data.read(name)
     t = np.array(d['t'])
     rz = np.array(d['rz'])
