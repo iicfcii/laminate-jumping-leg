@@ -40,7 +40,9 @@ for i,s in enumerate(design.springs):
     lines.append(ax.plot(theta,tau,'-',color=c[i],linewidth=lw)[0])
     lines.append(ax.plot(thetae,taue,'.-',color=c[i],linewidth=lw,markersize=2)[0])
 
-ax.legend(lines[:3],['Target','Simulation','Experiment'],loc='lower right',handlelength=1,handletextpad=0.5)
+# lg = plt.legend([lines[0],lines[3]],['0.15','0.30'],loc='upper left',handlelength=1,handletextpad=0.5)
+# ax.add_artist(lg)
+ax.legend(lines[:3],['Desired','Simulation','Experiment'],loc='lower right',handlelength=1,handletextpad=0.5)
 ax.set_xlabel('Rotation (rad)',labelpad=1)
 ax.set_ylabel('Torque (Nm)',labelpad=1)
 plt.subplots_adjust(

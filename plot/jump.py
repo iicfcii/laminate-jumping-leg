@@ -28,6 +28,8 @@ for j,k in enumerate([0.15,0.3]):
 
         cs['m'] = m
         cs['k'] = kp
+        # cs['k'] = 1/(1/kp+1/0.6)
+        # print(cs['k'])
         cs['a'] = ap
         print(m,k,kp,a,ap)
 
