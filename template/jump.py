@@ -14,6 +14,9 @@ g, m, Il, r, k, a, t, d = symbols('g m Il r k a t d')
 b, K, I, R, L, V = symbols('b K I R L V')
 y, dy, theta, dtheta, thetas, i = symbols('y dy theta dtheta thetas i')
 
+# p = [0.01290478170760566, -0.06128190277263893, 0.04575671701363875, 0.05348587213675358]
+# r = p[0]*theta**3+p[1]*theta**2+p[2]*theta+p[3]
+
 ts = t_spring(thetas,k,a,t)
 tb = (Max(0,theta-d/r)/(theta-d/r))*((theta-d/r)*10+dtheta*0.1)
 
