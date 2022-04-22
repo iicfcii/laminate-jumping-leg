@@ -46,23 +46,26 @@ def simf(rots,x,plot=False):
 
     rs = []
     for rot in rots:
-        lk, rot = geom.leg(rot,l,c,tr,tilt=tilt)
+        lk, rotp = geom.leg(rot,l,c,tr,tilt=tilt)
 
-        f = 1
+        fy = 1
+        mu = 0
+        fx = fy*mu
         ang_fr = geom.pose(lk[2])[1]
         dx_fr = lk[2][0,0]-lk[1][0,0]
         dy_fr = lk[2][0,1]-lk[1][0,1]
         dx_f = lk[4][1,0]-lk[1][0,0]
-        fr = f*dx_f/(np.sin(ang_fr)*dx_fr-np.cos(ang_fr)*dy_fr)
+        dy_f = lk[4][1,1]-lk[1][0,1]
+        fr = -(dx_f*fy-dy_f*fx)/(dx_fr*np.sin(ang_fr)-dy_fr*np.cos(ang_fr))
 
-        fiy = f-fr*np.sin(ang_fr)
-        fix = fr*np.cos(ang_fr)
+        fiy = -fy-fr*np.sin(ang_fr)
+        fix = -fx-fr*np.cos(ang_fr)
 
         ang_crank = geom.pose(lk[0])[1]
         l_crank = l[1]
-        tau = -(l_crank*np.cos(ang_crank)*fiy+l_crank*np.sin(ang_crank)*fix)
-
-        rs.append(abs(tau/f))
+        tau = -(l_crank*np.cos(ang_crank)*fiy-l_crank*np.sin(ang_crank)*fix)
+        
+        rs.append(abs(tau/fy))
     rs = np.array(rs)
 
     if plot:

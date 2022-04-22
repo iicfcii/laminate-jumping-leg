@@ -28,8 +28,8 @@ k_min = K.flatten()[idx_min]
 r_min = R.flatten()[idx_min]
 a_min = A.flatten()[idx_min]
 v_min = V.flatten()[idx_min]
-print('Max k={:.0f} r={:.2f} a={:.2f} v={:.2f}'.format(k_max,r_max,a_max,v_max))
-print('Min k={:.0f} r={:.2f} a={:.2f} v={:.2f}'.format(k_min,r_min,a_min,v_min))
+print('Max k={:.2f} r={:.2f} a={:.2f} v={:.2f}'.format(k_max,r_max,a_max,v_max))
+print('Min k={:.2f} r={:.2f} a={:.2f} v={:.2f}'.format(k_min,r_min,a_min,v_min))
 
 r_plots = [0.04,0.05,0.07,0.08,0.06]
 # r_plots = R[:,0,0]
