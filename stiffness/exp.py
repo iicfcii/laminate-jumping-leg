@@ -17,20 +17,17 @@ def str_movel(pose):
 
 # Base to foot of leg
 Tbc = m3d.Transform()
-Tbc.pos = m3d.Vector(-4/1000, (-25.4*21-1)/1000, 0.077)
-Tbc.orient = m3d.Orientation.new_euler((0, 0, -np.pi/2+75/180*np.pi), encoding='XYZ')
+Tbc.pos = m3d.Vector(-4/1000, (-25.4*20.5-1)/1000, 0.059)
+Tbc.orient = m3d.Orientation.new_euler((0, 0, -np.pi/2-(90-37.7)/180*np.pi), encoding='XYZ')
+# 16.1, 37.7
 
 # Tool pose wrt virtual rotation
 Tct = m3d.Transform()
-Tct.pos = m3d.Vector(-(40+40)/1000,0,0)
+Tct.pos = m3d.Vector(-(40+15)/1000,0,0)
 Tct.orient = m3d.Orientation.new_euler((np.pi, 0, np.pi/4), encoding='XYZ')
 
 MOVEL_INIT = to_movel(Tbc*Tct)
-ROT_MAX = 0.9
-
-# Beam
-# 20,40,60,80,100
-# 0.4 0.5 0.6 0,7 0.8
+ROT_MAX = -0.45
 
 if __name__ == '__main__':
     ur5 = urx.Robot("192.168.1.103")
@@ -54,7 +51,7 @@ if __name__ == '__main__':
 
     t = []
     rz = []
-    tz = []
+    ft = []
 
     for dr in drs:
         Tccp = m3d.Transform()
@@ -73,7 +70,9 @@ if __name__ == '__main__':
 
             t.append(time.time()-t0)
             rz.append(pose_c.orient.to_euler('XYZ')[2])
-            tz.append(f[5])
+            ft.append(f)
+
+    ft = np.array(ft).T
 
     ur5.movel(MOVEL_INIT,acc=0.1,vel=0.05,wait=False)
 
@@ -83,6 +82,6 @@ if __name__ == '__main__':
     file_name = './data/test.csv'
     data.write(
         file_name,
-        ['t','rz','tz'],
-        [t,rz,tz]
+        ['t','rz','fx','fy','fz','tx','ty','tz'],
+        [t,rz,*ft]
     )
