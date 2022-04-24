@@ -85,11 +85,11 @@ def leg(ang,l,c,tr,tilt=None):
     pf = (tilt @ pf.T).T
 
     lk = [
-        ps[0:2,:],
-        ps[1:3,:],
-        ps[2:4,:],
-        np.array([ps[3,:],ps[0,:]]),
-        np.array([ps[2,:],pf[0,:]])
+        ps[0:2,:], # crank
+        ps[1:3,:], # coupler
+        ps[2:4,:], # rocker
+        np.array([ps[3,:],ps[0,:]]), # ground
+        np.array([ps[2,:],pf[0,:]]) # foot
     ]
 
     return lk, tilt
@@ -118,10 +118,10 @@ def spring(ang,ls,c):
     assert ps is not None, 'No fourbar fk solution'
 
     lk = [
-        ps[0:2,:],
-        ps[1:3,:],
-        ps[2:4,:],
-        np.array([ps[3,:],ps[0,:]]),
+        ps[0:2,:], # ac, crank
+        ps[1:3,:], # bc, coupler
+        ps[2:4,:], # jb, coupler
+        np.array([ps[3,:],ps[0,:]]), # aj, ground
     ]
 
     return lk
