@@ -91,12 +91,12 @@ def obj(x,ws,plot=False):
             sol = spin.solve(cs)
             w = np.interp(t,sol.t,sol.y[0,:])
 
-            # steady state current cant be very hig
+            # steady state current cant be very high
             iss = sol.y[1,-1]
             if iss > 0.2: return 100
 
             idx = t <= (0.5+j*0.5)
-            ei = np.sqrt(np.sum((w[idx]-ws[j*3+i][idx])**2)/len(t[idx]))
+            ei = np.sqrt(np.mean((w[idx]-ws[j*3+i][idx])**2))
 
             e += ei
             sols.append(sol)
@@ -134,8 +134,8 @@ def cb(x,convergence=0):
 
 bounds=[(0,0.01),(K*0.5,K*2),(I_ROTOR*0.5,I_ROTOR*2),(0,R*5)]
 x = None
-# x = [0.00021493736182965403, 0.1834029440210516, 0.00012920296285840916, 12.030585215776586]
-x = [0.00025370457449805806, 0.12076156825373549, 7.547067829477504e-05, 10.978193010075643]
+# x = [0.00015356505435637838, 0.19367850172392562, 0.00013013941021725156, 12.197322261486839]
+x = [0.00024817282734284404, 0.1217335758051555, 8.023874392878126e-05, 10.858458192019658]
 
 if __name__ == '__main__':
     ws = read(False)+read(True)

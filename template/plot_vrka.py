@@ -31,7 +31,7 @@ v_min = V.flatten()[idx_min]
 print('Max k={:.2f} r={:.2f} a={:.2f} v={:.2f}'.format(k_max,r_max,a_max,v_max))
 print('Min k={:.2f} r={:.2f} a={:.2f} v={:.2f}'.format(k_min,r_min,a_min,v_min))
 
-r_plots = [0.04,0.05,0.07,0.08,0.06]
+r_plots = [0.02,0.03,0.05,0.06,0.04]
 # r_plots = R[:,0,0]
 
 plot.set_default()
@@ -52,7 +52,7 @@ for j,ax in enumerate(axes[:-2]):
         K[i,:,:],A[i,:,:],V[i,:,:],
         # np.linspace(np.maximum(v_min,0),v_max,8),
         # extend='neither' if v_min > 0 else 'min',
-        np.arange(1.0,2.01,0.1),extend='min'
+        np.flip(np.arange(v_max,1,-0.1)),extend='min'
     )
     for c in contour.collections: c.set_edgecolor("face")
     ax.tick_params(axis='both',which='both')

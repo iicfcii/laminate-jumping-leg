@@ -64,7 +64,7 @@ def simf(rots,x,plot=False):
         ang_crank = geom.pose(lk[0])[1]
         l_crank = l[1]
         tau = -(l_crank*np.cos(ang_crank)*fiy-l_crank*np.sin(ang_crank)*fix)
-        
+
         rs.append(abs(tau/fy))
     rs = np.array(rs)
 
