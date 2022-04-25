@@ -19,7 +19,7 @@ def prbm_k(t,l,w):
     return k
 
 def tf(ct):
-    return t_15/1000 if ct > 0 else t_30/1000
+    return t_15/1000 if ct > 0 else t_10/1000
 
 def sim(x,r,plot=False):
     ls = x[:4]
