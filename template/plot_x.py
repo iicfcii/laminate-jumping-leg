@@ -3,9 +3,9 @@ import numpy as np
 from . import jump
 
 cs = jump.cs
-cs['k'] = 0.3
+cs['k'] = 0.1
 
-for a in [0.5,1,2]:
+for a in [0.5,1,1.5]:
     cs['a'] = a
     sol = jump.solve(cs)
 

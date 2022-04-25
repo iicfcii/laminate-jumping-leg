@@ -4,8 +4,8 @@ from . import jump
 
 cs = jump.cs
 
-for i,k in enumerate([0.15,0.3]):
-    for a in [0.5,1,2]:
+for i,k in enumerate([0.1,0.2]):
+    for a in [0.7,1,1.5]:
         cs['k'] = k
         cs['a'] = a
         sol = jump.solve(cs,plot=False)

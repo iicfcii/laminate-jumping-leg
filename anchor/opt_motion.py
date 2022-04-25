@@ -7,9 +7,10 @@ from . import stiffness
 from template import jump
 
 cs = jump.cs
+sf = 1.5
 
 def obj_motion(x,plot=False):
-    rots = np.linspace(0,-cs['d']/cs['r'],50)+x[0]
+    rots = np.linspace(0,-cs['d']/cs['r']*sf,50)+x[0]
     try:
         xs,ys = motion.sim(rots,x,plot=plot)
     except AssertionError:
@@ -37,8 +38,7 @@ bounds_motion = [(-np.pi,np.pi)]+[(0.01,0.07)]*5+[(-1,1)]*1
 
 xm = None
 xs = None
-xm = [2.6991809060824115, 0.03242545661128508, 0.05396996718594392, 0.019378006836034578, 0.06998685024841261, 0.06995978963036192, 0.24901472138123104]
-
+xm = [2.922817922827338, 0.028908676858519923, 0.05722644091086613, 0.018089971341423216, 0.06997756156365584, 0.06997460828030092, 0.020595091382728636]
 if __name__ == '__main__':
     if xm is None:
         res = differential_evolution(
@@ -64,14 +64,7 @@ if __name__ == '__main__':
     print('xm',str(list(xm)))
     print('xm error',obj_motion(xm,plot=True))
 
-    rots = np.linspace(0,-cs['d']/cs['r'],50)+xm[0]
-    rs = motion.simf(rots,xm,plot=False)
-    rots = xm[0]-rots
-    p = np.polyfit(rots,rs,3)
-    rsp = np.polyval(p,rots)
-    plt.figure()
-    plt.plot(rots,rs)
-    plt.plot(rots,rsp)
-    print('r',str(list(p)))
+    rots = np.linspace(0,-cs['d']/cs['r']*sf,50)+xm[0]
+    rs = motion.simf(rots,xm,plot=True)
 
     plt.show()

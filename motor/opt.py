@@ -4,6 +4,7 @@ import numpy as np
 from . import spin
 from utils import data
 
+N = 75
 I_LOAD = 0.04*0.09**2 # Weights
 I_HOLDER = (
     25399.083+ # beam
@@ -11,20 +12,20 @@ I_HOLDER = (
     0.16*6**2*5+ # screws
     0.65*36**2+0.65*56**2 # markers
 )/1e3/1e6
-I_ROTOR = 3**2*np.pi*15*8/1e3*3**2/2*100**2/1e9 # 3mm radius 15mm height steel cylinder with gear ratio
-K = 1/0.1*9.81/1000 # From pololu
-R = 10 # ohm
+I_ROTOR = 3**2*np.pi*15*8/1e3*3**2/2*N**2/1e9 # 3mm radius 15mm height steel cylinder with gear ratio
+K = 1/0.12*9.81/1000 if N == 75 else 1/0.1*9.81/1000 # From pololu
+R = 6/1.5 # ohm
 L = 580e-6 # h
-VOLTS = [3,5.7,8.7] # V
-t = np.linspace(0,0.5,100)
+VOLTS = [3.0,6.0,9.0] # V
+t = np.linspace(0,spin.tfinal,100)
 
-def read(has_load):
+def read(has_load,plot=False):
     ws = []
     for v in VOLTS:
         dthetai = []
         for trial in [1,2]:
             # Exp motor data
-            d = data.read('./data/hpcb100_{:d}V_{:d}_{:d}.csv'.format(int(np.ceil(v)),int(has_load),trial))
+            d = data.read('./data/motor/hpcb{:d}_{:d}V_{:d}_{:d}.csv'.format(N,int(np.ceil(v)),int(has_load),trial))
             t_raw = np.array(d['t'])
             t1_raw = np.array(d['t1'])
 
@@ -50,7 +51,7 @@ def read(has_load):
 
             # Find start index
             idx_ti = np.nonzero(t_raw > 0.5)[0][0]
-            idx_tf = np.nonzero(t_raw > 1.0)[0][0]
+            idx_tf = np.nonzero(t_raw > 0.5+spin.tfinal)[0][0]
 
             dtheta = -dtheta[idx_ti:idx_tf]
             t_raw = t_raw[idx_ti:idx_tf]
@@ -60,16 +61,23 @@ def read(has_load):
 
         dthetai = np.sum(dthetai,axis=0)/len(dthetai)
         ws.append(dthetai)
+
+    if plot:
+        plt.figure()
+        for i,v in enumerate(VOLTS):
+            plt.plot(t,ws[i])
+
     return ws
+
+# ws = read(True,plot=True)
+# plt.show()
+# exit()
 
 def obj(x,ws,plot=False):
     e = 0
     sols = []
     for j in [0,1]:
-        if j == 0:
-            I = I_HOLDER+x[2]
-        else:
-            I = I_HOLDER+x[2]+I_LOAD
+        I = I_HOLDER+x[2]+I_LOAD*j
 
         for i in range(len(VOLTS)):
             cs = {
@@ -77,15 +85,21 @@ def obj(x,ws,plot=False):
                 'b': x[0],
                 'K': x[1],
                 'J': I,
-                'R': R,
+                'R': x[3],
                 'L': L
             }
             sol = spin.solve(cs)
             w = np.interp(t,sol.t,sol.y[0,:])
-            e += np.sqrt(np.sum((w-ws[i])**2)/len(t))
-            sols.append(sol)
 
-    e = e/len(ws)
+            # steady state current cant be very hig
+            iss = sol.y[1,-1]
+            if iss > 0.2: return 100
+
+            idx = t <= (0.5+j*0.5)
+            ei = np.sqrt(np.sum((w[idx]-ws[j*3+i][idx])**2)/len(t[idx]))
+
+            e += ei
+            sols.append(sol)
 
     if plot:
         plt.figure('w')
@@ -118,9 +132,10 @@ def cb(x,convergence=0):
     print('x',x)
     print('Convergence',convergence)
 
-bounds=[(0,0.01),(K*0.5,K*1.5),(I_ROTOR*0.5,I_ROTOR*1.5)]
+bounds=[(0,0.01),(K*0.5,K*2),(I_ROTOR*0.5,I_ROTOR*2),(0,R*5)]
 x = None
-x = [0.0006566656814173122, 0.14705778874626846, 9.345234544905957e-05]
+# x = [0.00021493736182965403, 0.1834029440210516, 0.00012920296285840916, 12.030585215776586]
+x = [0.00025370457449805806, 0.12076156825373549, 7.547067829477504e-05, 10.978193010075643]
 
 if __name__ == '__main__':
     ws = read(False)+read(True)
@@ -130,7 +145,7 @@ if __name__ == '__main__':
             obj,
             bounds=bounds,
             args=(ws,),
-            popsize=20,
+            popsize=10,
             maxiter=500,
             tol=0.01,
             callback=cb,

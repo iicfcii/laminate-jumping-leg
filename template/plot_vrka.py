@@ -52,7 +52,7 @@ for j,ax in enumerate(axes[:-2]):
         K[i,:,:],A[i,:,:],V[i,:,:],
         # np.linspace(np.maximum(v_min,0),v_max,8),
         # extend='neither' if v_min > 0 else 'min',
-        np.arange(1.0,2.21,0.1),extend='min'
+        np.arange(1.0,2.01,0.1),extend='min'
     )
     for c in contour.collections: c.set_edgecolor("face")
     ax.tick_params(axis='both',which='both')

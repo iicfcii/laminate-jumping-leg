@@ -3,6 +3,7 @@ from scipy.integrate import solve_ivp
 import matplotlib.pyplot as plt
 
 step_sim = 0.0005
+tfinal = 1
 
 V, J, K, b, R, L = symbols('V J K b R L')
 dtheta, i = symbols('dtheta i')
@@ -19,5 +20,5 @@ def solve(cs):
     def spin(t, x):
         return dx_f(*x).flatten()
 
-    sol = solve_ivp(spin, [0,0.5], [0,0], max_step=step_sim)
+    sol = solve_ivp(spin, [0,tfinal], [0,0], max_step=step_sim)
     return sol

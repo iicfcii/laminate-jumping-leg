@@ -92,7 +92,7 @@ if __name__ == '__main__':
         keys += ['t','x','y','z']
         values += [t,p[:,0],p[:,1],p[:,2]]
 
-    file_name = '../data/test.csv'
+    file_name = './data/test.csv'
     data.write(
         file_name,
         keys,

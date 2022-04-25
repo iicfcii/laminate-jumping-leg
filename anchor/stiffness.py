@@ -5,6 +5,7 @@ from . import geom
 # PRBM
 t_30 = 0.83
 t_15 = 0.45
+t_10 = 0.27
 ang_min = 15/180*np.pi
 tr = np.sum([t_30,0.015,0.05,0.015])/1000
 wr = 0.01
