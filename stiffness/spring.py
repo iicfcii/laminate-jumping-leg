@@ -81,7 +81,7 @@ def readn(s,k,a,type='leg'):
         rzs.append(rz)
         fs.append(f)
 
-    rzi = np.arange(0,jump.cs['t']/k,0.01)
+    rzi = np.arange(0,jump.cs['t']/k+0.001,0.01)
 
     fis = []
     for rz,f in zip(rzs,fs):

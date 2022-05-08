@@ -18,31 +18,32 @@ fig,ax = plt.subplots(
 lw = 0.8
 c = ['C0','C1','C0','C1','C0','C1']
 lines = []
+e = 0
 for i,s in enumerate(design.springs):
-    cs['k'] = s['k']
-    cs['a'] = s['a']
+    k = s['k']
+    a = s['a']
     x = s['x']
 
-    thetad = np.linspace(0,cs['t']/cs['k'],100)
-    taud = jump.t_spring(thetad,cs['k'],cs['a'],cs['t'])
+    theta_d = np.linspace(0,cs['t']/k,100)
+    tau_d = jump.t_spring(theta_d,k,a,cs['t'])
 
-    theta,tau = stiffness.sim(x,cs['t']/cs['k'],plot=False)
+    theta_es,tau_es = spring.readn(1,k,a,type='spring')[:2]
+    theta_el,tau_el = spring.readn(1,k,a,type='leg')[:2]
+    tau_el = tau_el*0.034
 
-    thetae,taue = spring.readn(0,cs['k'],cs['a'])
-    idx = thetae < cs['t']/cs['k']+0.01
-    thetae = thetae[idx]
-    taue = taue[idx]
+    e += np.sqrt(np.mean((tau_es-tau_el)**2))
+    kp,ap = spring.fit(theta_el,tau_el,k,a)
+    print(k,a,kp,ap)
 
-    kp,ap = spring.fit(thetae,taue,cs['k'],cs['a'])
-    print(cs['k'],cs['a'],kp,ap)
+    lines.append(ax.plot(theta_d,tau_d,'--',color=c[i],linewidth=lw)[0])
+    # lines.append(ax.plot(theta_es,tau_es,'-',color=c[i],linewidth=lw,markersize=2)[0])
+    lines.append(ax.plot(theta_el,tau_el,'.-',color=c[i],linewidth=lw,markersize=2)[0])
 
-    lines.append(ax.plot(thetad,taud,'--',color=c[i],linewidth=lw)[0])
-    lines.append(ax.plot(theta,tau,'-',color=c[i],linewidth=lw)[0])
-    lines.append(ax.plot(thetae,taue,'.-',color=c[i],linewidth=lw,markersize=2)[0])
+print(e)
 
 # lg = plt.legend([lines[0],lines[3]],['0.15','0.30'],loc='upper left',handlelength=1,handletextpad=0.5)
 # ax.add_artist(lg)
-ax.legend(lines[:3],['Desired','Simulation','Experiment'],loc='lower right',handlelength=1,handletextpad=0.5)
+# ax.legend(lines[:3],['Desired','Simulation','Experiment'],loc='lower right',handlelength=1,handletextpad=0.5)
 ax.set_xlabel('Rotation (rad)',labelpad=1)
 ax.set_ylabel('Torque (Nm)',labelpad=1)
 plt.subplots_adjust(
