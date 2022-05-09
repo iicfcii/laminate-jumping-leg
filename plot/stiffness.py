@@ -18,7 +18,11 @@ fig,ax = plt.subplots(
 lw = 0.8
 c = ['C0','C1','C0','C1','C0','C1']
 lines = []
-e = 0
+
+es = []
+kps = []
+aps = []
+
 for i,s in enumerate(design.springs):
     k = s['k']
     a = s['a']
@@ -31,15 +35,21 @@ for i,s in enumerate(design.springs):
     theta_el,tau_el = spring.readn(1,k,a,type='leg')[:2]
     tau_el = tau_el*0.034
 
-    e += np.sqrt(np.mean((tau_es-tau_el)**2))
+    es.append(np.sqrt(np.mean((tau_es-tau_el)**2)))
     kp,ap = spring.fit(theta_el,tau_el,k,a)
     print(k,a,kp,ap)
+    kps.append(kp)
+    aps.append(ap)
 
     lines.append(ax.plot(theta_d,tau_d,'--',color=c[i],linewidth=lw)[0])
     # lines.append(ax.plot(theta_es,tau_es,'-',color=c[i],linewidth=lw,markersize=2)[0])
     lines.append(ax.plot(theta_el,tau_el,'.-',color=c[i],linewidth=lw,markersize=2)[0])
 
-print(e)
+print(np.mean(es))
+kps_10 = [kps[i] for i in [0,2,4]]
+kps_20 = [kps[i] for i in [1,3,5]]
+print('k=0.1',np.mean(kps_10),np.std(kps_10),kps_10)
+print('k=0.2',np.mean(kps_20),np.std(kps_20),kps_20)
 
 # lg = plt.legend([lines[0],lines[3]],['0.15','0.30'],loc='upper left',handlelength=1,handletextpad=0.5)
 # ax.add_artist(lg)

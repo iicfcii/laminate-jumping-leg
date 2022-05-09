@@ -15,11 +15,16 @@ b, K, I, R, L, V = symbols('b K I R L V')
 y, dy, theta, dtheta, thetas, i = symbols('y dy theta dtheta thetas i')
 
 ts = t_spring(thetas,k,a,t)
-tb = (Max(0,theta-d/r)/(theta-d/r))*((theta-d/r)*10+dtheta*0.1)
+
+# Spring boundary
 tsb = (Max(0,thetas-t/k)/(thetas-t/k))*((thetas-t/k)*10+(dtheta-dy/r)*0.1)
+ts += tsb
+
+# Leg boundary by motor arm
+tlb = (Max(0,theta-d/r)/(theta-d/r))*((theta-d/r)*10+dtheta*0.1)
 
 ddy = (ts/r-m*g)/m
-ddtheta = (K*i-ts-tb-tsb-b*dtheta)/I
+ddtheta = (K*i-ts-tlb-b*dtheta)/I
 dthetas = dtheta-dy/r
 di = V/L-K*dtheta/L-R*i/L
 
@@ -31,7 +36,7 @@ xm = [0.00024817282734284404, 0.1217335758051555, 8.023874392878126e-05, 10.8584
 
 cs = {
     'g': 9.81,
-    'm': 0.027,
+    'm': 0.03,
     'r': 0.04,
     'k': 0.2,
     'a': 1,
