@@ -23,7 +23,11 @@ ts += tsb
 # Leg boundary by motor arm
 tlb = (Max(0,theta-d/r)/(theta-d/r))*((theta-d/r)*10+dtheta*0.1)
 
-ddy = (ts/r-m*g)/m
+# Body lower boundary
+eps = 1e-6
+tyb = Min(eps,y)/y*(y*10+dy*0.1)/r
+
+ddy = ((ts-tyb)/r-m*g)/m
 ddtheta = (K*i-ts-tlb-b*dtheta)/I
 dthetas = dtheta-dy/r
 di = V/L-K*dtheta/L-R*i/L
@@ -51,10 +55,8 @@ cs = {
 }
 
 def solve(cs,plot=False):
-    # Initial condition after settle
-    # thetas_i = np.power(cs['m']*cs['g']*cs['r']/cs['t'],1/cs['a'])*cs['t']/cs['k']
     thetas_i = 0
-    y_i = (0-thetas_i)*cs['r']
+    y_i = eps
 
     x0 = [y_i,0,0,0,thetas_i,0]
     dx_f = lambdify(x,dx.subs(cs))
