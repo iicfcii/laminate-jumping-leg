@@ -5,8 +5,8 @@ from utils import data
 from template import jump
 from stiffness import spring
 
-sos = butter(2,50,'lowpass',fs=1000,output='sos')
-sos_dy = butter(2,50,'lowpass',fs=360,output='sos')
+sos = butter(2,20,'lowpass',fs=326,output='sos')
+sos_dy = butter(2,20,'lowpass',fs=360,output='sos')
 
 def read(s,k,a,n,plot=False):
     name = './data/jump/jump_{:d}_{:d}_{:d}_{:d}.csv'.format(s,int(k*100),int(a*10),n)
@@ -14,6 +14,10 @@ def read(s,k,a,n,plot=False):
     t = np.array(d['t'])
     y_raw = np.array(d['y'])
     grf_raw = np.array(d['grf'])
+
+    # plt.figure('test')
+    # plt.plot(t,grf_raw)
+    # plt.show()
 
     t_y = t[y_raw != None].astype('float64')
     y_raw =  y_raw[y_raw != None].astype('float64')
@@ -38,7 +42,7 @@ def read(s,k,a,n,plot=False):
     while ti < 1:
         idx = np.logical_and(t > ti,t < ti+0.06)
         std = np.std(grf[idx])
-        if std < 0.0015:
+        if std < 0.01:
             grf_bias = np.average(grf[idx])
             break
         ti += 0.005
@@ -88,7 +92,7 @@ def readn(s,k,a,plot=False):
     grfs = []
     dys = []
     ms = []
-    for n in [1,2,3]:
+    for n in [1,2,3,4,5]:
         t,grf,dy,m = read(s,k,a,n,plot=plot)
         ts.append(t)
         grfs.append(grf)
@@ -114,5 +118,16 @@ def readn(s,k,a,plot=False):
 
     return t,grf,dy,m
 
+# readn(1,0.2,2,plot=True)
+
 if __name__ == '__main__':
-    readn(1,0.3,2,plot=True)
+    for k in [0.1,0.2]:
+        plt.figure('k={:.1f}'.format(k))
+        for a in [0.5,1,2]:
+            t,grf,dy,m = readn(1,k,a,plot=False)
+            plt.subplot(211)
+            plt.plot(t,dy)
+            plt.subplot(212)
+            plt.plot(t,grf)
+
+    plt.show()

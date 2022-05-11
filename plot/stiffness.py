@@ -41,9 +41,9 @@ for i,s in enumerate(design.springs):
     kps.append(kp)
     aps.append(ap)
 
-    lines.append(ax.plot(theta_d,tau_d,'--',color=c[i],linewidth=lw)[0])
-    # lines.append(ax.plot(theta_es,tau_es,'-',color=c[i],linewidth=lw,markersize=2)[0])
-    lines.append(ax.plot(theta_el,tau_el,'.-',color=c[i],linewidth=lw,markersize=2)[0])
+    # lines.append(ax.plot(theta_d,tau_d,'--',color=c[i],linewidth=lw)[0])
+    lines.append(ax.plot(theta_es,tau_es,'.-',color=c[i],linewidth=lw,markersize=2)[0])
+    lines.append(ax.plot(theta_el,tau_el,'-',color=c[i],linewidth=lw,markersize=2)[0])
 
 print(np.mean(es))
 kps_10 = [kps[i] for i in [0,2,4]]

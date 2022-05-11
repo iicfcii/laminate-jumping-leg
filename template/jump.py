@@ -10,6 +10,29 @@ def t_spring(theta,k,a,t):
     else:
         return np.sign(theta)*t*np.power(np.abs(theta*k/t),a)
 
+def grf(x,cs):
+    y,dy,theta,dtheta,thetas,i = x
+
+    t = cs['t']
+    k = cs['k']
+    r = cs['r']
+    a = cs['a']
+
+    ts = t_spring(thetas,k,a,t)
+    tsb = (np.maximum(0,thetas-t/k)/(thetas-t/k))*((thetas-t/k)*10+(dtheta-dy/r)*0.1)
+    ts += tsb
+
+    # Body lower boundary
+    eps = 1e-6
+    tyb = -np.minimum(eps,y)/y*(y*10+dy*0.1)/r
+
+    # print(tyb/r)
+
+    grf = (ts+tyb)/r
+
+    return grf
+
+
 g, m, Il, r, k, a, t, d = symbols('g m Il r k a t d')
 b, K, I, R, L, V = symbols('b K I R L V')
 y, dy, theta, dtheta, thetas, i = symbols('y dy theta dtheta thetas i')
@@ -25,9 +48,9 @@ tlb = (Max(0,theta-d/r)/(theta-d/r))*((theta-d/r)*10+dtheta*0.1)
 
 # Body lower boundary
 eps = 1e-6
-tyb = Min(eps,y)/y*(y*10+dy*0.1)/r
+tyb = -Min(eps,y)/y*(y*10+dy*0.1)/r
 
-ddy = ((ts-tyb)/r-m*g)/m
+ddy = ((ts+tyb)/r-m*g)/m
 ddtheta = (K*i-ts-tlb-b*dtheta)/I
 dthetas = dtheta-dy/r
 di = V/L-K*dtheta/L-R*i/L
@@ -73,11 +96,37 @@ def solve(cs,plot=False):
     sol = solve_ivp(f,[0,1],x0,events=[lift_off],max_step=1e-4)
 
     if plot:
-        for i in range(len(x)):
-            plt.subplot(len(x),1,i+1)
-            plt.plot(sol.t,sol.y[i,:])
+        f_grf = grf(sol.y,cs)
+
+
+        plt.figure('body')
+        plt.subplot(211)
+        plt.plot(sol.t,sol.y[0,:])
+        plt.ylabel('y')
+        plt.subplot(212)
+        plt.plot(sol.t,sol.y[1,:])
+        plt.ylabel('dy')
+
+        plt.figure('rotor')
+        plt.subplot(311)
+        plt.plot(sol.t,sol.y[2,:])
+        plt.ylabel('theta')
+        plt.subplot(312)
+        plt.plot(sol.t,sol.y[3,:])
+        plt.ylabel('dtheta')
+        plt.subplot(313)
+        plt.plot(sol.t,sol.y[5,:])
+        plt.ylabel('i')
+
+        plt.figure('spring')
+        plt.subplot(211)
+        plt.plot(sol.t,sol.y[4,:])
+        plt.ylabel('thetas')
+        plt.subplot(212)
+        plt.plot(sol.t,f_grf)
+        plt.ylabel('grf')
 
     return sol
 
-# solve(cs,plot=True)
-# plt.show()
+solve(cs,plot=True)
+plt.show()
