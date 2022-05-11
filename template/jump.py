@@ -2,56 +2,43 @@ from sympy import *
 from scipy.integrate import solve_ivp
 import matplotlib.pyplot as plt
 import numpy as np
+import sympy.core
 
-def t_spring(theta,k,a,t):
-    import sympy.core
-    if isinstance(theta,sympy.core.symbol.Symbol):
-        return sign(theta)*t*Pow(abs(theta*k/t),a)
-    else:
-        return np.sign(theta)*t*np.power(np.abs(theta*k/t),a)
+EPS = 1e-6
+Kb = 10
+Bb = 0.1
 
-def grf(x,cs):
+def f_ts(x,cs):
     y,dy,theta,dtheta,thetas,i = x
+    t,k,a,r = [cs['t'],cs['k'],cs['a'],cs['r']]
 
-    t = cs['t']
-    k = cs['k']
-    r = cs['r']
-    a = cs['a']
+    ts = np.sign(thetas)*t*np.power(np.abs(thetas*k/t),a)
+    tsb = (np.maximum(0,thetas-t/k)/(thetas-t/k))*((thetas-t/k)*Kb+(dtheta-dy/r)*Bb)
 
-    ts = t_spring(thetas,k,a,t)
-    tsb = (np.maximum(0,thetas-t/k)/(thetas-t/k))*((thetas-t/k)*10+(dtheta-dy/r)*0.1)
-    ts += tsb
+    return ts+tsb
 
-    # Body lower boundary
-    eps = 1e-6
-    tyb = -np.minimum(eps,y)/y*(y*10+dy*0.1)/r
+def f_grf(x,cs):
+    y,dy,theta,dtheta,thetas,i = x
+    t,k,a,r = [cs['t'],cs['k'],cs['a'],cs['r']]
 
-    # print(tyb/r)
-
+    ts = f_ts(x,cs)
+    tyb = -np.minimum(EPS,y)/y*(y*Kb+dy*Bb)/r
     grf = (ts+tyb)/r
 
     return grf
-
 
 g, m, Il, r, k, a, t, d = symbols('g m Il r k a t d')
 b, K, I, R, L, V = symbols('b K I R L V')
 y, dy, theta, dtheta, thetas, i = symbols('y dy theta dtheta thetas i')
 
-ts = t_spring(thetas,k,a,t)
+tsb = (Max(0,thetas-t/k)/(thetas-t/k))*((thetas-t/k)*Kb+(dtheta-dy/r)*Bb) # Spring boundary
+tmb = (Max(0,theta-d/r)/(theta-d/r))*((theta-d/r)*Kb+dtheta*Bb) # motor arm boundary
+tyb = -Min(EPS,y)/y*(y*Kb+dy*Bb)/r # Body lower boundary
 
-# Spring boundary
-tsb = (Max(0,thetas-t/k)/(thetas-t/k))*((thetas-t/k)*10+(dtheta-dy/r)*0.1)
-ts += tsb
-
-# Leg boundary by motor arm
-tlb = (Max(0,theta-d/r)/(theta-d/r))*((theta-d/r)*10+dtheta*0.1)
-
-# Body lower boundary
-eps = 1e-6
-tyb = -Min(eps,y)/y*(y*10+dy*0.1)/r
+ts = sign(thetas)*t*Pow(abs(thetas*k/t),a)+tsb # spring force
 
 ddy = ((ts+tyb)/r-m*g)/m
-ddtheta = (K*i-ts-tlb-b*dtheta)/I
+ddtheta = (K*i-ts-tmb-b*dtheta)/I
 dthetas = dtheta-dy/r
 di = V/L-K*dtheta/L-R*i/L
 
@@ -78,12 +65,17 @@ cs = {
 }
 
 def solve(cs,plot=False):
-    thetas_i = 0
-    y_i = eps
-
-    x0 = [y_i,0,0,0,thetas_i,0]
+    # Calculate initial condition
+    cs['V'] = 0
     dx_f = lambdify(x,dx.subs(cs))
+    def f(t, x):
+        return dx_f(*x).flatten()
 
+    sol = solve_ivp(f,[0,0.2],[EPS,0,0,0,0,0],max_step=1e-4)
+
+    # Simulate jump
+    cs['V'] = 9
+    dx_f = lambdify(x,dx.subs(cs))
     def f(t, x):
         return dx_f(*x).flatten()
 
@@ -93,11 +85,10 @@ def solve(cs,plot=False):
     lift_off.terminal = True
     lift_off.direction = -1
 
-    sol = solve_ivp(f,[0,1],x0,events=[lift_off],max_step=1e-4)
+    sol = solve_ivp(f,[0,1],sol.y[:,-1],events=[lift_off],max_step=1e-4)
 
     if plot:
-        f_grf = grf(sol.y,cs)
-
+        grf = f_grf(sol.y,cs)
 
         plt.figure('body')
         plt.subplot(211)
@@ -123,10 +114,10 @@ def solve(cs,plot=False):
         plt.plot(sol.t,sol.y[4,:])
         plt.ylabel('thetas')
         plt.subplot(212)
-        plt.plot(sol.t,f_grf)
+        plt.plot(sol.t,grf)
         plt.ylabel('grf')
 
     return sol
 
-solve(cs,plot=True)
-plt.show()
+# solve(cs,plot=True)
+# plt.show()
