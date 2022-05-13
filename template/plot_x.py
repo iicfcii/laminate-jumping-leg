@@ -29,4 +29,9 @@ for a in [0.7,1,1.5]:
     plt.plot(sol.t,sol.y[5,:])
     plt.ylabel('i')
 
+    grf = jump.f_grf(sol.y,cs)
+    plt.figure(7)
+    plt.plot(sol.t,grf)
+    plt.ylabel('grf')
+
 plt.show()

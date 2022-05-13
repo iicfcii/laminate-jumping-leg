@@ -7,9 +7,11 @@ from . import stiffness
 from . import design
 from template import jump
 
-cs = jump.cs
 k = 0.2
 a = 1
+cs = jump.cs
+cs['k'] = k
+cs['a'] = a
 
 def cb(x,convergence=0):
     print('x',x)
@@ -29,7 +31,9 @@ def obj_stiffness(x,plot=False):
     except AssertionError:
         return 10
 
-    tz_d = jump.t_spring(rz,k,a,cs['t'])
+    rzp = np.zeros((6,rz.shape[0]))
+    rzp[4,:] = rz
+    tz_d = jump.f_ts(rzp,cs)
     e = np.sqrt(np.sum((tz-tz_d)**2)/tz.shape[0])
 
     # spring should not hit ground
