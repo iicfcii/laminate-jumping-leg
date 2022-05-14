@@ -33,18 +33,15 @@ def center(plot=False):
     xc,yc,r = np.mean(xs,axis=0)
 
     if plot:
-        thetap = np.linspace(-np.pi,0,100)
+        thetap = np.linspace(-np.pi,np.pi,100)
         xp = r*np.cos(thetap)+xc
         yp = r*np.sin(thetap)+yc
-        print(xp)
         plt.plot(xp,yp,'k')
         plt.axis('scaled')
 
     return xc,yc,r
 
-def read(k,a,n,c,plot=False):
-    xc,yc,r = c
-
+def read(k,a,n,plot=False):
     # Read data
     d = data.read('./data/damping/damping_{:d}_{:d}_{:d}_{:d}.csv'.format(1,int(k*100),int(a*10),n))
     t = np.array(d['t'])
@@ -52,14 +49,15 @@ def read(k,a,n,c,plot=False):
     ym = np.array(d['y'])
 
     # Convert to angle
+    # r = np.mean(np.sqrt((xm-xc)**2+(ym-yc)**2))
     theta = np.arctan2(ym-yc,xm-xc)
     theta0 = np.mean(theta[t > 3])
     theta -= theta0
 
     # Select range
     dtheta = np.concatenate([[0],(theta[1:]-theta[:-1])/(t[1:]-t[:-1])])
-    i = np.nonzero(dtheta<-10)[0][0]-1
-    j = np.nonzero(t > t[i]+sim.tfinal)[0][0]
+    i = np.nonzero(dtheta<-5)[0][0]-1
+    j = np.nonzero(t > t[i]+tfinal)[0][0]
     tp = t[i:j]
     thetap = theta[i:j]
     dthetap = dtheta[i:j]
@@ -83,7 +81,7 @@ def obj(x,d,plot=False):
             'I': sim.cs['I'],
             'theta0': theta_e[0]
         }
-        sol = sim.solve(cs)
+        sol = sim.solve(cs,tf=tfinal)
         t = sol.t
         theta = sol.y[0,:]
         theta_e = np.interp(t,t_e,theta_e)
@@ -102,30 +100,38 @@ def cb(x,convergence=0):
     print('x',x)
     print('Convergence',convergence)
 
+# xc,yc = center()[:2]
+xc,yc = (0.1119146101596078, -0.2391665358840971)
 k = 0.2
 a = 2
-bounds=[(0,0.3),(0,0.001)]
+tfinal = 1
+
+bounds=[(0,0.5),(0,0.01)]
 x = None
 
 # k=0.1 a=0.5,1,2
-# x = [0.036696747822411474, 2.9593453947478416e-05]
+# x = [0.19709613065418616, 0.0009016953292126581]
+# x = [0.03228778345276065, 3.660339890862972e-05]
 
 # k=0.2 a=0.5,1,2
-x = [0.06043227741613831, 7.067560971637805e-05]
+# x = [0.39554976758396837, 0.0010207587273478487]
+x = [0.05889452551394256, 5.280507687376555e-05]
 
 if __name__ == '__main__':
-    c = center(plot=False)
+    # read(k,a,1,plot=True)
+    # plt.show()
+
     d = []
     for n in [1,2,3]:
-        t_e, theta_e = read(k,a,n,c)
-        d.append([t_e, theta_e])
+        t_e, theta_e = read(k,a,n)
+        d.append([t_e,theta_e])
 
     if x is None:
         res = differential_evolution(
             obj,
             bounds=bounds,
             args=(d,),
-            popsize=10,
+            popsize=20,
             maxiter=500,
             tol=0.001,
             callback=cb,

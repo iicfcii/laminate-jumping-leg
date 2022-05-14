@@ -3,7 +3,6 @@ from scipy.integrate import solve_ivp
 import matplotlib.pyplot as plt
 
 step = 1e-3
-tfinal = 1
 
 k,b,I, = symbols('k b I')
 theta,dtheta = symbols('thtea dtheta')
@@ -20,13 +19,13 @@ cs = {
     'theta0': 0.4
 }
 
-def solve(cs,plot=False):
+def solve(cs,tf=1,plot=False):
     dx_f = lambdify(x,dx.subs(cs))
 
     def spin(t, x):
         return dx_f(*x).flatten()
 
-    sol = solve_ivp(spin, [0,tfinal], [cs['theta0'],0], max_step=step)
+    sol = solve_ivp(spin, [0,tf], [cs['theta0'],0], max_step=step)
 
 
     if plot:
