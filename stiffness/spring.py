@@ -98,7 +98,12 @@ def readn(s,k,a,type='leg'):
 
 def fit(rz,tz,kp,ap):
     def obj(rz,k,a):
-        return jump.t_spring(rz,k,a,jump.cs['t'])
+        rzp = np.zeros((6,rz.shape[0]))
+        rzp[4,:] = rz
+        cs = jump.cs
+        cs['k'] = k
+        cs['a'] = a
+        return jump.f_ts(rzp,cs,bound=False)
 
     popt, pcov = curve_fit(obj,rz,tz,p0=[kp,ap])
     k,a = popt

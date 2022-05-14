@@ -29,7 +29,12 @@ for i,s in enumerate(design.springs):
     x = s['x']
 
     theta_d = np.linspace(0,cs['t']/k,100)
-    tau_d = jump.t_spring(theta_d,k,a,cs['t'])
+    theta_dp = np.zeros((6,theta_d.shape[0]))
+    theta_dp[4,:] = theta_d
+    cs = jump.cs
+    cs['k'] = k
+    cs['a'] = a
+    tau_d = jump.f_ts(theta_dp,cs,bound=False)
 
     theta_es,tau_es = spring.readn(1,k,a,type='spring')[:2]
     theta_el,tau_el = spring.readn(1,k,a,type='leg')[:2]

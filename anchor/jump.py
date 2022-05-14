@@ -26,15 +26,24 @@ def read(s,k,a,n,plot=False):
     # Filter
     grf = sosfiltfilt(sos,grf_raw)
     dy = sosfiltfilt(sos_dy,dy_raw)
+    y = sosfiltfilt(sos_dy,y_raw)
 
     if plot:
         plt.figure('filter')
-        plt.subplot(211)
+        plt.subplot(311)
+        plt.plot(t_y,y_raw)
+        plt.plot(t_y,y)
+        plt.subplot(313)
         plt.plot(t,grf_raw)
         plt.plot(t,grf)
-        plt.subplot(212)
+        plt.subplot(312)
         plt.plot(t_y,dy_raw)
         plt.plot(t_y,dy)
+
+    # Calculate jumping height
+    ymin = np.mean(y[t_y < 0.4])
+    ymax = np.amax(y)
+    h = ymax-ymin
 
     # Find start and lift off time
     grf_bias = None
@@ -67,67 +76,86 @@ def read(s,k,a,n,plot=False):
     t_y = t_y[idx_ti_y:idx_tf_y]
     dy_raw = dy_raw[idx_ti_y:idx_tf_y]
     dy = dy[idx_ti_y:idx_tf_y]
+    y_raw = y_raw[idx_ti_y:idx_tf_y]
+    y = y[idx_ti_y:idx_tf_y]
 
      # Upsample to make data simpler
     dy_raw = np.interp(t,t_y,dy_raw)
     dy = np.interp(t,t_y,dy)
+    y_raw = np.interp(t,t_y,y_raw)
+    y = np.interp(t,t_y,y)
 
     t -= t[0]
 
     if plot:
-        print(tf,grf_bias,m)
+        print(tf,grf_bias,m,h)
         plt.figure('jump')
-        plt.subplot(211)
-        plt.plot(t,grf_raw)
-        plt.plot(t,grf)
-        plt.subplot(212)
+        plt.subplot(311)
+        plt.plot(t,y_raw)
+        plt.plot(t,y)
+        plt.subplot(312)
         plt.plot(t,dy_raw)
         plt.plot(t,dy)
+        plt.subplot(313)
+        plt.plot(t,grf_raw)
+        plt.plot(t,grf)
         plt.show()
 
-    return t,grf,dy,m
+    return t,grf,dy,y,m,h
 
 def readn(s,k,a,plot=False):
     ts = []
     grfs = []
     dys = []
+    ys = []
     ms = []
+    hs = []
     for n in [1,2,3,4,5]:
-        t,grf,dy,m = read(s,k,a,n,plot=plot)
+        t,grf,dy,y,m,h = read(s,k,a,n,plot=plot)
         ts.append(t)
         grfs.append(grf)
         dys.append(dy)
+        ys.append(y)
         ms.append(m)
+        hs.append(h)
     tf = np.amin([np.amax(ts[i]) for i in range(len(ts))])
     t = np.linspace(0,tf,100)
     grfs = [np.interp(t,ts[i],grfs[i]) for i in range(len(grfs))]
     dys = [np.interp(t,ts[i],dys[i]) for i in range(len(dys))]
+    ys = [np.interp(t,ts[i],ys[i]) for i in range(len(ys))]
 
     grf = np.mean(grfs,axis=0)
     dy = np.mean(dys,axis=0)
+    y = np.mean(ys,axis=0)
     m = np.mean(ms)
+    h = np.mean(hs)
 
     if plot:
         plt.figure('trials')
-        for dy,grf in zip(dys,grfs):
-            plt.subplot(211)
+        for y,dy,grf in zip(ys,dys,grfs):
+            plt.subplot(311)
+            plt.plot(t,y)
+            plt.subplot(312)
             plt.plot(t,dy)
-            plt.subplot(212)
+            plt.subplot(313)
             plt.plot(t,grf)
         plt.show()
 
-    return t,grf,dy,m
+    return t,grf,dy,y,m,h
 
-# readn(1,0.2,2,plot=True)
+# readn(1,0.1,0.5,plot=True)
 
 if __name__ == '__main__':
     for k in [0.1,0.2]:
         plt.figure('k={:.1f}'.format(k))
         for a in [0.5,1,2]:
-            t,grf,dy,m = readn(1,k,a,plot=False)
-            plt.subplot(211)
+            t,grf,dy,y,m,h = readn(1,k,a,plot=False)
+            print(k,a,h)
+            plt.subplot(311)
+            plt.plot(t,y)
+            plt.subplot(312)
             plt.plot(t,dy)
-            plt.subplot(212)
+            plt.subplot(313)
             plt.plot(t,grf)
 
     plt.show()

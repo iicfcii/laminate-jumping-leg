@@ -8,14 +8,16 @@ EPS = 1e-6
 Kb = 10
 Bb = 0.1
 
-def f_ts(x,cs):
+def f_ts(x,cs,bound=True):
     y,dy,theta,dtheta,thetas,i = x
     t,k,a,r = [cs['t'],cs['k'],cs['a'],cs['r']]
-
     ts = np.sign(thetas)*t*np.power(np.abs(thetas*k/t),a)
-    tsb = (np.maximum(0,thetas-t/k-EPS)/(thetas-t/k-EPS))*((thetas-t/k-EPS)*Kb+(dtheta-dy/r)*Bb)
 
-    return ts+tsb
+    if not bound:
+        return ts
+    else:
+        tsb = (np.maximum(0,thetas-t/k)/(thetas-t/k))*((thetas-t/k)*Kb+(dtheta-dy/r)*Bb)
+        return ts+tsb
 
 def f_grf(x,cs):
     y,dy,theta,dtheta,thetas,i = x
@@ -31,7 +33,7 @@ g, m, Il, r, k, a, t, d = symbols('g m Il r k a t d')
 b, K, I, R, L, V = symbols('b K I R L V')
 y, dy, theta, dtheta, thetas, i = symbols('y dy theta dtheta thetas i')
 
-tsb = (Max(0,thetas-t/k-EPS)/(thetas-t/k-EPS))*((thetas-t/k-EPS)*Kb+(dtheta-dy/r)*Bb) # Spring boundary
+tsb = (Max(0,thetas-t/k)/(thetas-t/k))*((thetas-t/k)*Kb+(dtheta-dy/r)*Bb) # Spring boundary
 tmb = (Max(0,theta-d/r)/(theta-d/r))*((theta-d/r)*Kb+dtheta*Bb) # motor arm boundary
 tyb = -Min(EPS,y)/y*(y*Kb+dy*Bb)/r # Body lower boundary
 
