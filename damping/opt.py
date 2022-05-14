@@ -7,39 +7,35 @@ from . import sim
 
 def center(plot=False):
     def obj(x):
-        xc,yc,r = x
-        e = (xm-xc)**2+(ym-yc)**2-r**2
-        return np.sqrt(np.mean(e**2))
+        xc,yc = x
+        rs = np.sqrt((xm-xc)**2+(ym-yc)**2)
+        return np.std(rs)
 
-    xs = []
+    xm = []
+    ym = []
     for i,k in enumerate([0.1,0.2]):
-        for a in [2]:
+        for a in [0.5,2]:
             for n in [1,2,3]:
                 d = data.read('./data/damping/damping_{:d}_{:d}_{:d}_{:d}.csv'.format(1,int(k*100),int(a*10),n))
-                t = np.array(d['t'])
-                xm = np.array(d['x'])
-                ym = np.array(d['y'])
+                xm += d['x']
+                ym += d['y']
+    xm = np.array(xm)
+    ym = np.array(ym)
 
-                x0 = [xm[0],ym[0],0.018]
-                res = minimize(obj,x0,tol=1e-6)
-                xc,yc,r = res.x
-                xs.append([xc,yc,np.abs(r)])
-
-                if plot:
-                    plt.figure('center')
-                    plt.plot(xm,ym,'.',color='C{:d}'.format(i))
-
-    xs = np.array(xs)
-    xc,yc,r = np.mean(xs,axis=0)
+    x0 = [xm[0],ym[0]]
+    res = minimize(obj,x0,tol=1e-6)
+    xc,yc = res.x
 
     if plot:
+        r = np.mean(np.sqrt((xm-xc)**2+(ym-yc)**2))
         thetap = np.linspace(-np.pi,np.pi,100)
         xp = r*np.cos(thetap)+xc
         yp = r*np.sin(thetap)+yc
-        plt.plot(xp,yp,'k')
+        plt.plot(xp,yp)
+        plt.plot(xm,ym,'.')
         plt.axis('scaled')
 
-    return xc,yc,r
+    return xc,yc
 
 def read(k,a,n,plot=False):
     # Read data
@@ -100,8 +96,8 @@ def cb(x,convergence=0):
     print('x',x)
     print('Convergence',convergence)
 
-# xc,yc = center()[:2]
-xc,yc = (0.1119146101596078, -0.2391665358840971)
+# print(center())
+xc,yc = (0.11167429336120666, -0.23891391562798037)
 k = 0.2
 a = 2
 tfinal = 1
