@@ -58,6 +58,15 @@ def read(k,a,n,plot=False):
     thetap = theta[i:j]
     dthetap = dtheta[i:j]
 
+    # Skip the first cycle to avoid unnatural behavior due to manual release
+    for i in range(1,len(dthetap)):
+        if dthetap[i] > 0 and dthetap[i+1] < 0:
+            if dthetap[i+1] > -5: i += 1 # Skip flat peak
+            break
+    tp = tp[i:]
+    thetap = thetap[i:]
+    dthetap = dthetap[i:]
+
     if plot:
         plt.figure('theta')
         plt.plot(t,theta)
@@ -98,20 +107,22 @@ def cb(x,convergence=0):
 
 # print(center())
 xc,yc = (0.11167429336120666, -0.23891391562798037)
+TFINALS = {0.5:0.15,1:0.5,2:1}
+
 k = 0.2
 a = 2
-tfinal = 1
+tfinal = TFINALS[a]
 
 bounds=[(0,0.5),(0,0.01)]
 x = None
 
 # k=0.1 a=0.5,1,2
-# x = [0.19709613065418616, 0.0009016953292126581]
-# x = [0.03228778345276065, 3.660339890862972e-05]
+# x = [0.12128303221029496, 0.0005001788237487485]
+# x = [0.034248031170973, 2.6668605419837184e-05]
 
 # k=0.2 a=0.5,1,2
-# x = [0.39554976758396837, 0.0010207587273478487]
-x = [0.05889452551394256, 5.280507687376555e-05]
+# x =  [0.17483917895909365, 0.0004302590859624313]
+x = [0.05706440737077062, 4.855367671133953e-05]
 
 if __name__ == '__main__':
     # read(k,a,1,plot=True)
