@@ -15,7 +15,7 @@ dx = Matrix([dtheta, ddthtea])
 cs = {
     'k': 0.1,
     'b': 0.0001,
-    'I': 0.01*0.018**2,
+    'I': 0.01*0.018**2+0.0005*0.0217**2+2.93e-7, # weight, marker, 3d printed part
     'theta0': 0.4
 }
 

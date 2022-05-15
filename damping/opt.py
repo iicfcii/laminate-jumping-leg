@@ -14,7 +14,7 @@ def center(plot=False):
     xm = []
     ym = []
     for i,k in enumerate([0.1,0.2]):
-        for a in [0.5,2]:
+        for a in [0.5,1,2]:
             for n in [1,2,3]:
                 d = data.read('./data/damping/damping_{:d}_{:d}_{:d}_{:d}.csv'.format(1,int(k*100),int(a*10),n))
                 xm += d['x']
@@ -24,6 +24,7 @@ def center(plot=False):
 
     x0 = [xm[0],ym[0]]
     res = minimize(obj,x0,tol=1e-6)
+    print(res)
     xc,yc = res.x
 
     if plot:
@@ -45,12 +46,13 @@ def read(k,a,n,plot=False):
     ym = np.array(d['y'])
 
     # Convert to angle
-    # r = np.mean(np.sqrt((xm-xc)**2+(ym-yc)**2))
+    # r = np.mean(np.sqrt((xm-xc)**2+(ym-yc)**2)) # 0.0217
     theta = np.arctan2(ym-yc,xm-xc)
 
     # Select range
     dtheta = np.concatenate([[0],(theta[1:]-theta[:-1])/(t[1:]-t[:-1])])
     i = np.nonzero(dtheta<-5)[0][0]-1
+    ip = i
 
     # Skip the first cycle to avoid unnatural behavior due to manual release
     for ip in range(i,len(dtheta)):
@@ -68,8 +70,9 @@ def read(k,a,n,plot=False):
 
     if plot:
         plt.figure('theta')
-        plt.plot(t,theta)
-        plt.plot(tp,thetap)
+        c = 'C{:d}'.format(n-1)
+        plt.plot(t,theta,'-',color=c)
+        plt.plot(tp,thetap,'.',color=c)
 
     tp -= tp[0]
     return tp,thetap
@@ -105,27 +108,30 @@ def cb(x,convergence=0):
     print('Convergence',convergence)
 
 # print(center())
-xc,yc = (0.11167429336120666, -0.23891391562798037)
-TFINALS = {0.5:0.1,1:0.5,2:1}
+xc,yc = (0.1106286964213686, -0.23876000860024177)
 
-k = 0.2
-a = 2
-tfinal = TFINALS[a]
+k = 0.1
+a = 0.5
+tfinal = 0.3 # 0.3, 0.5, 1
 
 bounds=[(0,0.5),(0,0.01)]
 x = None
 
 # k=0.1 a=0.5,1,2
-# x = [0.14526367222647915, 0.000365712478361601]
-# x = [0.03425108755164452, 2.676795777526754e-05]
+x = [0.14171010765472708, 0.00016325042214574825]
+# x = [0.12817122286702087, 0.00012936189846465742]
+# x = [0.03976104133250624, 2.2544076353877424e-05]
 
 # k=0.2 a=0.5,1,2
-# x = [0.1729162896339119, 0.0004221147119192782]
-x = [0.057072088495751294, 4.85563563828173e-05]
+# x = [0.15983696179437762, 0.00022822430718920546]
+# x = [0.1883647842634908, 0.00015751871012245362]
+# x = [0.07235602831789512, 5.742922042662607e-05]
 
 if __name__ == '__main__':
-    # read(k,a,1,plot=True)
+    # for n in [1,2,3]:
+    #     read(k,a,n,plot=True)
     # plt.show()
+    # exit()
 
     d = []
     for n in [1,2,3]:

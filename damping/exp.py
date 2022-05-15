@@ -72,6 +72,9 @@ if __name__ == '__main__':
                     lm[m.id_num]['pos'].append(m.pos)
             updated = False
 
+        # IMPORTANT: Sleep a bit to not block the other thread
+        time.sleep(0.0001)
+
     streaming_client.shutdown()
 
     keys = []
