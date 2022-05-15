@@ -47,25 +47,24 @@ def read(k,a,n,plot=False):
     # Convert to angle
     # r = np.mean(np.sqrt((xm-xc)**2+(ym-yc)**2))
     theta = np.arctan2(ym-yc,xm-xc)
-    theta0 = np.mean(theta[t > 3])
-    theta -= theta0
 
     # Select range
     dtheta = np.concatenate([[0],(theta[1:]-theta[:-1])/(t[1:]-t[:-1])])
     i = np.nonzero(dtheta<-5)[0][0]-1
-    j = np.nonzero(t > t[i]+tfinal)[0][0]
-    tp = t[i:j]
-    thetap = theta[i:j]
-    dthetap = dtheta[i:j]
 
     # Skip the first cycle to avoid unnatural behavior due to manual release
-    for i in range(1,len(dthetap)):
-        if dthetap[i] > 0 and dthetap[i+1] < 0:
-            if dthetap[i+1] > -5: i += 1 # Skip flat peak
+    for ip in range(i,len(dtheta)):
+        if dtheta[ip] > 0 and dtheta[ip+1] < 0:
+            if dtheta[ip+1] > -5: ip += 1 # Skip flat peak
             break
-    tp = tp[i:]
-    thetap = thetap[i:]
-    dthetap = dthetap[i:]
+
+    j = np.nonzero(t > t[ip]+tfinal)[0][0]
+    theta0 = np.mean(theta[j:j+10])
+    theta -= theta0
+
+    tp = t[ip:j]
+    thetap = theta[ip:j]
+    dthetap = dtheta[ip:j]
 
     if plot:
         plt.figure('theta')
@@ -107,7 +106,7 @@ def cb(x,convergence=0):
 
 # print(center())
 xc,yc = (0.11167429336120666, -0.23891391562798037)
-TFINALS = {0.5:0.15,1:0.5,2:1}
+TFINALS = {0.5:0.1,1:0.5,2:1}
 
 k = 0.2
 a = 2
@@ -117,12 +116,12 @@ bounds=[(0,0.5),(0,0.01)]
 x = None
 
 # k=0.1 a=0.5,1,2
-# x = [0.12128303221029496, 0.0005001788237487485]
-# x = [0.034248031170973, 2.6668605419837184e-05]
+# x = [0.14526367222647915, 0.000365712478361601]
+# x = [0.03425108755164452, 2.676795777526754e-05]
 
 # k=0.2 a=0.5,1,2
-# x =  [0.17483917895909365, 0.0004302590859624313]
-x = [0.05706440737077062, 4.855367671133953e-05]
+# x = [0.1729162896339119, 0.0004221147119192782]
+x = [0.057072088495751294, 4.85563563828173e-05]
 
 if __name__ == '__main__':
     # read(k,a,1,plot=True)
