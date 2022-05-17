@@ -12,7 +12,7 @@ def mass(x):
     return (np.sum(x[1:6])+0.006)*motion.tr*motion.wr*geom.rho
 
 def obj_motion(x,plot=False):
-    rots = np.linspace(0,-cs['d']/cs['r'],50)+x[0]
+    rots = np.linspace(0,-cs['d'],50)+x[0]
     try:
         xs,ys = motion.sim(rots,x,plot=plot)
     except AssertionError:
@@ -64,12 +64,12 @@ if __name__ == '__main__':
         xm = res.x
 
 
-    print('crank range', cs['d']/cs['r'])
+    print('crank range', cs['d'])
     print('mass',mass(xm))
     print('xm',str(list(xm)))
     print('xm error',obj_motion(xm,plot=True))
 
-    rots = np.linspace(0,-cs['d']/cs['r'],50)+xm[0]
+    rots = np.linspace(0,-cs['d'],50)+xm[0]
     rs = motion.simf(rots,xm,plot=True)
 
     plt.show()

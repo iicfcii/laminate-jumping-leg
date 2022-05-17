@@ -51,7 +51,7 @@ def read(s,k,a,n,plot=False):
     while ti < 1:
         idx = np.logical_and(t > ti,t < ti+0.06)
         std = np.std(grf[idx])
-        if std < 0.01:
+        if std < 0.02:
             grf_bias = np.average(grf[idx])
             break
         ti += 0.005
@@ -59,8 +59,8 @@ def read(s,k,a,n,plot=False):
 
     m = -(np.mean(grf_raw[t<0.4])-grf_bias)/jump.cs['g']
 
-    ti = t[np.nonzero(t > 0.508)[0][0]]
-    tf = t[np.nonzero(grf > grf_bias)[0][0]]
+    ti = t[np.nonzero(t > 0.5)[0][0]-1]
+    tf = t[np.nonzero(grf > grf_bias)[0][0]+1]
     # ti = 0.5
     # tf = 0.8
 
@@ -143,12 +143,12 @@ def readn(s,k,a,plot=False):
 
     return t,grf,dy,y,m,h
 
-# readn(1,0.1,0.5,plot=True)
+# readn(1,0.2,2,plot=True)
 
 if __name__ == '__main__':
     for k in [0.1,0.2]:
         plt.figure('k={:.1f}'.format(k))
-        for a in [0.5,1,2]:
+        for a in [2,1,0.5]:
             t,grf,dy,y,m,h = readn(1,k,a,plot=False)
             print(k,a,h)
             plt.subplot(311)
