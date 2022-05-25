@@ -48,13 +48,15 @@ for i,ax in enumerate(axes.ravel()):
     if i%2 == 0: ax.set_xlabel('{:.1f}'.format(cs['a']),labelpad=2)
     if i>3: ax.set_ylabel('{:.2f}'.format(cs['k']),labelpad=0)
 
+    idx_a = int(i/2)
+    # idx_k = i%2
+    c = 'C{:d}'.format(2-idx_a)
     for j,lk in enumerate(lks):
-        ls = '.-k' if j == 0 else '.--k'
+        ls = '.-' if j == 0 else '.--'
         for k,link in enumerate(lk):
             ax.plot(
-                link[:,0],link[:,1],ls,
-                linewidth=0.8,
-                markersize=2
+                link[:,0],link[:,1],ls,color=c,
+                linewidth=0.8,markersize=2
             )
 
     ax.annotate(
@@ -81,7 +83,7 @@ ax = fig.add_subplot(111, frameon=False)
 ax.set_xticks([])
 ax.set_yticks([])
 ax.set_xlabel('Nonlinearity',labelpad=10)
-ax.set_ylabel('Stiffness Coefficient (N/m)',labelpad=10)
+ax.set_ylabel('Stiffness Coefficient (Nm/rad)',labelpad=10)
 
 plt.subplots_adjust(
     left=0.09,right=1,top=1,bottom=0.11,
