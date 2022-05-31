@@ -56,11 +56,11 @@ for i,ax in enumerate(axes.ravel()):
         for k,link in enumerate(lk):
             ax.plot(
                 link[:,0],link[:,1],ls,color=c,
-                linewidth=0.8,markersize=2
+                linewidth=1,markersize=3
             )
 
     ax.annotate(
-        '{:.0f} mm'.format(w*1000),
+        '{:.0f}mm'.format(w*1000),
         xy=(1, 1),xycoords='axes fraction',
         xytext=(-2,-2),textcoords='offset points',ha='right',va='top',
     )
@@ -74,7 +74,7 @@ for i,ax in enumerate(axes.ravel()):
         y2 = y1
         ax.plot([x1,x2],[y1,y2],'k',linewidth=2)
         ax.annotate(
-            '{:.0f} mm'.format(l*scale*1000),
+            '{:.0f}mm'.format(l*scale*1000),
             xy=((x1+x2)/2, (y1+y2)/2),
             xytext=(0,-4),textcoords='offset points',ha='center',va='top',
         )
