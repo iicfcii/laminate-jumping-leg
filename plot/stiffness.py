@@ -44,8 +44,8 @@ for i,s in enumerate(design.springs):
     kes,aes = spring.fit(theta_es,tau_es,k,a)
     kel,ael = spring.fit(theta_el,tau_el,k,a)
     print(
-        'k: {:.2f}, {:.2f}, {:.2f}, {:.2f} a: {:.2f}, {:.2f}, {:.2f}, {:.2f}'
-        .format(k,ko,kes,kel,a,ao,aes,ael)
+        'k: {:.2f}, {:.2f}, {:.2f}, {:.2f} a: {:.2f}, {:.2f}, {:.2f}, {:.2f}, {:.2e}'
+        .format(k,ko,kes,kel,a,ao,aes,ael,s['b'])
     )
 
     idx_a = int(i/2)
@@ -60,17 +60,17 @@ for i,s in enumerate(design.springs):
 print(np.mean(es))
 
 axes[0].annotate(
-    'k=0.1Nm/rad',
+    '0.1',
     xy=(1, 0),xycoords='axes fraction',
     xytext=(-2,2),textcoords='offset points',ha='right',va='bottom',
 )
 axes[1].annotate(
-    'k=0.2Nm/rad',
+    '0.2',
     xy=(1, 0),xycoords='axes fraction',
     xytext=(-2,2),textcoords='offset points',ha='right',va='bottom',
 )
-axes[0].legend(lines[:4],['Desired','Model','Spring','Leg'],loc='upper left',handlelength=1,handletextpad=0.5)
-axes[1].legend([lines[i] for i in [23,15,7]],['a=0.5','a=1.0','a=2.0'],loc='upper left',handlelength=1,handletextpad=0.5)
+axes[0].legend(lines[20:],['Goal','Model','Spring','Leg'],loc='upper left',handlelength=1,handletextpad=0.5)
+axes[1].legend([lines[i] for i in [23,15,7]],['0.5','1.0','2.0'],loc='upper left',handlelength=1,handletextpad=0.5)
 axes[0].set_xlabel('Rotation (rad)',labelpad=1)
 axes[1].set_xlabel('Rotation (rad)',labelpad=1)
 axes[0].set_ylabel('Torque (Nm)',labelpad=1)
