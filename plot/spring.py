@@ -8,86 +8,63 @@ from utils import plot
 
 plot.set_default()
 
-cs = jump.cs
-fig,axes = plt.subplots(
-    2,3,
-    figsize=(3.4-plot.pad*2,2.3),dpi=150
-)
-r = 0.046
-scales = [1,1,1,1,1,1]
-axes = np.flip(axes.T)
-for i,ax in enumerate(axes.ravel()):
-    s = design.springs[i]
-    cs['k'] = s['k']
-    cs['a'] = s['a']
+r = 0.042
+for i,s in enumerate(design.springs):
+    fig,ax = plt.subplots(1,1,figsize=(0.9-plot.pad*2,0.9-plot.pad*2),dpi=150)
+
+    k = s['k']
+    a = s['a']
     x = s['x']
-
-    print(cs['k'],cs['a'],cs['t']/cs['k'],mass(x))
-
     ls = x[:4]
     c = x[4]
     w = x[6]
 
-    scale = scales[i]
+    print(k,a,w)
 
     lks = []
-    for ang in np.linspace(0,cs['t']/cs['k'],2):
+    for ang in np.linspace(0,jump.cs['t']/k,2):
         lk = geom.spring(ang,ls,c)
         lks.append(lk)
-    lks = np.array(lks)/scale
+    lks = np.array(lks)
 
     bbox = geom.bbox(lks,pad=0)
     xc = (bbox[0]+bbox[1])/2
     yc = (bbox[2]+bbox[3])/2
-
     ax.axis('scaled')
     ax.set_xlim([xc-r,xc+r])
     ax.set_ylim([yc-r,yc+r])
     ax.set_xticks([])
     ax.set_yticks([])
-    if i%2 == 0: ax.set_xlabel('{:.1f}'.format(cs['a']),labelpad=2)
-    if i>3: ax.set_ylabel('{:.2f}'.format(cs['k']),labelpad=0)
+    ax.axis('off')
 
     idx_a = int(i/2)
     # idx_k = i%2
     c = 'C{:d}'.format(2-idx_a)
     for j,lk in enumerate(lks):
         ls = '.-' if j == 0 else '.--'
-        for k,link in enumerate(lk):
+        for link in lk:
             ax.plot(
                 link[:,0],link[:,1],ls,color=c,
                 linewidth=1,markersize=3
             )
 
-    ax.annotate(
-        '{:.0f}mm'.format(w*1000),
-        xy=(1, 1),xycoords='axes fraction',
-        xytext=(-2,-2),textcoords='offset points',ha='right',va='top',
-    )
-
-    if i == 0:
+    if i == 1:
         # Scale
-        l = 0.01/scale
+        l = 0.01
         x1 = xc+r-0.015-l/2
         x2 = x1+l
         y1 = yc-r+0.015
         y2 = y1
         ax.plot([x1,x2],[y1,y2],'k',linewidth=2)
         ax.annotate(
-            '{:.0f}mm'.format(l*scale*1000),
+            '{:.0f}mm'.format(l*1000),
             xy=((x1+x2)/2, (y1+y2)/2),
             xytext=(0,-4),textcoords='offset points',ha='center',va='top',
         )
 
-ax = fig.add_subplot(111, frameon=False)
-ax.set_xticks([])
-ax.set_yticks([])
-ax.set_xlabel('Nonlinearity',labelpad=10)
-ax.set_ylabel('Stiffness Coefficient (Nm/rad)',labelpad=10)
-
-plt.subplots_adjust(
-    left=0.09,right=1,top=1,bottom=0.11,
-    wspace=0,hspace=0
-)
-plot.savefig('spring.pdf',fig)
+    plt.subplots_adjust(
+        left=0,right=1,top=1,bottom=0,
+        wspace=0,hspace=0
+    )
+    plot.savefig('spring_{:.0f}_{:.0f}.pdf'.format(k*100,a*10),fig)
 plt.show()
