@@ -15,9 +15,11 @@ def set_default():
     plt.rcParams['patch.linewidth'] = lw
 
 pad = 0.005
-def savefig(name,fig):
+def savefig(name,fig,pdf=None):
     fig_size = fig.get_size_inches()
-    fig.savefig(
-        name,
-        bbox_inches=mtransforms.Bbox([[0-pad,0-pad],[fig_size[0]+pad,fig_size[1]+pad]])
-    )
+    bbox = mtransforms.Bbox([[0-pad,0-pad],[fig_size[0]+pad,fig_size[1]+pad]])
+
+    if pdf is None:
+        fig.savefig(name,bbox_inches=bbox)
+    else:
+        pdf.savefig(bbox_inches=bbox)
