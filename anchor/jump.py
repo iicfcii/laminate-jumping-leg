@@ -143,12 +143,13 @@ def readn(s,k,a,plot=False):
 
     return t,grf,dy,y,m,h
 
-# readn(1,0.2,2,plot=True)
+# readn(1,0.1,2,plot=True)
+# exit()
 
 if __name__ == '__main__':
     for k in [0.1,0.2]:
         plt.figure('k={:.1f}'.format(k))
-        for a in [2,1,0.5]:
+        for a in [0.5,1,2]:
             t,grf,dy,y,m,h = readn(1,k,a,plot=False)
             print(k,a,h)
             plt.subplot(311)
