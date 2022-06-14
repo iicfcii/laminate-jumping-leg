@@ -4,78 +4,69 @@ import matplotlib.pyplot as plt
 import numpy as np
 import sympy.core
 
-# Spring boundary constants
-K_SB = 1
-B_SB = 0.001
-# Motor boundary constants
 K_MB = 10
 B_MB = 0.1
-# Body boundary constants
-K_BB = 100
+K_BB = 5000
 
-def f_ts(x,cs,bound=True):
-    y,dy,theta,dtheta,thetas,i = x
-    t,k,a,r = [cs['t'],cs['k'],cs['a'],cs['r']]
-    ts = np.sign(thetas)*t*np.power(np.abs(thetas*k/t),a)
+def f_ts(x,cs):
+    yb,dyb,phim,dphim,phis,i = x
+    t,k,a,r,bs = [cs['t'],cs['k'],cs['a'],cs['r'],cs['bs']]
+    ts = np.sign(phis)*t*np.power(np.abs(phis*k/t),a)+bs*(dphim-dyb/r)
 
-    if not bound:
-        return ts
-    else:
-        tsb = (np.maximum(0,thetas-t/k)/(thetas-t/k))*((thetas-t/k)*K_SB+(dtheta-dy/r)*B_SB)*0
-        return ts+tsb
+    return ts
 
 def f_grf(x,cs):
-    y,dy,theta,dtheta,thetas,i = x
-    t,k,a,r,g,ml = [cs['t'],cs['k'],cs['a'],cs['r'],cs['g'],cs['ml']]
+    yb,dyb,phim,dphim,phis,i = x
+    r,g,mb,Il,mf = [cs['r'],cs['g'],cs['mb'],cs['Il'],cs['mf']]
 
     ts = f_ts(x,cs)
-    tyb = -np.minimum(0,y)/y*(y/r*K_BB)
-    grf = (ts+tyb)/r+ml*g
+    fbb = -np.minimum(0,yb)/yb*(yb*K_BB)
+    ddyb = (ts/r-mb*g+fbb)/(mb+Il/r/r)
+
+    grf = (ts-Il*ddyb/r)/r+mf*g+fbb
 
     return grf
 
-g, m, r, k, a, t, d, bs = symbols('g m r k a t d bs')
-b, K, I, R, L, V = symbols('b K I R L V')
-y, dy, theta, dtheta, thetas, i = symbols('y dy theta dtheta thetas i')
+g, mb, r, k, a, t, d, bs, Il = symbols('g mb r k a t d bs Il')
+bm, K, Im, R, L, V = symbols('bm K Im R L V') # motor
+yb, dyb, phim, dphim, phis, i = symbols('yb dyb phim dphim phis i')
 
-tsb = (Max(0,thetas-t/k)/(thetas-t/k))*((thetas-t/k)*K_SB+(dtheta-dy/r)*B_SB)*0 # Spring boundary
-tsd = bs*(dtheta-dy/r) # spring damping
-tmb = (Max(0,theta-d)/(theta-d))*((theta-d)*K_MB+dtheta*B_MB) # motor arm boundary
-tyb = -Min(0,y)/y*(y/r*K_BB) # Body lower boundary
+ts = sign(phis)*t*Pow(abs(phis*k/t),a)+bs*(dphim-dyb/r) # spring force
+tmb = (Max(0,phim-d)/(phim-d))*((phim-d)*K_MB+dphim*B_MB) # motor arm boundary
+fbb = -Min(0,yb)/yb*(yb*K_BB) # Body lower boundary
 
-ts = sign(thetas)*t*Pow(abs(thetas*k/t),a)+tsb+tsd # spring force
+ddyb = (ts/r-mb*g+fbb)/(mb+Il/r/r)
+ddphim = (K*i-ts-bm*dphim-tmb)/Im
+dphis = dphim-dyb/r
+di = V/L-K*dphim/L-R*i/L
 
-ddy = ((ts+tyb)/r-m*g-dy*0)/m
-ddtheta = (K*i-ts-tmb-b*dtheta)/I
-dthetas = dtheta-dy/r
-di = V/L-K*dtheta/L-R*i/L
-
-x = Matrix([y,dy,theta,dtheta,thetas,i])
-dx = Matrix([dy,ddy,dtheta,ddtheta,dthetas,di])
+x = Matrix([yb,dyb,phim,dphim,phis,i])
+dx = Matrix([dyb,ddyb,dphim,ddphim,dphis,di])
 
 # xm = [0.00015356505435637838, 0.19367850172392562, 0.00013013941021725156, 12.197322261486839]
 xm = [0.00024817282734284404, 0.1217335758051555, 8.023874392878126e-05, 10.858458192019658]
 
 cs = {
     'g': 9.81,
-    'm': 0.03,
-    'ml': 0.00,
+    'mb': 0.03,
+    'mf': 0.00,
     'r': 0.04,
-    'k': 0.2,
+    'k': 0.1,
     'a': 1,
     't': 0.06, # max spring torque, Nm
     'd': 1.5, # max motor arm range, rad
     'bs': 0, # spring damping
-    'b': xm[0],
+    'Il':0,
+    'bm': xm[0],
     'K': xm[1],
-    'I': xm[2],
+    'Im': xm[2],
     'R': xm[3],
     'L': 580e-6,
     'V': 9
 }
 
 def solve(cs,plot=False):
-    yi = -cs['m']*cs['g']*cs['r']/K_BB*cs['r']
+    yi = -cs['mb']*cs['g']/K_BB
     x0 = [yi,0,0,0,0,0]
 
     dx_f = lambdify(x,dx.subs(cs))
@@ -96,18 +87,18 @@ def solve(cs,plot=False):
         plt.figure('body')
         plt.subplot(211)
         plt.plot(sol.t,sol.y[0,:])
-        plt.ylabel('y')
+        plt.ylabel('yb')
         plt.subplot(212)
         plt.plot(sol.t,sol.y[1,:])
-        plt.ylabel('dy')
+        plt.ylabel('dyb')
 
         plt.figure('rotor')
         plt.subplot(311)
         plt.plot(sol.t,sol.y[2,:])
-        plt.ylabel('theta')
+        plt.ylabel('phim')
         plt.subplot(312)
         plt.plot(sol.t,sol.y[3,:])
-        plt.ylabel('dtheta')
+        plt.ylabel('dphim')
         plt.subplot(313)
         plt.plot(sol.t,sol.y[5,:])
         plt.ylabel('i')
@@ -115,7 +106,7 @@ def solve(cs,plot=False):
         plt.figure('spring')
         plt.subplot(211)
         plt.plot(sol.t,sol.y[4,:])
-        plt.ylabel('thetas')
+        plt.ylabel('phis')
         plt.subplot(212)
         plt.plot(sol.t,grf)
         plt.ylabel('grf')
