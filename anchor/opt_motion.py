@@ -70,6 +70,14 @@ if __name__ == '__main__':
     print('xm error',obj_motion(xm,plot=True))
 
     rots = np.linspace(0,-cs['d'],50)+xm[0]
-    rs = motion.simf(rots,xm,plot=True)
+    rs = motion.simf(rots,xm,plot=False)
+    rots = xm[0]-rots
+    p = np.polyfit(rots,rs,2)
+    rsp = np.polyval(p,rots)
+
+    plt.figure()
+    plt.plot(rots,rs)
+    plt.plot(rots,rsp)
+    print('r coeff',str(list(p)))
 
     plt.show()

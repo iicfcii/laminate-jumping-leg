@@ -9,14 +9,14 @@ B_MB = 0.1
 K_BB = 5000
 
 def f_ts(x,cs):
-    yb,dyb,phim,dphim,phis,i = x
+    yb,dyb,phim,dphim,phis,phil,i = x
     t,k,a,r,bs = [cs['t'],cs['k'],cs['a'],cs['r'],cs['bs']]
     ts = np.sign(phis)*t*np.power(np.abs(phis*k/t),a)+bs*(dphim-dyb/r)
 
     return ts
 
 def f_grf(x,cs):
-    yb,dyb,phim,dphim,phis,i = x
+    yb,dyb,phim,dphim,phis,phil,i = x
     r,g,mb,Il,mf = [cs['r'],cs['g'],cs['mb'],cs['Il'],cs['mf']]
 
     ts = f_ts(x,cs)
@@ -29,7 +29,10 @@ def f_grf(x,cs):
 
 g, mb, r, k, a, t, d, bs, Il = symbols('g mb r k a t d bs Il')
 bm, K, Im, R, L, V = symbols('bm K Im R L V') # motor
-yb, dyb, phim, dphim, phis, i = symbols('yb dyb phim dphim phis i')
+yb, dyb, phim, dphim, phis, phil, i = symbols('yb dyb phim dphim phis phil i')
+
+rp = [-0.028783019958200613, 0.040053500503592146, 0.030340072489310328]
+# r = rp[0]*phil**2+rp[1]*phil+rp[2]
 
 ts = sign(phis)*t*Pow(abs(phis*k/t),a)+bs*(dphim-dyb/r) # spring force
 tmb = (Max(0,phim-d)/(phim-d))*((phim-d)*K_MB+dphim*B_MB) # motor arm boundary
@@ -38,10 +41,11 @@ fbb = -Min(0,yb)/yb*(yb*K_BB) # Body lower boundary
 ddyb = (ts/r-mb*g+fbb)/(mb+Il/r/r)
 ddphim = (K*i-ts-bm*dphim-tmb)/Im
 dphis = dphim-dyb/r
+dphil = dyb/r
 di = V/L-K*dphim/L-R*i/L
 
-x = Matrix([yb,dyb,phim,dphim,phis,i])
-dx = Matrix([dyb,ddyb,dphim,ddphim,dphis,di])
+x = Matrix([yb,dyb,phim,dphim,phis,phil,i])
+dx = Matrix([dyb,ddyb,dphim,ddphim,dphis,dphil,di])
 
 # xm = [0.00015356505435637838, 0.19367850172392562, 0.00013013941021725156, 12.197322261486839]
 xm = [0.00024817282734284404, 0.1217335758051555, 8.023874392878126e-05, 10.858458192019658]
@@ -56,7 +60,7 @@ cs = {
     't': 0.06, # max spring torque, Nm
     'd': 1.5, # max motor arm range, rad
     'bs': 0, # spring damping
-    'Il':0,
+    'Il': 0,
     'bm': xm[0],
     'K': xm[1],
     'Im': xm[2],
@@ -67,7 +71,7 @@ cs = {
 
 def solve(cs,plot=False):
     yi = -cs['mb']*cs['g']/K_BB
-    x0 = [yi,0,0,0,0,0]
+    x0 = [yi,0,0,0,0,0,0]
 
     dx_f = lambdify(x,dx.subs(cs))
     def f(t, x):
@@ -100,14 +104,17 @@ def solve(cs,plot=False):
         plt.plot(sol.t,sol.y[3,:])
         plt.ylabel('dphim')
         plt.subplot(313)
-        plt.plot(sol.t,sol.y[5,:])
+        plt.plot(sol.t,sol.y[6,:])
         plt.ylabel('i')
 
         plt.figure('spring')
-        plt.subplot(211)
+        plt.subplot(311)
         plt.plot(sol.t,sol.y[4,:])
         plt.ylabel('phis')
-        plt.subplot(212)
+        plt.subplot(312)
+        plt.plot(sol.t,sol.y[5,:])
+        plt.ylabel('phil')
+        plt.subplot(313)
         plt.plot(sol.t,grf)
         plt.ylabel('grf')
 

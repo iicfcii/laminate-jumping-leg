@@ -28,18 +28,6 @@ def read(s,k,a,n,plot=False):
     dy = sosfiltfilt(sos_dy,dy_raw)
     y = sosfiltfilt(sos_dy,y_raw)
 
-    if plot:
-        plt.figure('filter')
-        plt.subplot(311)
-        plt.plot(t_y,y_raw)
-        plt.plot(t_y,y)
-        plt.subplot(313)
-        plt.plot(t,grf_raw)
-        plt.plot(t,grf)
-        plt.subplot(312)
-        plt.plot(t_y,dy_raw)
-        plt.plot(t_y,dy)
-
     # Calculate jumping height
     ymin = np.mean(y[t_y < 0.4])
     ymax = np.amax(y)
@@ -64,15 +52,29 @@ def read(s,k,a,n,plot=False):
     # ti = 0.5
     # tf = 0.8
 
-    # Select
     idx_ti_grf = np.nonzero(t > ti)[0][0]
     idx_tf_grf = np.nonzero(t > tf)[0][0]
+    idx_ti_y = np.nonzero(t_y > ti)[0][0]
+    idx_tf_y = np.nonzero(t_y > tf)[0][0]
+
+    if plot:
+        plt.figure('filter')
+        plt.subplot(311)
+        plt.plot(t_y,y_raw)
+        plt.plot(t_y,y)
+        plt.subplot(312)
+        plt.plot(t_y,dy_raw)
+        plt.plot(t_y,dy)
+        plt.subplot(313)
+        plt.plot(t,grf_raw)
+        plt.plot(t,grf)
+        plt.plot([t[idx_ti_grf],t[idx_tf_grf]],[grf_bias-m*jump.cs['g'],grf_bias],'.')
+
+    # Select
     t = t[idx_ti_grf:idx_tf_grf]
     grf_raw = -(grf_raw[idx_ti_grf:idx_tf_grf]-grf_bias)
     grf = -(grf[idx_ti_grf:idx_tf_grf]-grf_bias)
 
-    idx_ti_y = np.nonzero(t_y > ti)[0][0]
-    idx_tf_y = np.nonzero(t_y > tf)[0][0]
     t_y = t_y[idx_ti_y:idx_tf_y]
     dy_raw = dy_raw[idx_ti_y:idx_tf_y]
     dy = dy[idx_ti_y:idx_tf_y]

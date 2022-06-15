@@ -23,8 +23,9 @@ for i,s in enumerate(design.springs):
     # sim
     cs = tjump.cs
     cs['r'] = 0.04
-    cs['m'] = 0.03
-    cs['ml'] = 0
+    m = 0.028
+    cs['mb'] = 0.02
+    cs['mf'] =m-cs['mb']
     cs['k'] = s['kp']
     cs['a'] = s['ap']
     cs['bs'] = s['b']
@@ -34,7 +35,7 @@ for i,s in enumerate(design.springs):
     grf_s = tjump.f_grf(sol.y,cs)
 
     lw = 0.8
-    idx_a = int(i/2)
+    idx_a = 2-int(i/2)
     idx_k = i%2
     c = 'C{:d}'.format(idx_a)
     axes[0,idx_k].plot(t,dy,color=c,linewidth=lw,label='{:.2f}, {:.1f}'.format(k,a))
