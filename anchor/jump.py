@@ -47,7 +47,7 @@ def read(s,k,a,n,plot=False):
 
     m = -(np.mean(grf_raw[t<0.4])-grf_bias)/jump.cs['g']
 
-    ti = t[np.nonzero(t > 0.5)[0][0]-1]
+    ti = t[np.nonzero(t > 0.502)[0][0]-1]
     tf = t[np.nonzero(grf > grf_bias)[0][0]+1]
     # ti = 0.5
     # tf = 0.8

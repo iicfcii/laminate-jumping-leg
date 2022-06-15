@@ -25,12 +25,12 @@ for i,s in enumerate(design.springs):
     x = s['x']
 
     theta_d = np.linspace(0,cs['t']/k,100)
-    theta_dp = np.zeros((6,theta_d.shape[0]))
+    theta_dp = np.zeros((7,theta_d.shape[0]))
     theta_dp[4,:] = theta_d
     cs = jump.cs
     cs['k'] = k
     cs['a'] = a
-    tau_d = jump.f_ts(theta_dp,cs,bound=False)
+    tau_d = jump.f_ts(theta_dp,cs)
 
     theta_o,tau_o = stiffness.sim(x,cs['t']/k)
 
@@ -70,7 +70,7 @@ axes[1].annotate(
     xytext=(-2,2),textcoords='offset points',ha='right',va='bottom',
 )
 axes[0].legend(lines[20:],['Goal','Model','Spring','Leg'],loc='upper left',handlelength=1,handletextpad=0.5)
-axes[1].legend([lines[i] for i in [23,15,7]],['0.5','1.0','2.0'],loc='upper left',handlelength=1,handletextpad=0.5)
+axes[1].legend(lines[-1::-8],['0.5','1.0','2.0'],loc='upper left',handlelength=1,handletextpad=0.5)
 axes[0].set_xlabel('Rotation (rad)',labelpad=1)
 axes[1].set_xlabel('Rotation (rad)',labelpad=1)
 axes[0].set_ylabel('Torque (Nm)',labelpad=1)

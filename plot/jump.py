@@ -11,9 +11,10 @@ from anchor import design
 plot.set_default()
 
 fig,axes = plt.subplots(
-    2,2,sharex=True,sharey='row',
-    figsize=(3.4-plot.pad*2,3.3),dpi=150
+    3,2,sharex=True,sharey='row',
+    figsize=(3.4-plot.pad*2,4.3-plot.pad*2),dpi=150
 )
+lines = []
 for i,s in enumerate(design.springs):
     k = s['k']
     a = s['a']
@@ -38,25 +39,29 @@ for i,s in enumerate(design.springs):
     idx_a = 2-int(i/2)
     idx_k = i%2
     c = 'C{:d}'.format(idx_a)
-    axes[0,idx_k].plot(t,dy,color=c,linewidth=lw,label='{:.2f}, {:.1f}'.format(k,a))
-    axes[0,idx_k].plot(t_s,dy_s,'--',color=c,linewidth=lw)
+    lines.append(axes[0,idx_k].plot(t,dy,color=c,linewidth=lw)[0])
+    lines.append(axes[0,idx_k].plot(t_s,dy_s,'--',color=c,linewidth=lw)[0])
+    lines.append(axes[1,idx_k].plot(t,grf,color=c,linewidth=lw)[0])
+    lines.append(axes[1,idx_k].plot(t_s,grf_s,'--',color=c,linewidth=lw)[0])
+    lines.append(axes[2,idx_k].plot(t,grf*dy,color=c,linewidth=lw)[0])
+    lines.append(axes[2,idx_k].plot(t_s,grf_s*dy_s,'--',color=c,linewidth=lw)[0])
 
-    axes[1,idx_k].plot(t,grf,color=c,linewidth=lw)
-    axes[1,idx_k].plot(t_s,grf_s,'--',color=c,linewidth=lw)
-
-x_ticks = np.arange(0,0.09,0.02)
+xlim = axes[0,0].get_xlim()
+axes[0,0].set_xlim(xlim[0],xlim[1]*1.04)
+x_ticks = np.arange(0,0.081,0.02)
 x_ticks_labels = ['{:.0f}'.format(t*100) for t in x_ticks]
 axes[0,0].set_xticks(x_ticks,x_ticks_labels)
 axes[0,0].set_ylabel('Body Speed (m/s)',labelpad=1)
 axes[1,0].set_ylabel('GRF (N)',labelpad=1)
-axes[1,0].set_xlabel('Time (10ms)',labelpad=1)
-axes[1,1].set_xlabel('Time (10ms)',labelpad=1)
-axes[0,0].legend(loc='upper left',handlelength=1,handletextpad=0.5)
-axes[0,1].legend(loc='upper left',handlelength=1,handletextpad=0.5)
+axes[2,0].set_ylabel('Power (W)',labelpad=1)
+axes[2,0].set_xlabel('Time (10ms)',labelpad=1)
+axes[2,1].set_xlabel('Time (10ms)',labelpad=1)
+axes[0,0].legend(lines[24:],['Model','Experiment'],loc='upper left',handlelength=1,handletextpad=0.5)
+axes[0,1].legend(lines[-2::-12],['0.5','1.0','2.0'],loc='upper left',handlelength=1,handletextpad=0.5)
 
 plt.subplots_adjust(
-    left=0.11,right=1,top=1,bottom=0.1,
-    wspace=0,hspace=0
+    left=0.11,right=1,top=1,bottom=0.08,
+    wspace=0.1,hspace=0
 )
 plot.savefig('jump.pdf',fig)
 plt.show()
