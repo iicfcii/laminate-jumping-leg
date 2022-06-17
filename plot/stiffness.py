@@ -47,6 +47,10 @@ for i,s in enumerate(design.springs):
         'k: {:.2f}, {:.2f}, {:.2f}, {:.2f} a: {:.2f}, {:.2f}, {:.2f}, {:.2f}, {:.2e}'
         .format(k,ko,kes,kel,a,ao,aes,ael,s['b'])
     )
+    # print(
+    #     'k: {}, {}, {}, {} a: {}, {}, {}, {}, b: {}'
+    #     .format(k,ko,kes,kel,a,ao,aes,ael,s['b'])
+    # )
 
     idx_a = int(i/2)
     idx_k = i%2
