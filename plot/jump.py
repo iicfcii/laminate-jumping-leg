@@ -28,8 +28,8 @@ for i,s in enumerate(design.springs):
     cs['r'] = 0.04
     cs['mb'] = 0.02
     cs['mf'] =m-cs['mb']
-    cs['k'] = s['kp']
-    cs['a'] = s['ap']
+    cs['k'] = s['kl']
+    cs['a'] = s['al']
 
     # sim
     cs['bs'] = 0
@@ -46,6 +46,8 @@ for i,s in enumerate(design.springs):
     dy_sb = np.interp(t_s,t_sb,sol.y[1,:])
     grf_sb = np.interp(t_s,t_sb,tjump.f_grf(sol.y,cs))
     p_sb = grf_sb*dy_sb
+
+    print('k: {:.1f} a: {:.1f} p: {} {} {}'.format(k,a,np.amax(p_s),np.amax(p_sb),np.amax(p)))
 
     lw = 0.8
     alpha = 0.5
