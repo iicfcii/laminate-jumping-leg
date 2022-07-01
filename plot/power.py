@@ -20,33 +20,26 @@ lines = []
 for i in range(2):
     p = np.array(ps[i])
 
-    lines.append(axes[i].plot(p[:,0],p[:,1],'--',lw=1,color='C4')[0])
-    lines.append(axes[i].fill_between(p[:,0],p[:,1],p[:,2],color='C4',alpha=0.5,edgecolor=None))
+    lines.append(axes[i].plot(p[:,0],p[:,1],'--*',lw=1,color='C4',markersize=5)[0])
+    lines.append(axes[i].plot(p[:,0],p[:,2],'--',lw=1,color='C4')[0])
+    # lines.append(axes[i].fill_between(p[:,0],p[:,1],p[:,2],color='C4',alpha=0.5,edgecolor=None))
     lines.append(axes[i].plot(p[:,0],p[:,3],'-',lw=1,color='C4')[0])
 
-axes[1].legend(lines[:3],['Model','Damped','Experiment'],loc='upper left',handlelength=1,handletextpad=0.5)
+axes[1].legend(lines[:3],['No Damping','Model','Experiment'],loc='upper left',handlelength=1,handletextpad=0.5)
 
 alla = np.array(ps)[:,:,0].ravel()
 amin = np.amin(alla)
 amax = np.amax(alla)
 margin = (amax-amin)*0.1
+axes[0].set_title('(a) $k=0.1\,Nm/rad$',pad=4)
+axes[1].set_title('(b) $k=0.2\,Nm/rad$',pad=4)
 axes[0].set_xlim(amin-margin,amax+margin)
 axes[0].set_ylabel('Peak Power (W)',labelpad=1)
 axes[0].set_xlabel('Nonlinearity',labelpad=1)
 axes[1].set_xlabel('Nonlinearity',labelpad=1)
-axes[0].annotate(
-    '0.1',
-    xy=(1, 0),xycoords='axes fraction',
-    xytext=(-2,2),textcoords='offset points',ha='right',va='bottom',
-)
-axes[1].annotate(
-    '0.2',
-    xy=(1, 0),xycoords='axes fraction',
-    xytext=(-2,2),textcoords='offset points',ha='right',va='bottom',
-)
 
 plt.subplots_adjust(
-    left=0.11,right=1,top=1,bottom=0.2,
+    left=0.11,right=1,top=0.9,bottom=0.2,
     wspace=0.1,hspace=0
 )
 plot.savefig('power.pdf',fig)

@@ -10,10 +10,18 @@ from utils import plot
 
 plot.set_default()
 
+max_1 = 0.6
+margin_1 = max_1*0.1
+limit_1 = [0-margin_1,max_1+margin_1]
+
+max_2 = 0.3
+margin_2 = max_2*0.1
+limit_2 = [0-margin_2,max_2+margin_2]
+
 cs = jump.cs
 fig,axes = plt.subplots(
-    1,2,sharey=True,
-    figsize=(3.4-plot.pad*2,2.7),dpi=150
+    1,2,sharey=True,gridspec_kw={'width_ratios':[limit_1[1]-limit_1[0],limit_2[1]-limit_2[0]]},
+    figsize=(3.4-plot.pad*2,2.7-plot.pad*2),dpi=150
 )
 lw = 0.8
 lines = []
@@ -63,23 +71,19 @@ for i,s in enumerate(design.springs):
 
 print(np.mean(es))
 
-axes[0].annotate(
-    '0.1',
-    xy=(1, 0),xycoords='axes fraction',
-    xytext=(-2,2),textcoords='offset points',ha='right',va='bottom',
-)
-axes[1].annotate(
-    '0.2',
-    xy=(1, 0),xycoords='axes fraction',
-    xytext=(-2,2),textcoords='offset points',ha='right',va='bottom',
-)
+axes[0].set_title('(a) $k=0.1\,Nm/rad$',pad=4)
+axes[1].set_title('(b) $k=0.2\,Nm/rad$',pad=4)
+axes[0].set_xlim(*limit_1)
+axes[0].set_xticks(np.arange(0,0.61,0.1))
+axes[1].set_xlim(*limit_2)
+axes[1].set_xticks(np.arange(0,0.31,0.1))
 axes[0].legend(lines[20:],['Goal','Model','Spring','Leg'],loc='upper left',handlelength=1,handletextpad=0.5)
-axes[1].legend(lines[-1::-8],['0.5','1.0','2.0'],loc='upper left',handlelength=1,handletextpad=0.5)
+axes[1].legend(lines[-1::-8],['$a=0.5$','$a=1.0$','$a=2.0$'],loc='upper left',handlelength=1,handletextpad=0.5)
 axes[0].set_xlabel('Rotation (rad)',labelpad=1)
 axes[1].set_xlabel('Rotation (rad)',labelpad=1)
 axes[0].set_ylabel('Torque (Nm)',labelpad=1)
 plt.subplots_adjust(
-    left=0.125,right=1,top=1,bottom=0.12,
+    left=0.125,right=1,top=0.94,bottom=0.125,
     wspace=0.1,hspace=0
 )
 plot.savefig('stiffness.pdf',fig)

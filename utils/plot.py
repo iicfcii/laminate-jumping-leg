@@ -14,6 +14,12 @@ def set_default():
     plt.rcParams['ytick.major.width'] = lw
     plt.rcParams['patch.linewidth'] = lw
 
+    plt.rcParams['text.usetex'] = False
+    plt.rcParams['mathtext.fontset'] = 'cm'
+
+    # plt.rcParams['text.usetex'] = True
+    # plt.rcParams['text.latex.preamble'] = r'\usepackage{amsmath}'
+
 pad = 0.005
 def savefig(name,fig,pdf=None):
     fig_size = fig.get_size_inches()

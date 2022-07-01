@@ -47,6 +47,7 @@ for i,s in enumerate(design.springs):
     grf_sb = np.interp(t_s,t_sb,tjump.f_grf(sol.y,cs))
     p_sb = grf_sb*dy_sb
 
+    print('k: {:.1f} a: {:.1f} v: {}'.format(k,a,dy[-1]))
     print('k: {:.1f} a: {:.1f} p: {} {} {}'.format(k,a,np.amax(p_s),np.amax(p_sb),np.amax(p)))
 
     lw = 0.8
@@ -54,16 +55,18 @@ for i,s in enumerate(design.springs):
     idx_a = 2-int(i/2)
     idx_k = i%2
     c = 'C{:d}'.format(idx_a)
-    lines.append(axes[0,idx_k].plot(t_s,dy_s,'--',color=c,linewidth=lw)[0])
-    lines.append(axes[0,idx_k].fill_between(t_s,dy_s,dy_sb,color=c,alpha=alpha,edgecolor=None))
+    lines.append(axes[0,idx_k].plot(t_s,dy_sb,'--',color=c,linewidth=lw)[0])
+    # lines.append(axes[0,idx_k].fill_between(t_s,dy_s,dy_sb,color=c,alpha=alpha,edgecolor=None))
     lines.append(axes[0,idx_k].plot(t,dy,color=c,linewidth=lw)[0])
-    lines.append(axes[1,idx_k].fill_between(t_s,grf_s,grf_sb,color=c,alpha=alpha,edgecolor=None))
-    lines.append(axes[1,idx_k].plot(t_s,grf_s,'--',color=c,linewidth=lw)[0])
+    # lines.append(axes[1,idx_k].fill_between(t_s,grf_s,grf_sb,color=c,alpha=alpha,edgecolor=None))
+    lines.append(axes[1,idx_k].plot(t_s,grf_sb,'--',color=c,linewidth=lw)[0])
     lines.append(axes[1,idx_k].plot(t,grf,color=c,linewidth=lw)[0])
-    lines.append(axes[2,idx_k].fill_between(t_s,p_s,p_sb,color=c,alpha=alpha,edgecolor=None))
-    lines.append(axes[2,idx_k].plot(t_s,p_s,'--',color=c,linewidth=lw)[0])
+    # lines.append(axes[2,idx_k].fill_between(t_s,p_s,p_sb,color=c,alpha=alpha,edgecolor=None))
+    lines.append(axes[2,idx_k].plot(t_s,p_sb,'--',color=c,linewidth=lw)[0])
     lines.append(axes[2,idx_k].plot(t,p,color=c,linewidth=lw)[0])
 
+axes[0,0].set_title('(a) $k=0.1\,Nm/rad$',pad=4)
+axes[0,1].set_title('(b) $k=0.2\,Nm/rad$',pad=4)
 xlim = axes[0,0].get_xlim()
 axes[0,0].set_xlim(xlim[0],xlim[1]*1.04)
 x_ticks = np.arange(0,0.081,0.02)
@@ -74,21 +77,11 @@ axes[1,0].set_ylabel('GRF (N)',labelpad=1)
 axes[2,0].set_ylabel('Power (W)',labelpad=1)
 axes[2,0].set_xlabel('Time (10ms)',labelpad=1)
 axes[2,1].set_xlabel('Time (10ms)',labelpad=1)
-axes[0,0].legend(lines[36:],['Model','Damped','Experiment'],loc='upper left',handlelength=1,handletextpad=0.5)
-axes[0,1].legend(lines[-1::-18],['0.5','1.0','2.0'],loc='upper left',handlelength=1,handletextpad=0.5)
-axes[0,0].annotate(
-    '0.1',
-    xy=(1, 0),xycoords='axes fraction',
-    xytext=(-2,2),textcoords='offset points',ha='right',va='bottom',
-)
-axes[0,1].annotate(
-    '0.2',
-    xy=(1, 0),xycoords='axes fraction',
-    xytext=(-2,2),textcoords='offset points',ha='right',va='bottom',
-)
+axes[0,0].legend(lines[24:],['Model','Experiment'],loc='upper left',handlelength=1,handletextpad=0.5)
+axes[0,1].legend(lines[-1::-12],['$a=0.5$','$a=1.0$','$a=2.0$'],loc='upper left',handlelength=1,handletextpad=0.5)
 
 plt.subplots_adjust(
-    left=0.11,right=1,top=1,bottom=0.07,
+    left=0.11,right=1,top=0.965,bottom=0.07,
     wspace=0.1,hspace=0
 )
 plot.savefig('jump.pdf',fig)
