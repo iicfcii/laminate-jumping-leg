@@ -10,6 +10,7 @@ from utils import plot
 plot.set_default()
 
 with PdfPages('spring.pdf') as pdf:
+    lines = []
     for i in [4,2,0,5,3,1]:
         fig,ax = plt.subplots(1,1,figsize=(0.8-plot.pad*2,0.8-plot.pad*2),dpi=150)
 
@@ -29,6 +30,14 @@ with PdfPages('spring.pdf') as pdf:
             lks.append(lk)
         lks = np.array(lks)
 
+        ang = -geom.pose(lks[0,0,:])[1]
+        tf = np.array([[np.cos(ang),-np.sin(ang)],[np.sin(ang),np.cos(ang)]])
+        lks[0] = (tf@lks[0].transpose((0,2,1))).transpose((0,2,1))
+
+        ang = ang-jump.cs['t']/k
+        tf = np.array([[np.cos(ang),-np.sin(ang)],[np.sin(ang),np.cos(ang)]])
+        lks[1] = (tf@lks[1].transpose((0,2,1))).transpose((0,2,1))
+
         bbox = geom.bbox(lks,pad=0)
         xc = (bbox[0]+bbox[1])/2
         yc = (bbox[2]+bbox[3])/2
@@ -45,24 +54,25 @@ with PdfPages('spring.pdf') as pdf:
         c = 'C{:d}'.format(2-idx_a)
         for j,lk in enumerate(lks):
             ls = '.-' if j == 0 else '.--'
-            for link in lk:
-                ax.plot(
+            for n,link in enumerate(lk):
+                line = ax.plot(
                     link[:,0],link[:,1],ls,color=c,
                     linewidth=1,markersize=3
-                )
+                )[0]
+                if n == 0: lines.append(line)
 
         if i == 1:
             # Scale
             l = 0.01
             x1 = xc+r-0.015-l/2
             x2 = x1+l
-            y1 = yc-r+0.015
+            y1 = yc-r+0.012
             y2 = y1
-            ax.plot([x1,x2],[y1,y2],'k',linewidth=2)
+            ax.plot([x1,x2],[y1,y2],'k',linewidth=1)
             ax.annotate(
                 '{:.0f}mm'.format(l*1000),
                 xy=((x1+x2)/2, (y1+y2)/2),
-                xytext=(0,-4),textcoords='offset points',ha='center',va='top',
+                xytext=(0,-2),textcoords='offset points',ha='center',va='top',
             )
 
         plt.subplots_adjust(
@@ -70,4 +80,14 @@ with PdfPages('spring.pdf') as pdf:
             wspace=0,hspace=0
         )
         plot.savefig('spring_{:.0f}_{:.0f}.pdf'.format(k*100,a*10),fig,pdf=pdf)
-    plt.show()
+
+    fig,ax = plt.subplots(1,1,figsize=(5-plot.pad*2,0.13-plot.pad*2),dpi=150)
+    plt.subplots_adjust(
+        left=0,right=1,top=1,bottom=0,
+        wspace=0,hspace=0
+    )
+    ax.add_artist(plt.legend(lines[0:2],['At Rest',r'Deformed to $\tau_{max}/k$'],loc='center left',ncol=2,handlelength=1.8,handletextpad=0.25,columnspacing=0.5,borderaxespad=0,frameon=False))
+    ax.add_artist(plt.legend(lines[0:6:2],['$a=0.5$','$a=1.0$','$a=2.0$'],loc='center right',ncol=3,handlelength=1.8,handletextpad=0.25,columnspacing=0.5,borderaxespad=0,frameon=False))
+    ax.axis('off')
+    plot.savefig('spring_legend.pdf',fig,pdf=pdf)
+plt.show()

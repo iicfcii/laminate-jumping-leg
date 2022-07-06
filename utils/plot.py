@@ -20,6 +20,9 @@ def set_default():
     # plt.rcParams['text.usetex'] = True
     # plt.rcParams['text.latex.preamble'] = r'\usepackage{amsmath}'
 
+    plt.rcParams['pdf.fonttype'] = 42
+    plt.rcParams['ps.fonttype'] = 42
+
 pad = 0.005
 def savefig(name,fig,pdf=None):
     fig_size = fig.get_size_inches()
