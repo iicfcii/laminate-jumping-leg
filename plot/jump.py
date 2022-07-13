@@ -65,8 +65,8 @@ for i,s in enumerate(design.springs):
     lines.append(axes[2,idx_k].plot(t_s,p_sb,'--',color=c,linewidth=lw)[0])
     lines.append(axes[2,idx_k].plot(t,p,color=c,linewidth=lw)[0])
 
-axes[0,0].set_title('(a) $k=0.1\,Nm/rad$',pad=4)
-axes[0,1].set_title('(b) $k=0.2\,Nm/rad$',pad=4)
+axes[2,0].set_title('(a) $k=0.1\,Nm/rad$',pad=0,y=-0.31)
+axes[2,1].set_title('(b) $k=0.2\,Nm/rad$',pad=0,y=-0.31)
 xlim = axes[0,0].get_xlim()
 axes[0,0].set_xlim(xlim[0],xlim[1]*1.04)
 x_ticks = np.arange(0,0.081,0.02)
@@ -81,7 +81,7 @@ axes[0,0].legend(lines[24:],['Model','Experiment'],loc='upper left',handlelength
 axes[0,1].legend(lines[-1::-12],['$a=0.5$','$a=1.0$','$a=2.0$'],loc='upper left',handlelength=1,handletextpad=0.5)
 
 plt.subplots_adjust(
-    left=0.11,right=1,top=0.965,bottom=0.07,
+    left=0.11,right=1,top=1,bottom=0.105,
     wspace=0.1,hspace=0
 )
 plot.savefig('jump.pdf',fig)

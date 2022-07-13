@@ -31,15 +31,15 @@ alla = np.array(ps)[:,:,0].ravel()
 amin = np.amin(alla)
 amax = np.amax(alla)
 margin = (amax-amin)*0.1
-axes[0].set_title('(a) $k=0.1\,Nm/rad$',pad=4)
-axes[1].set_title('(b) $k=0.2\,Nm/rad$',pad=4)
+axes[0].set_title('(a) $k=0.1\,Nm/rad$',pad=0,y=-0.37)
+axes[1].set_title('(b) $k=0.2\,Nm/rad$',pad=0,y=-0.37)
 axes[0].set_xlim(amin-margin,amax+margin)
 axes[0].set_ylabel('Peak Power (W)',labelpad=1)
 axes[0].set_xlabel('Nonlinearity',labelpad=1)
 axes[1].set_xlabel('Nonlinearity',labelpad=1)
 
 plt.subplots_adjust(
-    left=0.11,right=1,top=0.9,bottom=0.2,
+    left=0.11,right=1,top=1,bottom=0.29,
     wspace=0.1,hspace=0
 )
 plot.savefig('power.pdf',fig)

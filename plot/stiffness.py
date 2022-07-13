@@ -71,8 +71,8 @@ for i,s in enumerate(design.springs):
 
 print(np.mean(es))
 
-axes[0].set_title('(a) $k=0.1\,Nm/rad$',pad=4)
-axes[1].set_title('(b) $k=0.2\,Nm/rad$',pad=4)
+axes[0].set_title('(a) $k=0.1\,Nm/rad$',pad=0,y=-0.2)
+axes[1].set_title('(b) $k=0.2\,Nm/rad$',pad=0,y=-0.2)
 axes[0].set_xlim(*limit_1)
 axes[0].set_xticks(np.arange(0,0.61,0.1))
 axes[1].set_xlim(*limit_2)
@@ -83,7 +83,7 @@ axes[0].set_xlabel('Rotation (rad)',labelpad=1)
 axes[1].set_xlabel('Rotation (rad)',labelpad=1)
 axes[0].set_ylabel('Torque (Nm)',labelpad=1)
 plt.subplots_adjust(
-    left=0.125,right=1,top=0.94,bottom=0.125,
+    left=0.125,right=1,top=1,bottom=0.18,
     wspace=0.1,hspace=0
 )
 plot.savefig('stiffness.pdf',fig)
