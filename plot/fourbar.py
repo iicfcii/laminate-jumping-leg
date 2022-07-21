@@ -39,11 +39,11 @@ e_ys = (ys-ys_d)/cs['d']/cs['r']*100
 rs = motion.simf(rots,x)*1000
 rsd = np.ones(len(rs))*40
 
-w = 3.4
+w = 3.25
 h = 1.5
 wl = 0.92 # legend width
-rx = 0.052
-ry = h/((3.4-wl)/2)*rx
+rx = 0.049
+ry = h/((w-wl)/2)*rx
 fig = plt.figure(figsize=(w-plot.pad*2,h-plot.pad*2),dpi=150)
 gs_lk = fig.add_gridspec(nrows=1,ncols=2,left=wl/(w-plot.pad*2),bottom=0,right=1,top=1,wspace=0,hspace=0)
 ax_lk = fig.add_subplot(gs_lk[0,0])
@@ -71,9 +71,9 @@ lines.append(line)
 
 # Scale
 l = 0.01
-x1 = xc+rx-0.013-l/2
+x1 = xc+rx-0.012-l/2
 x2 = x1+l
-y1 = yc-ry+0.01
+y1 = yc-ry+0.011
 y2 = y1
 ax_lk.plot([x1,x2],[y1,y2],'k',linewidth=1)
 ax_lk.annotate(

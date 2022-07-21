@@ -7,7 +7,7 @@ plot.set_default()
 
 fig,axes = plt.subplots(
     1,2,sharex=True,sharey='row',
-    figsize=(3.4-plot.pad*2,1.7-plot.pad*2),dpi=150
+    figsize=(3.25-plot.pad*2,1.7-plot.pad*2),dpi=150
 )
 
 ps = [[],[]]
@@ -39,7 +39,7 @@ axes[0].set_xlabel('Nonlinearity',labelpad=1)
 axes[1].set_xlabel('Nonlinearity',labelpad=1)
 
 plt.subplots_adjust(
-    left=0.11,right=1,top=1,bottom=0.29,
+    left=0.115,right=1,top=1,bottom=0.29,
     wspace=0.1,hspace=0
 )
 plot.savefig('power.pdf',fig)

@@ -21,7 +21,7 @@ limit_2 = [0-margin_2,max_2+margin_2]
 cs = jump.cs
 fig,axes = plt.subplots(
     1,2,sharey=True,gridspec_kw={'width_ratios':[limit_1[1]-limit_1[0],limit_2[1]-limit_2[0]]},
-    figsize=(3.4-plot.pad*2,2.7-plot.pad*2),dpi=150
+    figsize=(3.25-plot.pad*2,2.7-plot.pad*2),dpi=150
 )
 lw = 0.8
 lines = []
@@ -83,7 +83,7 @@ axes[0].set_xlabel('Rotation (rad)',labelpad=1)
 axes[1].set_xlabel('Rotation (rad)',labelpad=1)
 axes[0].set_ylabel('Torque (Nm)',labelpad=1)
 plt.subplots_adjust(
-    left=0.125,right=1,top=1,bottom=0.18,
+    left=0.135,right=1-0.005,top=1,bottom=0.18,
     wspace=0.1,hspace=0
 )
 plot.savefig('stiffness.pdf',fig)

@@ -12,7 +12,7 @@ plot.set_default()
 
 fig,axes = plt.subplots(
     3,2,sharex=True,sharey='row',
-    figsize=(3.4-plot.pad*2,4.8-plot.pad*2),dpi=150
+    figsize=(3.25-plot.pad*2,4.8-plot.pad*2),dpi=150
 )
 lines = []
 for i,s in enumerate(design.springs):
@@ -81,7 +81,7 @@ axes[0,0].legend(lines[24:],['Model','Experiment'],loc='upper left',handlelength
 axes[0,1].legend(lines[-1::-12],['$a=0.5$','$a=1.0$','$a=2.0$'],loc='upper left',handlelength=1,handletextpad=0.5)
 
 plt.subplots_adjust(
-    left=0.11,right=1,top=1,bottom=0.105,
+    left=0.115,right=1,top=1,bottom=0.105,
     wspace=0.1,hspace=0
 )
 plot.savefig('jump.pdf',fig)

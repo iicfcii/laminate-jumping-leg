@@ -8,7 +8,7 @@ plot.set_default()
 
 fig,ax = plt.subplots(
     1,1,
-    figsize=(3.4-plot.pad*2,1.4-plot.pad*2),dpi=150
+    figsize=(3.25-plot.pad*2,1.4-plot.pad*2),dpi=150
 )
 
 kas = [[],[],[],[]]
@@ -40,7 +40,7 @@ ax.set_ylabel('Nonlinearity',labelpad=1)
 ax.legend(loc='center left',handlelength=1,handletextpad=0.5,bbox_to_anchor=(1,0.5))
 
 plt.subplots_adjust(
-    left=0.11,right=0.815,top=1,bottom=0.23,
+    left=0.115,right=0.805,top=1,bottom=0.23,
     wspace=0,hspace=0
 )
 plot.savefig('design.pdf',fig)
