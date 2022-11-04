@@ -112,13 +112,13 @@ def fit(rz,tz,kp,ap):
 
 if __name__ == '__main__':
     plt.figure()
-    for k in [0.1,0.2]:
-        for a in [0.5,1,2]:
-            for s in [1]:
+    for k in [0.2]:
+        for a in [0.5]:
+            for s in [1,97]:
                 for i,n in enumerate([1,2,3]):
-                    rz,f = read(s,k,a,n,type='leg')
+                    rz,f = read(s,k,a,n,type='spring')
                     # f = f*jump.cs['r']
-                    f = f*0.032
+                    # f = f*0.032
 
                     c = 'C{:d}'.format(i)
                     plt.plot(rz,f,'.-',markersize=4,color=c)
@@ -126,7 +126,12 @@ if __name__ == '__main__':
                     kp,ap = fit(rz,f,k,a)
                     print(kp,ap)
 
-            rzp = np.linspace(0,jump.cs['t']/k,100)
-            fp = jump.t_spring(rzp,k,a,jump.cs['t'])
-            plt.plot(rzp,fp,'--k')
+            theta_d = np.linspace(0,jump.cs['t']/k,100)
+            theta_dp = np.zeros((7,theta_d.shape[0]))
+            theta_dp[4,:] = theta_d
+            cs = jump.cs
+            cs['k'] = k
+            cs['a'] = a
+            tau_d = jump.f_ts(theta_dp,cs)
+            plt.plot(theta_d,tau_d,'--k')
     plt.show()
