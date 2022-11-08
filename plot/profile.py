@@ -7,7 +7,7 @@ plot.set_default()
 cs = jump.cs
 
 fig,ax = plt.subplots(
-    1,1,figsize=(2.35-plot.pad*2,2.7-plot.pad*2),dpi=150
+    1,1,figsize=(3.25-plot.pad*2,1.25-plot.pad*2),dpi=150
 )
 lines = []
 for k in [0.1,0.2]:
@@ -26,8 +26,8 @@ for k in [0.1,0.2]:
         lines.append(line[0])
 
 
-l1 = plt.legend(lines[:3],['$a=0.5$','$a=1.0$','$a=2.0$'],loc='upper left',handlelength=1,handletextpad=0.5,borderpad=0,labelspacing=0.5,borderaxespad=0,frameon=False,bbox_to_anchor=(0.1,0.98))
-l2 = plt.legend(lines[::3],['$k=0.1\,Nm/rad$','$k=0.2\,Nm/rad$'],loc='lower right',handlelength=1,handletextpad=0.5,borderpad=0,labelspacing=0.5,borderaxespad=0,frameon=False,bbox_to_anchor=(0.96,0.08))
+l1 = plt.legend(lines[:3],['$a=0.5$','$a=1.0$','$a=2.0$'],loc='upper left',handlelength=1,handletextpad=0.5,borderpad=0,labelspacing=0.5,borderaxespad=0,frameon=False,bbox_to_anchor=(0.04,1))
+l2 = plt.legend(lines[::3],['$k=0.1\,Nm/rad$','$k=0.2\,Nm/rad$'],loc='lower right',handlelength=1,handletextpad=0.5,borderpad=0,labelspacing=0.5,borderaxespad=0,frameon=False,bbox_to_anchor=(1,0.08))
 ax.add_artist(l1)
 ax.add_artist(l2)
 ax.spines[["left", "bottom"]].set_linewidth(1)
@@ -35,14 +35,16 @@ ax.spines[["left", "bottom"]].set_position(("data", 0))
 ax.spines[["top", "right"]].set_visible(False)
 ax.plot(1,0,'>k',markersize=3,transform=ax.get_yaxis_transform(),clip_on=False)
 ax.plot(0,1,'^k',markersize=3,transform=ax.get_xaxis_transform(),clip_on=False)
-ax.set_ylabel('$F$',labelpad=1)
-ax.set_xlabel('$x$',labelpad=1)
+ax.set_ylabel('$F$',labelpad=0)
+ax.set_xlabel('$x$',labelpad=0)
 
 ax.set_xticks([])
 ax.set_yticks([])
+ax.set_xlim([-0.01,0.61])
+ax.set_ylim([-0.0035,0.0635])
 
 plt.subplots_adjust(
-    left=0.015,right=1-0.03,top=1-0.04,bottom=0.01,
+    left=0.025,right=1-0.015,top=1-0.04,bottom=0.02,
     wspace=0,hspace=0
 )
 plot.savefig('profile.pdf',fig)

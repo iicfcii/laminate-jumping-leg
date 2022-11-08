@@ -55,11 +55,13 @@ with PdfPages('spring.pdf') as pdf:
         for j,lk in enumerate(lks):
             ls = '.-' if j == 0 else '.--'
             for n,link in enumerate(lk):
+                lw = 2 if n==0 or n == 3 and j == 0 else 1
                 line = ax.plot(
                     link[:,0],link[:,1],ls,color=c,
-                    linewidth=1,markersize=3
+                    linewidth=lw,markersize=3
                 )[0]
                 if n == 0: lines.append(line)
+                if n == 1: lines.append(line)
 
         if i == 1:
             # Scale
@@ -81,13 +83,13 @@ with PdfPages('spring.pdf') as pdf:
         )
         plot.savefig('spring_{:.0f}_{:.0f}.pdf'.format(k*100,a*10),fig,pdf=pdf)
 
-    fig,ax = plt.subplots(1,1,figsize=(5-plot.pad*2,0.13-plot.pad*2),dpi=150)
+    fig,ax = plt.subplots(1,1,figsize=(4.6-plot.pad*2,0.13-plot.pad*2),dpi=150)
     plt.subplots_adjust(
         left=0,right=1,top=1,bottom=0,
         wspace=0,hspace=0
     )
-    ax.add_artist(plt.legend(lines[0:2],['At Rest',r'Deformed to $\tau_{max}/k$'],loc='center left',ncol=2,handlelength=1.8,handletextpad=0.25,columnspacing=0.5,borderaxespad=0,frameon=False))
-    ax.add_artist(plt.legend(lines[0:6:2],['$a=0.5$','$a=1.0$','$a=2.0$'],loc='center right',ncol=3,handlelength=1.8,handletextpad=0.25,columnspacing=0.5,borderaxespad=0,frameon=False))
+    ax.add_artist(plt.legend([lines[i] for i in [1,3,0]],['At Rest',r'Deformed to $\tau_{max}/k$','Input/Output Link'],loc='center left',ncol=3,handlelength=1.5,handletextpad=0.25,columnspacing=0.5,borderpad=0,borderaxespad=0,frameon=False))
+    ax.add_artist(plt.legend([lines[i] for i in [1,5,9]],['$a=0.5$','$a=1.0$','$a=2.0$'],loc='center right',ncol=3,handlelength=1.5,handletextpad=0.25,columnspacing=0.5,borderpad=0,borderaxespad=0,frameon=False))
     ax.axis('off')
     plot.savefig('spring_legend.pdf',fig,pdf=pdf)
 plt.show()
