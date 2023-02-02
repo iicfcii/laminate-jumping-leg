@@ -1,5 +1,7 @@
 import matplotlib.pyplot as plt
 import matplotlib.transforms as mtransforms
+import matplotlib as mpl
+import numpy as np
 
 def set_default():
     fs = 8
@@ -22,6 +24,10 @@ def set_default():
 
     plt.rcParams['pdf.fonttype'] = 42
     plt.rcParams['ps.fonttype'] = 42
+
+    plt.rcParams['axes.prop_cycle'] = plt.cycler(
+        color=mpl.colormaps['viridis'](np.linspace(1,0,4))[:,:3]
+    )
 
 pad = 0.005
 def savefig(name,fig,pdf=None):

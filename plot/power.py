@@ -20,10 +20,10 @@ lines = []
 for i in range(2):
     p = np.array(ps[i])
 
-    lines.append(axes[i].plot(p[:,0],p[:,1],'--*',lw=1,color='C4',markersize=5)[0])
-    lines.append(axes[i].plot(p[:,0],p[:,2],'--',lw=1,color='C4')[0])
-    # lines.append(axes[i].fill_between(p[:,0],p[:,1],p[:,2],color='C4',alpha=0.5,edgecolor=None))
-    lines.append(axes[i].plot(p[:,0],p[:,3],'-',lw=1,color='C4')[0])
+    lines.append(axes[i].plot(p[:,0],p[:,1],'--*',lw=1,color='C3',markersize=5)[0])
+    lines.append(axes[i].plot(p[:,0],p[:,2],'--',lw=1,color='C3')[0])
+    # lines.append(axes[i].fill_between(p[:,0],p[:,1],p[:,2],color='C3',alpha=0.5,edgecolor=None))
+    lines.append(axes[i].plot(p[:,0],p[:,3],'-',lw=1,color='C3')[0])
 
 axes[1].legend(lines[:3],['No Damping','Model','Experiment'],loc='upper left',handlelength=1,handletextpad=0.5)
 

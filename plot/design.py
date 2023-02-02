@@ -23,7 +23,7 @@ ls = ['--','^-','.-','-']
 for i,ka in enumerate(kas):
     ka = np.array(ka)
     ka = np.concatenate([ka,ka[[0],:]],axis=0)
-    c='C4'
+    c='C3'
     ax.plot(ka[:,0],ka[:,1],ls[i],color=c,lw=1,label=kas_label[i],markersize=5)
     ax.fill(ka[:,0],ka[:,1],color=c,ec=None,fill=True,alpha=0.4)
 
