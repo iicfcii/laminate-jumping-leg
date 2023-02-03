@@ -66,7 +66,7 @@ for i,lk in enumerate(lksp):
         line = ax_lk.plot(link[:,0],link[:,1],ls,linewidth=1,markersize=3)[0]
         if n == 0: lines.append(line)
 pfs = lks[:,4,1,:]
-line = ax_lk.plot(pfs[:,0],pfs[:,1],'-r',linewidth=1)[0]
+line = ax_lk.plot(pfs[:,0],pfs[:,1],'-',color='C0',linewidth=1)[0]
 lines.append(line)
 
 # Scale

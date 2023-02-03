@@ -26,7 +26,7 @@ def set_default():
     plt.rcParams['ps.fonttype'] = 42
 
     plt.rcParams['axes.prop_cycle'] = plt.cycler(
-        color=mpl.colormaps['viridis'](np.linspace(1,0,4))[:,:3]
+        color=mpl.colormaps['viridis'](np.linspace(0.9,0.1,4))[:,:3]
     )
 
 pad = 0.005
